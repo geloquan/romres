@@ -1,0 +1,13 @@
+database:
+    -host -> 1
+    scope:  -> 1
+        level: -> 1 or more
+            -index level -> 1
+            -reservee -> 1
+            slot: -> 1 or more
+                edge: -> 1 or more
+                    -x -> 1
+                    -y -> 1
+                -reservee -> 1
+                date&time: -> 1 or more 
+                    -reservee -> 1 or more

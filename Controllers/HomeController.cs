@@ -9,11 +9,14 @@ namespace WebApplication2.Controllers {
         public HomeController(ILogger<HomeController> logger) {
             _logger = logger;
         }
-
         public IActionResult Index() {
             return View();
         }
-
+        public IActionResult Branch() {
+            DatabaseConnect databaseConnect = new DatabaseConnect();
+            databaseConnect.OnGete();
+            return View(databaseConnect);
+        }
         public IActionResult Privacy() {
             return View();
         }

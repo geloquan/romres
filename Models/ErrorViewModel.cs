@@ -5,6 +5,15 @@ namespace WebApplication2.Models {
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
     }
+    public class SlotModel {
+        public int? FnlId { get; set; }
+        public string? Name { get; set; }
+        public System.Data.SqlTypes.SqlDouble? EdgeX { get; set; }
+        public System.Data.SqlTypes.SqlDouble? EdgeY { get; set; }
+        public int? ReserverId { get; set; }
+        public string? ReservationStart { get; set; }
+        public string? ReservationEnd { get; set; }
+    }
     
     public class Host {
         public int Id { get; set; }

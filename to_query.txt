@@ -1,0 +1,38 @@
+CREATE TABLE user (
+	id int primary key auto_increment,
+    name varchar(150),
+    password varchar(50),
+    index idx_user_id (id),
+);
+CREATE TABLE slot (
+	id int primary key auto_increment,
+    name varchar(150),
+    host_id int not null,
+    index idx_slot_id (id),
+    foreign key (host_id) references host(id)
+);
+CREATE TABLE edge (
+	id int primary key auto_increment,
+    x mediumint,
+    y mediumint,
+    slot_id INT,
+    index idx_edge_id (id),
+    foreign KEY (slot_id) REFERENCES slot(id)
+);
+CREATE TABLE reserver (
+	id int primary key auto_increment,
+    user_id int not null,
+    duration_start datetime,
+    duration_end datetime,
+    index idx_edge_id (id),
+    foreign key (user_id) references user(id)
+);
+CREATE TABLE slot_fnl (
+	id int primary key auto_increment,
+    slot_id int,
+    reserver_id int,
+    index idx_slot_fnl_id (id),
+    foreign key (reserver_id) references reserver(id),
+    foreign key (slot_id) references slot(id)
+);
+

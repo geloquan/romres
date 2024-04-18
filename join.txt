@@ -1,0 +1,16 @@
+SELECT
+    sf.id AS slot_fnl_id,
+    s.name AS slot_name,
+    e.x AS edge_x,
+    e.y AS edge_y,
+    r.user_id AS reserver_user_id,
+    r.duration_start AS reservation_start,
+    r.duration_end AS reservation_end
+FROM
+    slot_fnl sf
+JOIN
+    slot s ON sf.slot_id = s.id
+JOIN
+    edge e ON e.slot_id = s.id
+JOIN
+    reserver r ON sf.reserver_id = r.id;

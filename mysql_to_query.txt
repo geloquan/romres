@@ -1,0 +1,96 @@
+CREATE TABLE user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NULL,
+    password VARCHAR(50) NULL
+);
+
+CREATE INDEX idx_user_id ON user(id);
+
+CREATE TABLE host (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NULL,
+    password VARCHAR(150) NULL
+);
+
+CREATE INDEX idx_host_id ON host(id);
+
+CREATE TABLE admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NULL,
+    password VARCHAR(150) NULL
+);
+
+CREATE INDEX idx_admin_id ON admin(id);
+
+
+
+
+
+CREATE TABLE reserver (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    duration_start DATETIME NULL,
+    duration_end DATETIME NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id)
+);
+
+CREATE INDEX idx_reserver_id ON reserver(id);
+
+CREATE TABLE slot (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NULL,
+    host_id INT NULL,
+    parent_root_id INT NULL,
+    child_root_id INT NULL,
+    FOREIGN KEY (host_id) REFERENCES user (id),
+    CONSTRAINT FK_child_root_id FOREIGN KEY (child_root_id) REFERENCES slot (id),
+    CONSTRAINT FK_parent_root_id FOREIGN KEY (parent_root_id) REFERENCES slot (id)
+);
+
+CREATE INDEX idx_slot_id ON slot(id);
+
+CREATE TABLE invitation (
+    id INT NOT NULL,
+    generated_by INT NULL,
+    slot_id INT NULL,
+    is_one_time_usage TINYINT NULL,
+    code VARCHAR(100) NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (generated_by) REFERENCES host (id),
+    FOREIGN KEY (slot_id) REFERENCES slot (id)
+);
+
+CREATE INDEX idx_invitation_id ON invitation(id);
+
+CREATE TABLE edge (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    x FLOAT NULL,
+    y FLOAT NULL,
+    slot_id INT NULL,
+    FOREIGN KEY (slot_id) REFERENCES slot (id)
+);
+
+CREATE INDEX idx_edge_id ON edge(id);
+
+CREATE TABLE slot_allowed_time (
+    id INT NOT NULL,
+    slot_id INT NOT NULL,
+    time_start TIME NULL,
+    time_end TIME NULL,
+    day_of_week VARCHAR(50) NULL,
+    month_of_year VARCHAR(50) NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (slot_id) REFERENCES slot (id)
+);
+
+CREATE INDEX idx_slot_allowed_time_id ON slot_allowed_time(id);
+
+CREATE TABLE slot_fnl (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    slot_id INT NULL,
+    reserver_id INT NULL,
+    FOREIGN KEY (slot_id) REFERENCES slot (id),
+    FOREIGN KEY (reserver_id) REFERENCES reserver (id)
+);
+
+CREATE INDEX idx_slot_fnl_id ON slot_fnl(id);

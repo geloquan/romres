@@ -28,6 +28,10 @@ namespace WebApplication2
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
+            app.MapControllerRoute(
+                name: "HostDashboard",
+                pattern: "{controller=Home}/{action=HostDashboard}/{id?}");
+
             app.Run();
         }
     }

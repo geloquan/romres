@@ -8,12 +8,25 @@ namespace WebApplication2.Models {
         public string? ReservationStart { get; set; }
         public string? ReservationEnd { get; set; }
     }
+    public class SlotModelV2 {
+        public int? PrimarySlotId { get; set; }
+        public string? PrimarySlotName { get; set; }
+        public int? ParentRootId { get; set; }
+        public string? ParentRootName { get; set; }
+        public int? ChildRootId { get; set; }
+        public string? ChildRootName { get; set; }
+        public int? ReserverId { get; set; }
+        public int? HostId { get; set; }
+        public int? EdgeId { get; set; }
+        public System.Data.SqlTypes.SqlDouble? EdgeX { get; set; }
+        public System.Data.SqlTypes.SqlDouble? EdgeY { get; set; }
+        public int? InvitationId { get; set; }
+        public string? Code { get; set; }
+        public bool? IsOneTimeUsage { get; set; }
+    }
     
     public class Host {
         public int Id { get; set; }
-        public string HostName { get; set; }
-
-        public Scope Scope { get; set; }
     }
 
     public class Scope {

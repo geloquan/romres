@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebApplication2.Models;
 
 namespace WebApplication2.Controllers {
+    [Route("/")]
     public class HomeController : Controller {
         //private readonly ILogger<HomeController> _logger;
         //public HomeController(ILogger<HomeController> logger) {
@@ -14,6 +15,18 @@ namespace WebApplication2.Controllers {
         public IActionResult Branch() {
             DatabaseConnect databaseConnect = new DatabaseConnect();
             databaseConnect.OnGete();
+            return View(databaseConnect);
+        }
+        [Route("/HostDashboard/{HostId}")]
+        public IActionResult HostDashboard(int HostId) {
+            HostEntityData databaseConnect = new HostEntityData();
+            databaseConnect.InitRootSlots(HostId);
+            return View(databaseConnect);
+        }
+        [Route("/HostDashboard/{HostId}/Slot/{SlotId}")]
+        public IActionResult SlotPrimary(int SlotId) {
+            HostEntityData databaseConnect = new HostEntityData();
+            databaseConnect.InitRootSlots(SlotId);
             return View(databaseConnect);
         }
         public IActionResult Privacy() {

@@ -1,0 +1,51 @@
+@model WebApplication2.Models.HostEntityData
+
+@{
+    ViewData["Title"] = "HostDashboard";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Ceqweqweeee123eore</a>.</p>
+</div>
+<h2>Slot List</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Primary Slot ID</th>
+            <th>Primary Slot Name</th>
+            <th>Parent Root ID</th>
+            <th>Parent Root Name</th>
+            <th>Child Root ID</th>
+            <th>Child Root Name</th>
+            <th>Reserver ID</th>
+            <th>Host ID</th>
+            <th>Edge ID</th>
+            <th>Edge X</th>
+            <th>Edge Y</th>
+            <th>Invitation ID</th>
+            <th>Invitation Code</th>
+            <th>Is One Time Usage</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model.RootSlots) {
+            <tr>
+                <td>@item.PrimarySlotId</td>
+                <td>@item.PrimarySlotName</td>
+                <td>@item.ParentRootId</td>
+                <td>@item.ParentRootName</td>
+                <td>@item.ChildRootId</td>
+                <td>@item.ChildRootName</td>
+                <td>@item.ReserverId</td>
+                <td>@item.HostId</td>
+                <td>@item.EdgeId</td>
+                <td>@item.EdgeX</td>
+                <td>@item.EdgeY</td>
+                <td>@item.InvitationId</td>
+                <td>@item.Code</td>
+                <td>@item.IsOneTimeUsage</td>
+            </tr>
+        }
+    </tbody>
+</table>

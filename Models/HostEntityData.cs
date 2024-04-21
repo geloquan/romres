@@ -71,5 +71,34 @@ namespace WebApplication2.Models {
             }
         }
     }
-    public class Host
+    public class HostEntityLogin {
+        public LoginSuccessModel Verify(LoginModel loginModel, string EntityType) {
+            LoginSuccessModel loginSuccessModel = new LoginSuccessModel();
+            loginSuccessModel.Valid = false;
+            loginSuccessModel.loginModel = loginModel;
+            string query = "SELECT * FROM " + EntityType + " WHERE name = @name AND password = @password;";
+            try {
+                string ConnectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+                using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
+                    using (SqlCommand command = new SqlCommand(query, conn)) {
+                        command.Parameters.Add("@name", System.Data.SqlDbType.VarChar, 50).Value = loginModel.UserName;
+                        command.Parameters.Add("@password", System.Data.SqlDbType.VarChar, 50).Value = loginModel.UserPassword;
+                        conn.Open();
+                        using (SqlDataReader reader = command.ExecuteReader()){
+                            if (reader.HasRows) {
+                                loginSuccessModel.Valid = true;
+                                return loginSuccessModel;
+                            } else {
+                                return loginSuccessModel;
+                            }
+                        };
+                    };
+                };
+            } 
+            catch (Exception e) {
+                Console.WriteLine("LoginSuccessModel Verify : " + e.Message);
+                return loginSuccessModel;
+            }
+        }
+    }
 }

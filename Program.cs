@@ -23,15 +23,9 @@ namespace WebApplication2
             app.UseRouting();
 
             app.UseAuthorization();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
-
             app.MapControllerRoute(
                 name: "HostDashboard",
-                pattern: "{controller=Home}/{action=HostDashboard}/{id?}");
-
+                pattern: "{action=HostDashboard}/{HostId?}");
             app.Run();
         }
     }

@@ -23,13 +23,18 @@ namespace WebApplication2
             app.UseRouting();
 
             app.UseAuthorization();
-            app.MapControllerRoute(
-                name: "HostDashboard",
-                pattern: "{action=HostDashboard}/{HostId?}");
+            //app.MapControllerRoute(
+            //    name: "HostDashboard",
+            //    pattern: "{action=HostDashboard}/{HostId?}");
             app.MapControllerRoute(
                 name: "hostDashboardWithId",
-                pattern: "HostDashboard/{id}",
+                pattern: "HostDashboard/{host_id}",
                 defaults: new { controller = "Host", action = "Id" }
+            );
+            app.MapControllerRoute(
+                name: "hostDashboardWithIdWithSlotWithId",
+                pattern: "HostDashboard/{host_id}/Slot/{slot_id}",
+                defaults: new { controller = "Host", action = "Slot" }
             );
             app.MapControllerRoute(
                 name: "adminDashboardWithId",
@@ -37,9 +42,19 @@ namespace WebApplication2
                 defaults: new { controller = "Admin", action = "Id" }
             );
             app.MapControllerRoute(
+                name: "adminDashboardWithIdWithSlotWithSlotNameSlotCode",
+                pattern: "AdminDashboard/{admin_id}/Slot/{slot_name_slot_code}",
+                defaults: new { controller = "Admin", action = "Slot" }
+            );
+            app.MapControllerRoute(
                 name: "reserveeDashboardWithId",
                 pattern: "ReserveeDashboard/{id}",
                 defaults: new { controller = "Reservee", action = "Id" }
+            );
+            app.MapControllerRoute(
+                name: "reserveeDashboardWithIdWithSlotWithId",
+                pattern: "ReserveeDashboard/{reservee_id}/Slot/{slot_id}",
+                defaults: new { controller = "Reservee", action = "Slot" }
             );
             app.Run();
         }

@@ -26,6 +26,21 @@ namespace WebApplication2
             app.MapControllerRoute(
                 name: "HostDashboard",
                 pattern: "{action=HostDashboard}/{HostId?}");
+            app.MapControllerRoute(
+                name: "hostDashboardWithId",
+                pattern: "HostDashboard/{id}",
+                defaults: new { controller = "Host", action = "Id" }
+            );
+            app.MapControllerRoute(
+                name: "adminDashboardWithId",
+                pattern: "AdminDashboard/{id}",
+                defaults: new { controller = "Admin", action = "Id" }
+            );
+            app.MapControllerRoute(
+                name: "reserveeDashboardWithId",
+                pattern: "ReserveeDashboard/{id}",
+                defaults: new { controller = "Reservee", action = "Id" }
+            );
             app.Run();
         }
     }

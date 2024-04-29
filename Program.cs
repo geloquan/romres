@@ -27,35 +27,44 @@ namespace WebApplication2
             //    name: "HostDashboard",
             //    pattern: "{action=HostDashboard}/{HostId?}");
             app.MapControllerRoute(
-                name: "hostDashboardWithId",
-                pattern: "HostDashboard/{host_id}",
-                defaults: new { controller = "Host", action = "Id" }
+                name: "default",
+                pattern: "{controller=User}/{action=Index}"
             );
-            app.MapControllerRoute(
-                name: "hostDashboardWithIdWithSlotWithId",
-                pattern: "HostDashboard/{host_id}/Slot/{slot_id}",
-                defaults: new { controller = "Host", action = "Slot" }
-            );
-            app.MapControllerRoute(
-                name: "adminDashboardWithId",
-                pattern: "AdminDashboard/{id}",
-                defaults: new { controller = "Admin", action = "Id" }
-            );
-            app.MapControllerRoute(
-                name: "adminDashboardWithIdWithSlotWithSlotNameSlotCode",
-                pattern: "AdminDashboard/{admin_id}/Slot/{slot_name_slot_code}",
-                defaults: new { controller = "Admin", action = "Slot" }
-            );
-            app.MapControllerRoute(
-                name: "reserveeDashboardWithId",
-                pattern: "ReserveeDashboard/{id}",
-                defaults: new { controller = "Reservee", action = "Id" }
-            );
-            app.MapControllerRoute(
-                name: "reserveeDashboardWithIdWithSlotWithId",
-                pattern: "ReserveeDashboard/{reservee_id}/Slot/{slot_id}",
-                defaults: new { controller = "Reservee", action = "Slot" }
-            );
+            //app.MapControllerRoute(
+            //    name: "hostDashboard",
+            //    pattern: "HostDashboard",
+            //    defaults: new { controller = "Host", action = "Index" }
+            //);
+            //app.MapControllerRoute(
+            //    name: "hostDashboardWithId",
+            //    pattern: "HostDashboard/{host_id}",
+            //    defaults: new { controller = "Host", action = "Id" }
+            //);
+            //app.MapControllerRoute(
+            //    name: "hostDashboardWithIdWithSlotWithId",
+            //    pattern: "HostDashboard/{host_id}/Slot/{slot_id}",
+            //    defaults: new { controller = "Host", action = "Slot" }
+            //);
+            //app.MapControllerRoute(
+            //    name: "adminDashboardWithId",
+            //    pattern: "AdminDashboard/{id}",
+            //    defaults: new { controller = "Admin", action = "Id" }
+            //);
+            //app.MapControllerRoute(
+            //    name: "adminDashboardWithIdWithSlotWithSlotNameSlotCode",
+            //    pattern: "AdminDashboard/{admin_id}/Slot/{slot_name_slot_code}",
+            //    defaults: new { controller = "Admin", action = "Slot" }
+            //);
+            //app.MapControllerRoute(
+            //    name: "reserveeDashboardWithId",
+            //    pattern: "ReserveeDashboard/{id}",
+            //    defaults: new { controller = "Reservee", action = "Id" }
+            //);
+            //app.MapControllerRoute(
+            //    name: "reserveeDashboardWithIdWithSlotWithId",
+            //    pattern: "ReserveeDashboard/{reservee_id}/Slot/{slot_id}",
+            //    defaults: new { controller = "Reservee", action = "Slot" }
+            //);
             app.Run();
         }
     }

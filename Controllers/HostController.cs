@@ -9,11 +9,9 @@ namespace WebApplication2.Controllers {
         }
 
         public IActionResult Id(int host_id) {
-            //show slots where host_id and parent_slot == null;
             return View();
         }
         public IActionResult Slot(int host_id, int slot_id) {
-            //show slots where host_id and parent_slot == null;
             return View();
         }
     }

@@ -35,11 +35,11 @@ namespace WebApplication2
             //    pattern: "HostDashboard",
             //    defaults: new { controller = "Host", action = "Index" }
             //);
-            //app.MapControllerRoute(
-            //    name: "hostDashboardWithId",
-            //    pattern: "HostDashboard/{host_id}",
-            //    defaults: new { controller = "Host", action = "Id" }
-            //);
+            app.MapControllerRoute(
+                name: "userWithId",
+                pattern: "User/{host_id}",
+                defaults: new { controller = "User", action = "Id" }
+            );
             //app.MapControllerRoute(
             //    name: "hostDashboardWithIdWithSlotWithId",
             //    pattern: "HostDashboard/{host_id}/Slot/{slot_id}",

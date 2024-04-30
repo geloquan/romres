@@ -5,5 +5,28 @@
 
 <div class="text-center">
     <h1 class="display-4">Welcome User/Home!</h1>
+    <h2>Welcome, @ViewData["UserName"]!</h2>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Ceqweqweeee123eore</a>.</p>
 </div>
+<div id="partialContent">
+    <!-- This is where the partial view content will be loaded -->
+</div>
+
+<button id="updateButton">Say hello!</button>
+
+<script>
+    $(document).ready(function() {
+        $('#updateButton').click(function() {
+            $.ajax({
+                url: '@Url.Action("SayHello", "User")',
+                type: 'GET',
+                success: function(result) {
+                    $('#partialContent').html(result);
+                },
+                error: function() {
+                    alert('An error occurred while loading the content.');
+                }
+            });
+        });
+    });
+</script>

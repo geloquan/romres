@@ -4,11 +4,15 @@ using WebApplication2.Models;
 
 namespace WebApplication2.Controllers {
     public class UserController : Controller {
-        public IActionResult Id(int HostId) {
+        public IActionResult SayHello() {
+            return Content("hello");
+        }
+        public IActionResult Id(int HostId, string UserName) {
             Console.WriteLine("3");
+            ViewData["UserName"] = UserName;
             HostEntityData databaseConnect = new HostEntityData();
             databaseConnect.InitRootSlots(HostId);
-            return View(databaseConnect);
+            return View("Home", databaseConnect);
         }
         public IActionResult Login(LoginModel Host) {
             Console.WriteLine("2");
@@ -18,7 +22,7 @@ namespace WebApplication2.Controllers {
             if (loginSuccessModel.Valid) {
                 int? nullableInt = loginSuccessModel.loginModel.Id; 
                 int UserId = nullableInt ?? 0; 
-                return Id(UserId);
+                return RedirectToAction("Id", new { HostId = UserId, UserName =  loginSuccessModel.loginModel.UserName});
             } else if (loginSuccessModel.Valid == false){
                 return View("Error");
             } else {

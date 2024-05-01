@@ -14,6 +14,18 @@ namespace WebApplication2.Controllers {
             databaseConnect.InitRootSlots(HostId);
             return View("Home", databaseConnect);
         }
+        public IActionResult FavoriteSlots() {
+            //JSON return
+            return Content("");
+        }
+        public IActionResult ReservedSlots() {
+            //JSON return
+            return Content("");
+        }
+        public IActionResult AdministeredSlots() {
+            //JSON return
+            return Content("");
+        }
         public IActionResult Login(LoginModel Host) {
             Console.WriteLine("2");
             HostEntityLogin hostEntityLogin = new HostEntityLogin();

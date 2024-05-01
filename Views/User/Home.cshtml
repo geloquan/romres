@@ -18,7 +18,7 @@
     $(document).ready(function() {
         $('#updateButton').click(function() {
             $.ajax({
-                url: '@Url.Action("SayHello", "User")',
+                url: '@Url.Action("FavoriteSlots", "User")',
                 type: 'GET',
                 success: function(result) {
                     $('#partialContent').html(result);

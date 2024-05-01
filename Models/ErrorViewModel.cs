@@ -14,7 +14,7 @@ namespace WebApplication2.Models {
         public int? ParentRootId { get; set; }
         public string? ParentRootName { get; set; }
         public int? ChildRootId { get; set; }
-        public string? ChildRootName { get; set; }
+        public List<SlotModelV2>? Children { get; set; }
         public int? ReserverId { get; set; }
         public int? HostId { get; set; }
         public int? EdgeId { get; set; }
@@ -22,6 +22,7 @@ namespace WebApplication2.Models {
         public System.Data.SqlTypes.SqlDouble? EdgeY { get; set; }
         public int? InvitationId { get; set; }
         public string? Code { get; set; }
+        public bool? IsRervable { get; set; }
         public bool? IsOneTimeUsage { get; set; }
     }
     public class LoginModel {
@@ -32,5 +33,12 @@ namespace WebApplication2.Models {
     public class LoginSuccessModel {
         public bool Valid { get; set; }
         public LoginModel? loginModel { get; set; }
+    }
+
+    public class SlotParent {
+        public int parent_id { get; set; }
+    }
+    public class SlotTree {
+        public List<SlotModelV2> slots { get; set; } 
     }
 }

@@ -4,27 +4,13 @@ using WebApplication2.Models;
 
 namespace WebApplication2.Controllers {
     public class UserController : Controller {
-        public IActionResult SayHello() {
-            return Content("hello");
-        }
+
         public IActionResult Id(int HostId, string UserName) {
             Console.WriteLine("3");
             ViewData["UserName"] = UserName;
             HostEntityData databaseConnect = new HostEntityData();
             databaseConnect.InitRootSlots(HostId);
             return View("Home", databaseConnect);
-        }
-        public IActionResult FavoriteSlots() {
-            //JSON return
-            return Content("");
-        }
-        public IActionResult ReservedSlots() {
-            //JSON return
-            return Content("");
-        }
-        public IActionResult AdministeredSlots() {
-            //JSON return
-            return Content("");
         }
         public IActionResult Login(LoginModel Host) {
             Console.WriteLine("2");

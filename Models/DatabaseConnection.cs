@@ -3,6 +3,8 @@ namespace WebApplication2.Models {
     public class DatabaseConnect {
         public List<SlotModel> SlotList = new List<SlotModel>();
         public List<SlotModel> RootSlots = new List<SlotModel>();
+        public List<SlotModel> favoriteSlots = new List<SlotModel>();
+        public List<SlotTree> SlotTree = new List<SlotTree>();
         public void OnGete() {
             string query_1 = @"SELECT
     sf.id AS slot_fnl_id,

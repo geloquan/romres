@@ -2,7 +2,7 @@ using System.Data;
 using System.Data.SqlClient;
 namespace WebApplication2.Models {
     public class UserEntityData {
-        public List<SlotModelV2> RootSlots = new List<SlotModelV2>();
+        //public List<SlotModelV2> RootSlots = new List<SlotModelV2>();
         public List<SlotTree> SlotTree = new List<SlotTree>();
         private List<Host> HostedTreeSlots = new List<Host>();
         
@@ -59,7 +59,7 @@ namespace WebApplication2.Models {
                                             int root_slot_id = reader_2.GetInt32(0);
                                             int second_layer_slot_id = reader_2.GetInt32(1);
                                             int third_layer_slot_id = reader_2.GetInt32(2);
-                                            
+                                            if ()
                                         }
                                     }
                                 }

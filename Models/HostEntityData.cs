@@ -2,7 +2,7 @@ using System.Data;
 using System.Data.SqlClient;
 namespace WebApplication2.Models {
     public class HostEntityData {
-        public List<SlotModelV2> RootSlots = new List<SlotModelV2>();
+        public List<SlotModel> RootSlots = new List<SlotModel>();
         public void InitRootSlots(int HostId) {
             string query = @"SELECT
                                 sf.slot_id AS primary_slot_id,
@@ -45,7 +45,7 @@ namespace WebApplication2.Models {
                         conn.Open();
                         using (SqlDataReader reader = command.ExecuteReader()){
                             while (reader.Read()) {
-                                SlotModelV2 slotModel = new SlotModelV2();
+                                SlotModel slotModel = new SlotModel();
                                 slotModel.PrimarySlotId = reader.IsDBNull(0) ? null : reader.GetInt32(0);
                                 slotModel.PrimarySlotName = reader.IsDBNull(1) ? null : reader.GetString(1);
                                 slotModel.ParentRootId = reader.IsDBNull(2) ? null : reader.GetInt32(2);

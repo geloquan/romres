@@ -3,7 +3,7 @@ using System.Data.SqlClient;
 namespace WebApplication2.Models {
     public class UserEntityData {
         //public List<SlotModelV2> RootSlots = new List<SlotModelV2>();
-        public List<SlotTree> SlotTree = new List<SlotTree>();
+        public List<SlotModel> SlotTree = new List<SlotModel>();
         private List<Host> HostedTreeSlots = new List<Host>();
         
         public void FavoriteSlots(int UserId) {
@@ -39,6 +39,8 @@ namespace WebApplication2.Models {
                     [user] u ON r.user_id = u.id 
                 LEFT JOIN 
                     edge e ON sf.slot_id = e.slot_id
+                LEFT JOIN
+                    invitation inv ON s.id = inv.slot_id                    
                 WHERE 
                     s.id = @slot_id;
             ";
@@ -55,11 +57,27 @@ namespace WebApplication2.Models {
                                     command_2.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = slot_id;
                                     conn.Open();
                                     using (SqlDataReader reader_2 = command_2.ExecuteReader()){
+                                        SlotTree Tree = new SlotTree();
                                         while (reader_2.Read()) {
                                             int root_slot_id = reader_2.GetInt32(0);
                                             int second_layer_slot_id = reader_2.GetInt32(1);
                                             int third_layer_slot_id = reader_2.GetInt32(2);
-                                            if ()
+                                            if (root_slot_id != Tree.RootId) {
+                                                using (SqlCommand command_root_slot = new SqlCommand(slot_info_query, conn)) {
+                                                    command_root_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = root_slot_id;
+                                                    conn.Open();
+                                                    using (SqlDataReader reader_root_slot = command_2.ExecuteReader()){
+                                                        while (reader_root_slot.Read()) {
+                                                            
+                                                        }
+                                                    }
+                                                }
+                                                Tree.RootId = root_slot_id;
+                                            } if (!Tree.SecondLayerExists(second_layer_slot_id)) {
+                                                
+                                            } if (!Tree.ThirdLayerExists(third_layer_slot_id)) {
+                                                
+                                            } 
                                         }
                                     }
                                 }

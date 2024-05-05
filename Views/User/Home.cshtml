@@ -13,17 +13,26 @@
 </div>
 
 <button id="updateButton">Say hello!</button>
+<h4>your id is: @ViewData["UserId"]</h4>
 
 <script>
     $(document).ready(function() {
         $('#updateButton').click(function() {
+            var userId = 123;
+
+            // Construct the URL with the UserId as a query parameter
+            var url = '@Url.Action("FavoriteSlots", "User")' + '?userId=' + userId;
+
+            // Make the AJAX GET request
             $.ajax({
-                url: '@Url.Action("FavoriteSlots", "User")',
+                url: url,
                 type: 'GET',
                 success: function(result) {
+                    // Update the HTML content with the returned result
                     $('#partialContent').html(result);
                 },
                 error: function() {
+                    // Handle error
                     alert('An error occurred while loading the content.');
                 }
             });

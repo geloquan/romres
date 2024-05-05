@@ -37,7 +37,7 @@ namespace WebApplication2
             //);
             app.MapControllerRoute(
                 name: "userWithId",
-                pattern: "User/{host_id}",
+                pattern: "User/{user_id}",
                 defaults: new { controller = "User", action = "Id" }
             );
             //app.MapControllerRoute(

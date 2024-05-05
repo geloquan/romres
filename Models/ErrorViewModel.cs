@@ -1,5 +1,10 @@
 namespace WebApplication2.Models {
-    
+    public class FavoriteSlots {
+        public List<SlotTree> SlotTrees { get; set; } = new List<SlotTree>();
+        public void AddSlotTree(SlotTree slotTree) {
+            this.SlotTrees.Add(slotTree);
+        }
+    }
     public class SlotModel {
         public List<(
         System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble
@@ -7,15 +12,16 @@ namespace WebApplication2.Models {
         new List<(System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble)>();
         public List<(DateTime, DateTime)> Durations { get; set; } = new List<(DateTime, DateTime)>();
         public string? Name { get; set; }
-        public int? ReserverId { get; set; }
-        public int? HostId { get; set; }
-        public int? EdgeId { get; set; }
+        public int? Id { get; set; }
+        public bool? IsRervable { get; set; }
+        public string? ReserverName { get; set; }
+        public string? InvitationCode { get; set; }
+        //public int? HostId { get; set; }
+        //public int? EdgeId { get; set; }
         //public System.Data.SqlTypes.SqlDouble? EdgeX { get; set; }
         //public System.Data.SqlTypes.SqlDouble? EdgeY { get; set; }
-        public int? InvitationId { get; set; }
-        public string? Code { get; set; }
-        public bool? IsRervable { get; set; }
-        public bool? IsOneTimeUsage { get; set; }
+        //public int? InvitationId { get; set; }
+        //public bool? IsOneTimeUsage { get; set; }
         public void AddEdge((System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble) edge) {
 
         }
@@ -30,10 +36,10 @@ namespace WebApplication2.Models {
         public int? RootId { get; set; }
         public List<SlotModel> SecondLayerChildren { get; set; } = new List<SlotModel>();
         public List<SlotModel> ThirdLayerChildren { get; set; } = new List<SlotModel>();
-        private void AddSecondLayer(int SlotId) {
+        public void AddSecondLayer(int SlotId) {
             this.SecondLayerId.Add(SlotId);
         }
-        private void AddThirdLayer(int SlotId) {
+        public void AddThirdLayer(int SlotId) {
             this.ThirdLayerId.Add(SlotId);
         }
         public bool SecondLayerExists(int SlotId) {

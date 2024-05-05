@@ -4,6 +4,7 @@ namespace WebApplication2.Models {
     public class UserEntityData {
         //public List<SlotModelV2> RootSlots = new List<SlotModelV2>();
         public List<SlotModel> SlotTree = new List<SlotModel>();
+        public FavoriteSlots favoriteSlots = new FavoriteSlots();
         private List<Host> HostedTreeSlots = new List<Host>();
         
         public void FavoriteSlots(int UserId) {
@@ -29,8 +30,8 @@ namespace WebApplication2.Models {
                     s.name AS slot_name,
                     s.id AS slot_id,
                     s.is_reservable AS slot_is_reservable,
-                    inv.code AS slot_invitation_code,
                     u.name AS reserver_user_name
+                    inv.code AS slot_invitation_code,
                 FROM 
                     slot s 
                 LEFT JOIN 
@@ -72,23 +73,64 @@ namespace WebApplication2.Models {
                                                     conn.Open();
                                                     using (SqlDataReader reader_root_slot = command_root_slot.ExecuteReader()){
                                                         SlotModel Model = new SlotModel();
-                                                        
                                                         while (reader_root_slot.Read()) {
                                                             Model.AddEdge((reader_root_slot.GetSqlDouble(0), reader_root_slot.GetSqlDouble(1)));
                                                             Model.AddDuration((reader_root_slot.GetDateTime(2), reader_root_slot.GetDateTime(3)));
+                                                            Model.Name = reader_root_slot.GetString(4);
+                                                            Model.Id = reader_root_slot.GetInt16(5);
+                                                            Model.IsRervable = reader_root_slot.GetByte(6) != 0;
+                                                            Model.ReserverName = reader_root_slot.GetString(7);
+                                                            Model.InvitationCode = reader_root_slot.GetString(8);
                                                         }
+                                                        Tree.RootSlotModel = Model;
+                                                        Tree.RootId = root_slot_id;
                                                     }
                                                 }
-                                                Tree.RootId = root_slot_id;
                                             } if (!Tree.SecondLayerExists(second_layer_slot_id)) {
-                                                
+                                                using (SqlCommand command_second_layer_slot = new SqlCommand(slot_info_query, conn)) {
+                                                    command_second_layer_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = second_layer_slot_id;
+                                                    conn.Open();
+                                                    using (SqlDataReader reader_second_layer_slot = command_second_layer_slot.ExecuteReader()){
+                                                        SlotModel Model = new SlotModel();
+                                                        while (reader_second_layer_slot.Read()) {
+                                                            Model.AddEdge((reader_second_layer_slot.GetSqlDouble(0), reader_second_layer_slot.GetSqlDouble(1)));
+                                                            Model.AddDuration((reader_second_layer_slot.GetDateTime(2), reader_second_layer_slot.GetDateTime(3)));
+                                                            Model.Name = reader_second_layer_slot.GetString(4);
+                                                            Model.Id = reader_second_layer_slot.GetInt16(5);
+                                                            Model.IsRervable = reader_second_layer_slot.GetByte(6) != 0;
+                                                            Model.ReserverName = reader_second_layer_slot.GetString(7);
+                                                            Model.InvitationCode = reader_second_layer_slot.GetString(8);
+                                                        }
+                                                        Tree.AddSecondLayer(second_layer_slot_id);
+                                                        Tree.AddSecondLayerChildren(Model);
+                                                    }
+                                                }
                                             } if (!Tree.ThirdLayerExists(third_layer_slot_id)) {
-                                                
+                                                using (SqlCommand command_third_layer_slot = new SqlCommand(slot_info_query, conn)) {
+                                                    command_third_layer_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = third_layer_slot_id;
+                                                    conn.Open();
+                                                    using (SqlDataReader reader_third_layer_slot = command_third_layer_slot.ExecuteReader()){
+                                                        SlotModel Model = new SlotModel();
+                                                        while (reader_third_layer_slot.Read()) {
+                                                            Model.AddEdge((reader_third_layer_slot.GetSqlDouble(0), reader_third_layer_slot.GetSqlDouble(1)));
+                                                            Model.AddDuration((reader_third_layer_slot.GetDateTime(2), reader_third_layer_slot.GetDateTime(3)));
+                                                            Model.Name = reader_third_layer_slot.GetString(4);
+                                                            Model.Id = reader_third_layer_slot.GetInt16(5);
+                                                            Model.IsRervable = reader_third_layer_slot.GetByte(6) != 0;
+                                                            Model.ReserverName = reader_third_layer_slot.GetString(7);
+                                                            Model.InvitationCode = reader_third_layer_slot.GetString(8);
+                                                        }
+                                                        Tree.AddThirdLayer(third_layer_slot_id);
+                                                        Tree.AddThirdLayerChildren(Model);
+                                                    }
+                                                }
                                             } 
                                         }
+                                        favoriteSlots.AddSlotTree(Tree);
                                     }
                                 }
                             }
+
                         };
                     };
                 };

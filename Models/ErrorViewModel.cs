@@ -1,15 +1,27 @@
 namespace WebApplication2.Models {
+    
     public class SlotModel {
+        public List<(
+        System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble
+        )> Edge { get; set; } = 
+        new List<(System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble)>();
+        public List<(DateTime, DateTime)> Durations { get; set; } = new List<(DateTime, DateTime)>();
         public string? Name { get; set; }
         public int? ReserverId { get; set; }
         public int? HostId { get; set; }
         public int? EdgeId { get; set; }
-        public System.Data.SqlTypes.SqlDouble? EdgeX { get; set; }
-        public System.Data.SqlTypes.SqlDouble? EdgeY { get; set; }
+        //public System.Data.SqlTypes.SqlDouble? EdgeX { get; set; }
+        //public System.Data.SqlTypes.SqlDouble? EdgeY { get; set; }
         public int? InvitationId { get; set; }
         public string? Code { get; set; }
         public bool? IsRervable { get; set; }
         public bool? IsOneTimeUsage { get; set; }
+        public void AddEdge((System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble) edge) {
+
+        }
+        public void AddDuration((DateTime, DateTime) duration) {
+            
+        }
     }
     public class SlotTree {
         public List<int> SecondLayerId { get; set; } = new List<int>();
@@ -45,7 +57,7 @@ namespace WebApplication2.Models {
             this.ThirdLayerChildren.Add(slotModel);
         }
         public void SetRootSlot(SlotModel slotModel) {
-            this.RootSlotModel = slotModel
+            this.RootSlotModel = slotModel;
         }
 
 

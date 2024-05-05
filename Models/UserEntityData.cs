@@ -28,6 +28,8 @@ namespace WebApplication2.Models {
                     r.duration_end AS reserve_duration_end,
                     s.name AS slot_name,
                     s.id AS slot_id,
+                    s.is_reservable AS slot_is_reservable,
+                    inv.code AS slot_invitation_code,
                     u.name AS reserver_user_name
                 FROM 
                     slot s 
@@ -35,6 +37,8 @@ namespace WebApplication2.Models {
                     slot_fnl sf ON sf.slot_id = s.id
                 LEFT JOIN 
                     reserver r ON sf.reserver_id = r.id
+                LEFT JOIN 
+                    host h ON s.host_id = h.id
                 LEFT JOIN 
                     [user] u ON r.user_id = u.id 
                 LEFT JOIN 
@@ -66,9 +70,12 @@ namespace WebApplication2.Models {
                                                 using (SqlCommand command_root_slot = new SqlCommand(slot_info_query, conn)) {
                                                     command_root_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = root_slot_id;
                                                     conn.Open();
-                                                    using (SqlDataReader reader_root_slot = command_2.ExecuteReader()){
+                                                    using (SqlDataReader reader_root_slot = command_root_slot.ExecuteReader()){
+                                                        SlotModel Model = new SlotModel();
+                                                        
                                                         while (reader_root_slot.Read()) {
-                                                            
+                                                            Model.AddEdge((reader_root_slot.GetSqlDouble(0), reader_root_slot.GetSqlDouble(1)));
+                                                            Model.AddDuration((reader_root_slot.GetDateTime(2), reader_root_slot.GetDateTime(3)));
                                                         }
                                                     }
                                                 }

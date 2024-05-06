@@ -19,21 +19,15 @@
     $(document).ready(function() {
         $('#updateButton').click(function() {
             var userId = @ViewData["UserId"];
-
-            // Construct the URL with the UserId as a query parameter
             var url = '@Url.Action("FavoriteSlots", "User")' + '?userId=' + userId;
-
-            // Make the AJAX GET request
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(result) {
                 console.log("AJAX Success. Result:", result);
-                    // Update the HTML content with the returned result
                     $('#partialContent').html(result);
                 },
                 error: function() {
-                    // Handle error
                     alert('An error occurred while loading the content.');
                 }
             });

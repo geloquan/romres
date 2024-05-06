@@ -76,14 +76,14 @@ namespace WebApplication2.Models {
                                                             using (SqlDataReader reader_root_slot = command_root_slot.ExecuteReader()){
                                                                 SlotModel Model = new SlotModel();
                                                                 while (reader_root_slot.Read()) {
-                                                                    System.Data.SqlTypes.SqlDouble x = reader_root_slot.IsDBNull(0) ? reader_root_slot.GetSqlDouble(0) : 0;
-                                                                    System.Data.SqlTypes.SqlDouble y = reader_root_slot.IsDBNull(1) ? reader_root_slot.GetSqlDouble(1) : 0;
+                                                                    double x = reader_root_slot.IsDBNull(0) ? 0 : reader_root_slot.GetSqlDouble(0).Value;
+                                                                    double y = reader_root_slot.IsDBNull(1) ? 0 : reader_root_slot.GetSqlDouble(1).Value;
                                                                     Model.AddEdge((x, y));
                                                                     DateTime startDate = reader_root_slot.IsDBNull(2) ? DateTime.MinValue : reader_root_slot.GetDateTime(2);
                                                                     DateTime endDate = reader_root_slot.IsDBNull(3) ? DateTime.MinValue : reader_root_slot.GetDateTime(3);
-                                                                    Model.AddDuration((startDate, endDate));                                                            
+                                                                    Model.AddDuration((startDate, endDate));           
                                                                     Model.Name = reader_root_slot.GetString(4);
-                                                                    Model.Id = reader_root_slot.GetInt32(5);
+                                                                    Model.SlotId = reader_root_slot.GetInt32(5);
                                                                     Model.IsRervable = !reader_root_slot.IsDBNull(7) ? reader_root_slot.GetByte(6) != 0 : false;
                                                                     Model.ReserverName = !reader_root_slot.IsDBNull(7) ? reader_root_slot.GetString(7) : string.Empty;
                                                                     Model.InvitationCode = !reader_root_slot.IsDBNull(8) ? reader_root_slot.GetString(8) : string.Empty;
@@ -102,18 +102,19 @@ namespace WebApplication2.Models {
                                                             using (SqlDataReader reader_second_layer_slot = command_second_layer_slot.ExecuteReader()){
                                                                 SlotModel Model = new SlotModel();
                                                                 while (reader_second_layer_slot.Read()) {
-                                                                    System.Data.SqlTypes.SqlDouble x = reader_second_layer_slot.IsDBNull(0) ? reader_second_layer_slot.GetSqlDouble(0) : 0;
-                                                                    System.Data.SqlTypes.SqlDouble y = reader_second_layer_slot.IsDBNull(1) ? reader_second_layer_slot.GetSqlDouble(1) : 0;
+                                                                    double x = reader_second_layer_slot.IsDBNull(0) ? 0 : reader_second_layer_slot.GetSqlDouble(0).Value;
+                                                                    double y = reader_second_layer_slot.IsDBNull(1) ? 0 : reader_second_layer_slot.GetSqlDouble(1).Value;
                                                                     Model.AddEdge((x, y));
                                                                     DateTime startDate = reader_second_layer_slot.IsDBNull(2) ? DateTime.MinValue : reader_second_layer_slot.GetDateTime(2);
                                                                     DateTime endDate = reader_second_layer_slot.IsDBNull(3) ? DateTime.MinValue : reader_second_layer_slot.GetDateTime(3);
                                                                     Model.AddDuration((startDate, endDate));                                                            
                                                                     Model.Name = reader_second_layer_slot.GetString(4);
-                                                                    Model.Id = reader_second_layer_slot.GetInt32(5);
+                                                                    Model.SlotId = reader_second_layer_slot.GetInt32(5);
                                                                     Model.IsRervable = !reader_second_layer_slot.IsDBNull(7) ? reader_second_layer_slot.GetByte(6) != 0 : false;
                                                                     Model.ReserverName = !reader_second_layer_slot.IsDBNull(7) ? reader_second_layer_slot.GetString(7) : string.Empty;
                                                                     Model.InvitationCode = !reader_second_layer_slot.IsDBNull(8) ? reader_second_layer_slot.GetString(8) : string.Empty;
                                                                 }
+                                                                Model.ParentSlotId = Tree.RootId;
                                                                 Tree.AddSecondLayer(second_layer_slot_id.Value);
                                                                 Tree.AddSecondLayerChildren(Model);
                                                             }
@@ -128,18 +129,19 @@ namespace WebApplication2.Models {
                                                             using (SqlDataReader reader_third_layer_slot = command_third_layer_slot.ExecuteReader()){
                                                                 SlotModel Model = new SlotModel();
                                                                 while (reader_third_layer_slot.Read()) {
-                                                                    System.Data.SqlTypes.SqlDouble x = reader_third_layer_slot.IsDBNull(0) ? reader_third_layer_slot.GetSqlDouble(0) : 0;
-                                                                    System.Data.SqlTypes.SqlDouble y = reader_third_layer_slot.IsDBNull(1) ? reader_third_layer_slot.GetSqlDouble(1) : 0;
+                                                                    double x = reader_third_layer_slot.IsDBNull(0) ? 0 : reader_third_layer_slot.GetSqlDouble(0).Value;
+                                                                    double y = reader_third_layer_slot.IsDBNull(1) ? 0 : reader_third_layer_slot.GetSqlDouble(1).Value;
                                                                     Model.AddEdge((x, y));
                                                                     DateTime startDate = reader_third_layer_slot.IsDBNull(2) ? DateTime.MinValue : reader_third_layer_slot.GetDateTime(2);
                                                                     DateTime endDate = reader_third_layer_slot.IsDBNull(3) ? DateTime.MinValue : reader_third_layer_slot.GetDateTime(3);
                                                                     Model.AddDuration((startDate, endDate));                               
                                                                     Model.Name = reader_third_layer_slot.GetString(4);
-                                                                    Model.Id = reader_third_layer_slot.GetInt32(5);
+                                                                    Model.SlotId = reader_third_layer_slot.GetInt32(5);
                                                                     Model.IsRervable = !reader_third_layer_slot.IsDBNull(7) ? reader_third_layer_slot.GetByte(6) != 0 : false;
                                                                     Model.ReserverName = !reader_third_layer_slot.IsDBNull(7) ? reader_third_layer_slot.GetString(7) : string.Empty;
                                                                     Model.InvitationCode = !reader_third_layer_slot.IsDBNull(8) ? reader_third_layer_slot.GetString(8) : string.Empty;
                                                                 }
+                                                                Model.ParentSlotId = second_layer_slot_id.Value;
                                                                 Tree.AddThirdLayer(third_layer_slot_id.Value);
                                                                 Tree.AddThirdLayerChildren(Model);
                                                             }

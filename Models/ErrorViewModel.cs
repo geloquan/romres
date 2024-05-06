@@ -6,13 +6,19 @@ namespace WebApplication2.Models {
         }
     }
     public class SlotModel {
-        public List<(
-        System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble
-        )> Edge { get; set; } = 
-        new List<(System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble)>();
-        public List<(DateTime, DateTime)> Durations { get; set; } = new List<(DateTime, DateTime)>();
+        public class EdgeMod {
+            public double X { get; set; }
+            public double Y { get; set; }
+        }
+        public class DateMod {
+            public string Start { get; set; }
+            public string End { get; set; }
+        }
+        public HashSet<EdgeMod> Edge { get; set; } = new HashSet<EdgeMod>();
+        public HashSet<DateMod> Durations { get; set; } = new HashSet<DateMod>();
         public string? Name { get; set; }
-        public int? Id { get; set; }
+        public int? SlotId { get; set; }
+        public int? ParentSlotId { get; set; }
         public bool? IsRervable { get; set; }
         public string? ReserverName { get; set; }
         public string? InvitationCode { get; set; }
@@ -22,11 +28,17 @@ namespace WebApplication2.Models {
         //public System.Data.SqlTypes.SqlDouble? EdgeY { get; set; }
         //public int? InvitationId { get; set; }
         //public bool? IsOneTimeUsage { get; set; }
-        public void AddEdge((System.Data.SqlTypes.SqlDouble, System.Data.SqlTypes.SqlDouble) edge) {
-
+        public void AddEdge((double, double) edge) {
+            this.Edge.Add(new EdgeMod{
+                X = edge.Item1,
+                Y = edge.Item2
+            });
         }
         public void AddDuration((DateTime, DateTime) duration) {
-            
+            this.Durations.Add(new DateMod{
+                Start = duration.Item1.ToString("MM-dd-yyyy HH:mm:ss"),
+                End = duration.Item2.ToString("MM-dd-yyyy HH:mm:ss")
+            });
         }
     }
     public class SlotTree {

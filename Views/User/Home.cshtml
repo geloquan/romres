@@ -18,7 +18,7 @@
 <script>
     $(document).ready(function() {
         $('#updateButton').click(function() {
-            var userId = 123;
+            var userId = @ViewData["UserId"];
 
             // Construct the URL with the UserId as a query parameter
             var url = '@Url.Action("FavoriteSlots", "User")' + '?userId=' + userId;
@@ -28,6 +28,7 @@
                 url: url,
                 type: 'GET',
                 success: function(result) {
+                console.log("AJAX Success. Result:", result);
                     // Update the HTML content with the returned result
                     $('#partialContent').html(result);
                 },

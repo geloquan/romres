@@ -21,19 +21,22 @@ namespace WebApplication2.Controllers {
         [HttpGet]
         public IActionResult FavoriteSlots() {
             Console.WriteLine("FavoriteSlots()");
-            UserEntityData userEntityData = new UserEntityData();
-            userEntityData.FavoriteSlots(1);
-            return Content(userEntityData.favoriteSlots.ToString());
+            if (Request.Query.ContainsKey("userId") && int.TryParse(Request.Query["userId"], out int userId)) {
+                UserEntityData userEntityData = new UserEntityData();
+                userEntityData.FavoriteSlots(userId);
+                return new JsonResult(userEntityData.favoriteSlots);
+            }
+            return BadRequest("UserId is missing or invalid.");
         }
         public IActionResult Login(LoginModel User) {
             Console.WriteLine("2");
             UserEntityLogin userEntityLogin = new UserEntityLogin();
-            LoginSuccessModel loginSuccessModel = userEntityLogin.Verify(User);
-            if (loginSuccessModel.Valid) {
-                int? nullableInt = loginSuccessModel.loginModel.Id; 
+            userEntityLogin.Verify(User);
+            if (userEntityLogin.Verified) {
+                int? nullableInt = userEntityLogin.Id; 
                 int UserId = nullableInt ?? 69; 
-                return RedirectToRoute("userWithId", new { user_id = UserId });
-            } else if (!loginSuccessModel.Valid){
+                return RedirectToRoute("userWithId", new { user_id = userEntityLogin.Id });
+            } else if (!userEntityLogin.Verified){
                 return View("Error");
             } else {
                 return View("Error");

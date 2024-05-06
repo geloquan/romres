@@ -30,8 +30,8 @@ namespace WebApplication2.Models {
                     s.name AS slot_name,
                     s.id AS slot_id,
                     s.is_reservable AS slot_is_reservable,
-                    u.name AS reserver_user_name
-                    inv.code AS slot_invitation_code,
+                    u.name AS reserver_user_name,
+                    inv.code AS slot_invitation_code
                 FROM 
                     slot s 
                 LEFT JOIN 
@@ -58,75 +58,97 @@ namespace WebApplication2.Models {
                         using (SqlDataReader reader_1 = command_1.ExecuteReader()){
                             while (reader_1.Read()) {
                                 int slot_id = reader_1.GetInt32(0);
-                                using (SqlCommand command_2 = new SqlCommand(slot_tree_query, conn)) {
-                                    command_2.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = slot_id;
-                                    conn.Open();
-                                    using (SqlDataReader reader_2 = command_2.ExecuteReader()){
-                                        SlotTree Tree = new SlotTree();
-                                        while (reader_2.Read()) {
-                                            int root_slot_id = reader_2.GetInt32(0);
-                                            int second_layer_slot_id = reader_2.GetInt32(1);
-                                            int third_layer_slot_id = reader_2.GetInt32(2);
-                                            if (root_slot_id != Tree.RootId) {
-                                                using (SqlCommand command_root_slot = new SqlCommand(slot_info_query, conn)) {
-                                                    command_root_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = root_slot_id;
-                                                    conn.Open();
-                                                    using (SqlDataReader reader_root_slot = command_root_slot.ExecuteReader()){
-                                                        SlotModel Model = new SlotModel();
-                                                        while (reader_root_slot.Read()) {
-                                                            Model.AddEdge((reader_root_slot.GetSqlDouble(0), reader_root_slot.GetSqlDouble(1)));
-                                                            Model.AddDuration((reader_root_slot.GetDateTime(2), reader_root_slot.GetDateTime(3)));
-                                                            Model.Name = reader_root_slot.GetString(4);
-                                                            Model.Id = reader_root_slot.GetInt16(5);
-                                                            Model.IsRervable = reader_root_slot.GetByte(6) != 0;
-                                                            Model.ReserverName = reader_root_slot.GetString(7);
-                                                            Model.InvitationCode = reader_root_slot.GetString(8);
+                                using (SqlConnection conn_2 = new SqlConnection(ConnectionQuery)) {
+                                    using (SqlCommand command_2 = new SqlCommand(slot_tree_query, conn_2)) {
+                                        command_2.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = slot_id;
+                                        conn_2.Open();
+                                        using (SqlDataReader reader_2 = command_2.ExecuteReader()){
+                                            SlotTree Tree = new SlotTree();
+                                            while (reader_2.Read()) {
+                                                int? root_slot_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
+                                                int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
+                                                int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
+                                                if (root_slot_id != Tree.RootId && root_slot_id != null) {
+                                                    using (SqlConnection conn_3 = new SqlConnection(ConnectionQuery)) {
+                                                        using (SqlCommand command_root_slot = new SqlCommand(slot_info_query, conn_3)) {
+                                                            command_root_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = root_slot_id;
+                                                            conn_3.Open();
+                                                            using (SqlDataReader reader_root_slot = command_root_slot.ExecuteReader()){
+                                                                SlotModel Model = new SlotModel();
+                                                                while (reader_root_slot.Read()) {
+                                                                    System.Data.SqlTypes.SqlDouble x = reader_root_slot.IsDBNull(0) ? reader_root_slot.GetSqlDouble(0) : 0;
+                                                                    System.Data.SqlTypes.SqlDouble y = reader_root_slot.IsDBNull(1) ? reader_root_slot.GetSqlDouble(1) : 0;
+                                                                    Model.AddEdge((x, y));
+                                                                    DateTime startDate = reader_root_slot.IsDBNull(2) ? DateTime.MinValue : reader_root_slot.GetDateTime(2);
+                                                                    DateTime endDate = reader_root_slot.IsDBNull(3) ? DateTime.MinValue : reader_root_slot.GetDateTime(3);
+                                                                    Model.AddDuration((startDate, endDate));                                                            
+                                                                    Model.Name = reader_root_slot.GetString(4);
+                                                                    Model.Id = reader_root_slot.GetInt32(5);
+                                                                    Model.IsRervable = !reader_root_slot.IsDBNull(7) ? reader_root_slot.GetByte(6) != 0 : false;
+                                                                    Model.ReserverName = !reader_root_slot.IsDBNull(7) ? reader_root_slot.GetString(7) : string.Empty;
+                                                                    Model.InvitationCode = !reader_root_slot.IsDBNull(8) ? reader_root_slot.GetString(8) : string.Empty;
+                                                                }
+                                                                Tree.RootSlotModel = Model;
+                                                                Tree.RootId = root_slot_id;
+                                                            }
                                                         }
-                                                        Tree.RootSlotModel = Model;
-                                                        Tree.RootId = root_slot_id;
                                                     }
-                                                }
-                                            } if (!Tree.SecondLayerExists(second_layer_slot_id)) {
-                                                using (SqlCommand command_second_layer_slot = new SqlCommand(slot_info_query, conn)) {
-                                                    command_second_layer_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = second_layer_slot_id;
-                                                    conn.Open();
-                                                    using (SqlDataReader reader_second_layer_slot = command_second_layer_slot.ExecuteReader()){
-                                                        SlotModel Model = new SlotModel();
-                                                        while (reader_second_layer_slot.Read()) {
-                                                            Model.AddEdge((reader_second_layer_slot.GetSqlDouble(0), reader_second_layer_slot.GetSqlDouble(1)));
-                                                            Model.AddDuration((reader_second_layer_slot.GetDateTime(2), reader_second_layer_slot.GetDateTime(3)));
-                                                            Model.Name = reader_second_layer_slot.GetString(4);
-                                                            Model.Id = reader_second_layer_slot.GetInt16(5);
-                                                            Model.IsRervable = reader_second_layer_slot.GetByte(6) != 0;
-                                                            Model.ReserverName = reader_second_layer_slot.GetString(7);
-                                                            Model.InvitationCode = reader_second_layer_slot.GetString(8);
+                                                } 
+                                                if (!Tree.SecondLayerExists(second_layer_slot_id.Value) && second_layer_slot_id != null) {
+                                                    using (SqlConnection conn_4 = new SqlConnection(ConnectionQuery)) {
+                                                        using (SqlCommand command_second_layer_slot = new SqlCommand(slot_info_query, conn_4)) {
+                                                            command_second_layer_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = second_layer_slot_id;
+                                                            conn_4.Open();
+                                                            using (SqlDataReader reader_second_layer_slot = command_second_layer_slot.ExecuteReader()){
+                                                                SlotModel Model = new SlotModel();
+                                                                while (reader_second_layer_slot.Read()) {
+                                                                    System.Data.SqlTypes.SqlDouble x = reader_second_layer_slot.IsDBNull(0) ? reader_second_layer_slot.GetSqlDouble(0) : 0;
+                                                                    System.Data.SqlTypes.SqlDouble y = reader_second_layer_slot.IsDBNull(1) ? reader_second_layer_slot.GetSqlDouble(1) : 0;
+                                                                    Model.AddEdge((x, y));
+                                                                    DateTime startDate = reader_second_layer_slot.IsDBNull(2) ? DateTime.MinValue : reader_second_layer_slot.GetDateTime(2);
+                                                                    DateTime endDate = reader_second_layer_slot.IsDBNull(3) ? DateTime.MinValue : reader_second_layer_slot.GetDateTime(3);
+                                                                    Model.AddDuration((startDate, endDate));                                                            
+                                                                    Model.Name = reader_second_layer_slot.GetString(4);
+                                                                    Model.Id = reader_second_layer_slot.GetInt32(5);
+                                                                    Model.IsRervable = !reader_second_layer_slot.IsDBNull(7) ? reader_second_layer_slot.GetByte(6) != 0 : false;
+                                                                    Model.ReserverName = !reader_second_layer_slot.IsDBNull(7) ? reader_second_layer_slot.GetString(7) : string.Empty;
+                                                                    Model.InvitationCode = !reader_second_layer_slot.IsDBNull(8) ? reader_second_layer_slot.GetString(8) : string.Empty;
+                                                                }
+                                                                Tree.AddSecondLayer(second_layer_slot_id.Value);
+                                                                Tree.AddSecondLayerChildren(Model);
+                                                            }
                                                         }
-                                                        Tree.AddSecondLayer(second_layer_slot_id);
-                                                        Tree.AddSecondLayerChildren(Model);
                                                     }
-                                                }
-                                            } if (!Tree.ThirdLayerExists(third_layer_slot_id)) {
-                                                using (SqlCommand command_third_layer_slot = new SqlCommand(slot_info_query, conn)) {
-                                                    command_third_layer_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = third_layer_slot_id;
-                                                    conn.Open();
-                                                    using (SqlDataReader reader_third_layer_slot = command_third_layer_slot.ExecuteReader()){
-                                                        SlotModel Model = new SlotModel();
-                                                        while (reader_third_layer_slot.Read()) {
-                                                            Model.AddEdge((reader_third_layer_slot.GetSqlDouble(0), reader_third_layer_slot.GetSqlDouble(1)));
-                                                            Model.AddDuration((reader_third_layer_slot.GetDateTime(2), reader_third_layer_slot.GetDateTime(3)));
-                                                            Model.Name = reader_third_layer_slot.GetString(4);
-                                                            Model.Id = reader_third_layer_slot.GetInt16(5);
-                                                            Model.IsRervable = reader_third_layer_slot.GetByte(6) != 0;
-                                                            Model.ReserverName = reader_third_layer_slot.GetString(7);
-                                                            Model.InvitationCode = reader_third_layer_slot.GetString(8);
+                                                } 
+                                                if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
+                                                    using (SqlConnection conn_5 = new SqlConnection(ConnectionQuery)) {
+                                                        using (SqlCommand command_third_layer_slot = new SqlCommand(slot_info_query, conn_5)) {
+                                                            command_third_layer_slot.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = third_layer_slot_id;
+                                                            conn_5.Open();
+                                                            using (SqlDataReader reader_third_layer_slot = command_third_layer_slot.ExecuteReader()){
+                                                                SlotModel Model = new SlotModel();
+                                                                while (reader_third_layer_slot.Read()) {
+                                                                    System.Data.SqlTypes.SqlDouble x = reader_third_layer_slot.IsDBNull(0) ? reader_third_layer_slot.GetSqlDouble(0) : 0;
+                                                                    System.Data.SqlTypes.SqlDouble y = reader_third_layer_slot.IsDBNull(1) ? reader_third_layer_slot.GetSqlDouble(1) : 0;
+                                                                    Model.AddEdge((x, y));
+                                                                    DateTime startDate = reader_third_layer_slot.IsDBNull(2) ? DateTime.MinValue : reader_third_layer_slot.GetDateTime(2);
+                                                                    DateTime endDate = reader_third_layer_slot.IsDBNull(3) ? DateTime.MinValue : reader_third_layer_slot.GetDateTime(3);
+                                                                    Model.AddDuration((startDate, endDate));                               
+                                                                    Model.Name = reader_third_layer_slot.GetString(4);
+                                                                    Model.Id = reader_third_layer_slot.GetInt32(5);
+                                                                    Model.IsRervable = !reader_third_layer_slot.IsDBNull(7) ? reader_third_layer_slot.GetByte(6) != 0 : false;
+                                                                    Model.ReserverName = !reader_third_layer_slot.IsDBNull(7) ? reader_third_layer_slot.GetString(7) : string.Empty;
+                                                                    Model.InvitationCode = !reader_third_layer_slot.IsDBNull(8) ? reader_third_layer_slot.GetString(8) : string.Empty;
+                                                                }
+                                                                Tree.AddThirdLayer(third_layer_slot_id.Value);
+                                                                Tree.AddThirdLayerChildren(Model);
+                                                            }
                                                         }
-                                                        Tree.AddThirdLayer(third_layer_slot_id);
-                                                        Tree.AddThirdLayerChildren(Model);
                                                     }
-                                                }
-                                            } 
+                                                } 
+                                            }
+                                            favoriteSlots.AddSlotTree(Tree);
                                         }
-                                        favoriteSlots.AddSlotTree(Tree);
                                     }
                                 }
                             }
@@ -136,7 +158,7 @@ namespace WebApplication2.Models {
                 };
             } 
             catch (Exception e) {
-                Console.WriteLine("AWWWWWWWWWWWW" + e.Message);
+                Console.WriteLine("AWWWWWWWWWWWW " + e.Message);
             }
         }
         public void Slots() {

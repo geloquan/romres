@@ -19,7 +19,7 @@ namespace WebApplication2.Models {
         public string? Name { get; set; }
         public int? SlotId { get; set; }
         public int? ParentSlotId { get; set; }
-        public bool? IsRervable { get; set; }
+        public bool? IsReservable { get; set; }
         public string? ReserverName { get; set; }
         public string? InvitationCode { get; set; }
         //public int? HostId { get; set; }

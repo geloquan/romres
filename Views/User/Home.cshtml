@@ -11,10 +11,49 @@
 <div id="partialContent">
     <!-- This is where the partial view content will be loaded -->
 </div>
-
+<div id="slot" class="container mt-5">
+    <h3 id="slot-name" class="mb-4"></h3>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Slot ID</th>
+                <th scope="col">Is Reservable</th>
+                <th scope="col">Invitation Code</th>
+                <th scope="col">Edge (x, y)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td id="slot-id"></td>
+                <td id="slot-is-reservable"></td>
+                <td id="slot-invitation-code"></td>
+                <td id="slot-edges"></td>
+            </tr>
+        </tbody>
+    </table>
+    <h4>Children:</h4>
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Slot Name</th>
+                <th scope="col">Is Reservable</th>
+                <th scope="col">Invitation Code</th>
+                <th scope="col">Edge (x, y)</th>
+            </tr>
+        </thead>
+        <tbody id="slot-children">
+            <tr>
+                <td id="slot-name"></td>
+                <td id="slot-is-reservable"></td>
+                <td id="slot-invitation-code"></td>
+                <td id="slot-edges"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 <button id="updateButton">Say hello!</button>
 <h4>your id is: @ViewData["UserId"]</h4>
-
+<script src="/js/slotting.js"></script>
 <script>
     $(document).ready(function() {
         $('#updateButton').click(function() {
@@ -24,7 +63,8 @@
                 url: url,
                 type: 'GET',
                 success: function(result) {
-                console.log("AJAX Success. Result:", result);
+                    console.log("AJAX Success. Result:", result);
+                    Init(result, 4);
                     $('#partialContent').html(result);
                 },
                 error: function() {

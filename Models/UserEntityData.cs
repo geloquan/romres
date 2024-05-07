@@ -22,7 +22,7 @@ namespace WebApplication2.Models {
                             Model.AddDuration((startDate, endDate));           
                             Model.Name = reader.GetString(4);
                             Model.SlotId = reader.GetInt32(5);
-                            Model.IsRervable = !reader.IsDBNull(7) ? reader.GetByte(6) != 0 : false;
+                            Model.IsReservable = !reader.IsDBNull(6) ? reader.GetByte(6) != 0 : false;
                             Model.ReserverName = !reader.IsDBNull(7) ? reader.GetString(7) : string.Empty;
                             Model.InvitationCode = !reader.IsDBNull(8) ? reader.GetString(8) : string.Empty;
                             Model.ParentSlotId = root_id;
@@ -105,7 +105,7 @@ namespace WebApplication2.Models {
                                                     Tree.AddSecondLayer(second_layer_slot_id.Value);
                                                 } 
                                                 if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
-                                                    Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, Tree.RootId));
+                                                    Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value));
                                                     Tree.AddThirdLayer(third_layer_slot_id.Value);
                                                     
                                                 } 

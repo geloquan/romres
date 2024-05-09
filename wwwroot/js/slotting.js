@@ -51,6 +51,7 @@ function Init(slot_object, slot_id) {
         document.getElementById("slot-id").innerText = result.slotId;
         document.getElementById("slot-is-reservable").innerText = result.isReservable ? "Yes" : "No";
         document.getElementById("slot-invitation-code").innerText = result.invitationCode || 'None'; 
+        document.getElementById("slot-note").innerText = result.note || 'No note'; 
         let edgesText = '';
         console.log("result.isReservable:", result.isReservable);
         console.log("result.invitationCode:", result.invitationCode);
@@ -79,7 +80,7 @@ function Init(slot_object, slot_id) {
             const invitationCodeCell = document.createElement("td");
             invitationCodeCell.innerText = childSlot.invitationCode || 'None';
             row.appendChild(invitationCodeCell);
-
+            
             let childEdgesText = '';
             if (childSlot.edges && Array.isArray(childSlot.edges)) {
                 childEdgesText = childSlot.edges.map(coord => `(${coord.x}, ${coord.y})`).join(', ');
@@ -87,6 +88,10 @@ function Init(slot_object, slot_id) {
             const edgesCell = document.createElement("td");
             edgesCell.innerText = childEdgesText;
             row.appendChild(edgesCell);
+            
+            const noteCell = document.createElement("td");
+            noteCell.innerText = childSlot.note || 'No note';
+            row.appendChild(noteCell);
 
             // Append the row to the tbody
             tbody.appendChild(row);

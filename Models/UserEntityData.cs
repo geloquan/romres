@@ -6,11 +6,12 @@ namespace WebApplication2.Models {
         public List<SlotModel> SlotTree = new List<SlotModel>();
         public FavoriteSlots favoriteSlots = new FavoriteSlots();
         private List<Host> HostedTreeSlots = new List<Host>();
-        private SlotModel SlotInfoQuery(string ConnectionQuery, string Query, int slot_id, int? root_id) {
+        private SlotModel SlotInfoQuery(string ConnectionQuery, string Query, int slot_id, int? root_id, int? user_id) {
             SlotModel Model = new SlotModel();
             using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
                 using (SqlCommand command = new SqlCommand(Query, conn)) {
                     command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = slot_id;
+                    command.Parameters.Add("@user_id", System.Data.SqlDbType.Int, 50).Value = user_id;
                     conn.Open();
                     using (SqlDataReader reader = command.ExecuteReader()){
                         while (reader.Read()) {
@@ -25,6 +26,7 @@ namespace WebApplication2.Models {
                             Model.IsReservable = !reader.IsDBNull(6) ? reader.GetByte(6) != 0 : false;
                             Model.ReserverName = !reader.IsDBNull(7) ? reader.GetString(7) : string.Empty;
                             Model.InvitationCode = !reader.IsDBNull(8) ? reader.GetString(8) : string.Empty;
+                            Model.Note = !reader.IsDBNull(9) ? reader.GetString(9) : string.Empty;
                             Model.ParentSlotId = root_id;
                         }
                     }
@@ -57,7 +59,8 @@ namespace WebApplication2.Models {
                     s.id AS slot_id,
                     s.is_reservable AS slot_is_reservable,
                     u.name AS reserver_user_name,
-                    inv.code AS slot_invitation_code
+                    inv.code AS slot_invitation_code,
+                    ft.note AS slot_note
                 FROM 
                     slot s 
                 LEFT JOIN 
@@ -71,7 +74,9 @@ namespace WebApplication2.Models {
                 LEFT JOIN 
                     edge e ON sf.slot_id = e.slot_id
                 LEFT JOIN
-                    invitation inv ON s.id = inv.slot_id                    
+                    invitation inv ON s.id = inv.slot_id
+                LEFT JOIN 
+                    favorites_tagging ft ON s.id = ft.slot_id AND ft.user_id = @user_id
                 WHERE 
                     s.id = @slot_id;
             ";
@@ -97,15 +102,15 @@ namespace WebApplication2.Models {
                                                 int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
                                                 int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
                                                 if (root_slot_id != Tree.RootId && root_slot_id != null) {
-                                                    Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null);
+                                                    Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId);
                                                     Tree.RootId = root_slot_id;
                                                 } 
                                                 if (!Tree.SecondLayerExists(second_layer_slot_id.Value) && second_layer_slot_id != null) {
-                                                    Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId));
+                                                    Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId));
                                                     Tree.AddSecondLayer(second_layer_slot_id.Value);
                                                 } 
                                                 if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
-                                                    Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value));
+                                                    Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId));
                                                     Tree.AddThirdLayer(third_layer_slot_id.Value);
                                                     
                                                 } 

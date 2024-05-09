@@ -1,19 +1,19 @@
 namespace WebApplication2.Models {
+    public class EdgeMod {
+        public double X { get; set; }
+        public double Y { get; set; }
+    }
+    public class DateMod {
+        public string Start { get; set; }
+        public string End { get; set; }
+    }
     public class FavoriteSlots {
         public List<SlotTree> SlotTrees { get; set; } = new List<SlotTree>();
         public void AddSlotTree(SlotTree slotTree) {
             this.SlotTrees.Add(slotTree);
         }
     }
-    public class SlotModel {
-        public class EdgeMod {
-            public double X { get; set; }
-            public double Y { get; set; }
-        }
-        public class DateMod {
-            public string Start { get; set; }
-            public string End { get; set; }
-        }
+        public class SlotModel {
         public HashSet<EdgeMod> Edge { get; set; } = new HashSet<EdgeMod>();
         public HashSet<DateMod> Durations { get; set; } = new HashSet<DateMod>();
         public string? Name { get; set; }
@@ -22,6 +22,7 @@ namespace WebApplication2.Models {
         public bool? IsReservable { get; set; }
         public string? ReserverName { get; set; }
         public string? InvitationCode { get; set; }
+        public string? Note { get; set; }
         //public int? HostId { get; set; }
         //public int? EdgeId { get; set; }
         //public System.Data.SqlTypes.SqlDouble? EdgeX { get; set; }

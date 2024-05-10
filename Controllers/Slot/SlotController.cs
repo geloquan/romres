@@ -19,8 +19,9 @@ namespace WebApplication2.Controllers {
             return StatusCode(500, "Invalid request data.");
         }
         [HttpPut("/slot/{id}/edit")]
-        public IActionResult SlotEdit(int id, [FromBody] HttpPutReserve request) {
-            if (request != null && request.Reserve != null && request.UserId != null) {
+        public IActionResult SlotEdit(int id, [FromBody] HttpPutSlotEdit request) {
+            Console.WriteLine("[HttpPut(/slot/{id}/edit)]");
+            if (request != null) {
                 bool processingResult = request.Process();
                 if (processingResult) {
                     return Ok("Reservation successful.");

@@ -12,8 +12,9 @@
     <!-- This is where the partial view content will be loaded -->
 </div>
 <div id="slot" class="container mt-5">
-    <h3 id="slot-name" class="mb-4"></h3>
-    <table class="table table-bordered">
+    
+    <h3 id="slot-parent-name" class="mb-4"></h3>
+    <table id="slot-parent-table" class="table table-bordered">
         <thead class="thead-dark">
             <tr>
                 <th scope="col">Slot ID</th>
@@ -21,20 +22,22 @@
                 <th scope="col">Invitation Code</th>
                 <th scope="col">Edge (x, y)</th>
                 <th scope="col">Note</th>
+<th scope="col">edit</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td id="slot-id"></td>
-                <td id="slot-is-reservable"></td>
-                <td id="slot-invitation-code"></td>
-                <td id="slot-edges"></td>
-                <td id="slot-note"></td>
+                <td id="slot-parent-id"></td>
+                <td id="slot-parent-is-reservable"></td>
+                <td id="slot-parent-invitation-code"></td>
+                <td id="slot-parent-edges"></td>
+                <td id="slot-parent-note"></td>
+<td id="slot-parent-edit"></td>
             </tr>
         </tbody>
     </table>
-    <h4>Children:</h4>
-    <table class="table table-bordered">
+    <h4 id="slot-children-name">Children:</h4>
+    <table id="slot-children-table" class="table table-bordered">
         <thead class="thead-dark">
             <tr>
                 <th scope="col">Slot Name</th>
@@ -45,14 +48,7 @@
             </tr>
         </thead>
         <tbody id="slot-children">
-            <tr>
-                <td id="slot-name"></td>
-                <td id="slot-is-reservable"></td>
-                <td id="slot-invitation-code"></td>
-                <td id="slot-edges"></td>
-                <td id="slot-note"></td>
-            </tr>
-        </tbody>
+                    </tbody>
     </table>
 </div>
 <button id="updateButton">Say hello!</button>

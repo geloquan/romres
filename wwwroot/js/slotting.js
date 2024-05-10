@@ -66,48 +66,42 @@ function ParentSlot(result) {
     editButton.innerText = "Edit Slot";
     editButton.className = "btn btn-primary";
     editButton.onclick = function() {
-        const slotNameElement = document.getElementById("slot-parent-name");
-        const slotIsReservableElement = document.getElementById("slot-parent-is-reservable");
-        const slotInvitationCodeElement = document.getElementById("slot-parent-invitation-code");
+        //const slotNameElement = document.getElementById("slot-parent-name");
+        //const slotIsReservableElement = document.getElementById("slot-parent-is-reservable");
+        //const slotInvitationCodeElement = document.getElementById("slot-parent-invitation-code");
         const slotNoteElement = document.getElementById("slot-parent-note");
     
-        // Replace innerText with input elements to make fields editable
-        slotNameElement.innerHTML = `<input type="text" value="${result.name}" id="edit-slot-name">`;
-        slotIsReservableElement.innerHTML = `<input type="checkbox" ${result.isReservable ? 'checked' : ''} id="edit-slot-reservable">`;
-        slotInvitationCodeElement.innerHTML = `<input type="text" value="${result.invitationCode || ''}" id="edit-slot-invitation">`;
+        //slotNameElement.innerHTML = `<input type="text" value="${result.name}" id="edit-slot-name">`;
+        //slotIsReservableElement.innerHTML = `<input class="form-check-input mt-0" type="checkbox" ${result.isReservable ? 'checked' : ''} id="edit-slot-reservable">`;
+        //slotInvitationCodeElement.innerHTML = `<input type="text" value="${result.invitationCode || ''}" id="edit-slot-invitation">`;
         slotNoteElement.innerHTML = `<textarea id="edit-slot-note">${result.note || ''}</textarea>`;
     
-        // Change button text and behavior to submit changes
-        editButton.innerText = "Submit Changes";
+        editButton.innerText = "Save";
         editButton.onclick = function() {
-            const editedName = document.getElementById("edit-slot-name").value;
-            const editedReservable = document.getElementById("edit-slot-reservable").checked;
-            const editedInvitationCode = document.getElementById("edit-slot-invitation").value;
+            //const editedName = document.getElementById("edit-slot-name").value;
+            //const editedReservable = document.getElementById("edit-slot-reservable").checked;
+            //const editedInvitationCode = document.getElementById("edit-slot-invitation").value;
             const editedNote = document.getElementById("edit-slot-note").value;
     
             const id = result.slotId;
     
             const method = 'PUT'; // Use PUT method for updating existing slot
     
-            fetch(`/slot/${id}/edit`, {
+            fetch(`/slot/${id}/noteedit`, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    name: editedName,
-                    isReservable: editedReservable,
-                    invitationCode: editedInvitationCode,
                     note: editedNote
                 })
             })
             .then(response => {
                 if (response.ok) {
                     console.log(`Action: Slot Edit for ID ${id} completed successfully`);
-                    // Update displayed fields with edited values
-                    slotNameElement.innerText = editedName;
-                    slotIsReservableElement.innerText = editedReservable ? "Yes" : "No";
-                    slotInvitationCodeElement.innerText = editedInvitationCode || 'None';
+                    //slotNameElement.innerText = editedName;
+                    //slotIsReservableElement.innerText = editedReservable ? "Yes" : "No";
+                    //slotInvitationCodeElement.innerText = editedInvitationCode || 'None';
                     slotNoteElement.innerText = editedNote || 'No note';
                     // Restore button text and behavior
                     editButton.innerText = "Edit Slot";
@@ -121,14 +115,12 @@ function ParentSlot(result) {
             });
         };
     
-        // Function to revert button back to initial state when canceled or after submission
         const initialEditButtonClickHandler = function() {
-            // Restore original field display
-            slotNameElement.innerText = result.name;
-            slotIsReservableElement.innerText = result.isReservable ? "Yes" : "No";
-            slotInvitationCodeElement.innerText = result.invitationCode || 'None';
+            //slotNameElement.innerText = result.name;
+            //slotIsReservableElement.innerText = result.isReservable ? "Yes" : "No";
+            //slotInvitationCodeElement.innerText = result.invitationCode || 'None';
             slotNoteElement.innerText = result.note || 'No note';
-            // Restore button text and behavior
+
             editButton.innerText = "Edit Slot";
             editButton.onclick = editButtonClickHandler; // Restore initial click handler
         };

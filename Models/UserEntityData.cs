@@ -2,7 +2,6 @@ using System.Data;
 using System.Data.SqlClient;
 namespace WebApplication2.Models {
     public class UserEntityData {
-        //public List<SlotModelV2> RootSlots = new List<SlotModelV2>();
         public List<SlotModel> SlotTree = new List<SlotModel>();
         public FavoriteSlots favoriteSlots = new FavoriteSlots();
         private List<Host> HostedTreeSlots = new List<Host>();

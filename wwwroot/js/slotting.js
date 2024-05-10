@@ -44,22 +44,98 @@ function SlotScope(slot_object, slot_id) {
     return matchedSubtree;
 }
 function ParentSlot(result) {
-    const slotNameElement = document.getElementById("slot-name");
+    const slotNameElement = document.getElementById("slot-parent-name");
     slotNameElement.innerText = result.name;
-    document.getElementById("slot-id").innerText = result.slotId;
-    document.getElementById("slot-is-reservable").innerText = result.isReservable ? "Yes" : "No";
-    document.getElementById("slot-invitation-code").innerText = result.invitationCode || 'None'; 
-    document.getElementById("slot-note").innerText = result.note || 'No note'; 
+    
+    document.getElementById("slot-parent-id").innerText = result.slotId;
+    document.getElementById("slot-parent-is-reservable").innerText = result.isReservable ? "Yes" : "No";
+    document.getElementById("slot-parent-invitation-code").innerText = result.invitationCode || 'None'; 
+    document.getElementById("slot-parent-note").innerText = result.note || 'No note'; 
     let edgesText = '';
     console.log("result.isReservable:", result.isReservable);
     console.log("result.invitationCode:", result.invitationCode);
     if (result.edges && Array.isArray(result.edges)) {
         edgesText = result.edges.map(coord => `(${coord.x}, ${coord.y})`).join(', ');
     }
-    document.getElementById("slot-edges").innerText = edgesText;
+    document.getElementById("slot-parent-edges").innerText = edgesText;
     const tbody = document.getElementById("slot-children");
 
     tbody.innerHTML = '';
+
+    const editButton = document.createElement("button");
+    editButton.innerText = "Edit Slot";
+    editButton.className = "btn btn-primary";
+    editButton.onclick = function() {
+        const slotNameElement = document.getElementById("slot-parent-name");
+        const slotIsReservableElement = document.getElementById("slot-parent-is-reservable");
+        const slotInvitationCodeElement = document.getElementById("slot-parent-invitation-code");
+        const slotNoteElement = document.getElementById("slot-parent-note");
+    
+        // Replace innerText with input elements to make fields editable
+        slotNameElement.innerHTML = `<input type="text" value="${result.name}" id="edit-slot-name">`;
+        slotIsReservableElement.innerHTML = `<input type="checkbox" ${result.isReservable ? 'checked' : ''} id="edit-slot-reservable">`;
+        slotInvitationCodeElement.innerHTML = `<input type="text" value="${result.invitationCode || ''}" id="edit-slot-invitation">`;
+        slotNoteElement.innerHTML = `<textarea id="edit-slot-note">${result.note || ''}</textarea>`;
+    
+        // Change button text and behavior to submit changes
+        editButton.innerText = "Submit Changes";
+        editButton.onclick = function() {
+            const editedName = document.getElementById("edit-slot-name").value;
+            const editedReservable = document.getElementById("edit-slot-reservable").checked;
+            const editedInvitationCode = document.getElementById("edit-slot-invitation").value;
+            const editedNote = document.getElementById("edit-slot-note").value;
+    
+            const id = result.slotId;
+    
+            const method = 'PUT'; // Use PUT method for updating existing slot
+    
+            fetch(`/slot/${id}/edit`, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: editedName,
+                    isReservable: editedReservable,
+                    invitationCode: editedInvitationCode,
+                    note: editedNote
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log(`Action: Slot Edit for ID ${id} completed successfully`);
+                    // Update displayed fields with edited values
+                    slotNameElement.innerText = editedName;
+                    slotIsReservableElement.innerText = editedReservable ? "Yes" : "No";
+                    slotInvitationCodeElement.innerText = editedInvitationCode || 'None';
+                    slotNoteElement.innerText = editedNote || 'No note';
+                    // Restore button text and behavior
+                    editButton.innerText = "Edit Slot";
+                    editButton.onclick = initialEditButtonClickHandler; // Restore initial click handler
+                } else {
+                    console.error(`Error: Slot Edit request for ID ${id} failed`);
+                }
+            })
+            .catch(error => {
+                console.error(`Error: Slot Edit request for ID ${id} failed`);
+            });
+        };
+    
+        // Function to revert button back to initial state when canceled or after submission
+        const initialEditButtonClickHandler = function() {
+            // Restore original field display
+            slotNameElement.innerText = result.name;
+            slotIsReservableElement.innerText = result.isReservable ? "Yes" : "No";
+            slotInvitationCodeElement.innerText = result.invitationCode || 'None';
+            slotNoteElement.innerText = result.note || 'No note';
+            // Restore button text and behavior
+            editButton.innerText = "Edit Slot";
+            editButton.onclick = editButtonClickHandler; // Restore initial click handler
+        };
+    };
+    const slotEditTd = document.getElementById("slot-parent-edit");
+    slotEditTd.innerHTML = ''; 
+    slotEditTd.appendChild(editButton);
 }
 function ChildrenSlots(result) {
     const tbody = document.getElementById("slot-children");

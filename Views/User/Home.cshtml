@@ -9,62 +9,38 @@
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Ceqweqweeee123eore</a>.</p>
 </div>
 <div id="partialContent">
-    <!-- This is where the partial view content will be loaded -->
 </div>
 <div id="slot" class="container mt-5">
-    
-    <h3 id="slot-parent-name" class="mb-4"></h3>
-    <table id="slot-parent-table" class="table table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">Slot ID</th>
-                <th scope="col">Is Reservable</th>
-                <th scope="col">Invitation Code</th>
-                <th scope="col">Edge (x, y)</th>
-                <th scope="col">Note</th>
-                <th scope="col">edit</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td id="slot-parent-id"></td>
-                <td id="slot-parent-is-reservable"></td>
-                <td id="slot-parent-invitation-code"></td>
-                <td id="slot-parent-edges"></td>
-                <td id="slot-parent-note"></td>
-                <td id="slot-parent-edit"></td>
-            </tr>
-        </tbody>
-    </table>
-    <h4 id="slot-children-name">Children:</h4>
-    <table id="slot-children-table" class="table table-bordered">
-        <thead class="thead-dark">
-            <tr>
-                <th scope="col">Slot Name</th>
-                <th scope="col">Is Reservable</th>
-                <th scope="col">Invitation Code</th>
-                <th scope="col">Edge (x, y)</th>
-                <th scope="col">Note</th>
-            </tr>
-        </thead>
-        <tbody id="slot-children">
-        </tbody>
-    </table>
+
 </div>
 <button id="updateButton">Say hello!</button>
 <h4>your id is: @ViewData["UserId"]</h4>
+
+<script src="/js/tables.js"></script>
+
+<script>
+    var global_slot_object;
+    var user_id;
+    var userId;
+</script>
+
 <script src="/js/slotting.js"></script>
+
 <script>
     $(document).ready(function() {
         $('#updateButton').click(function() {
-            var userId = @ViewData["UserId"];
+            user_id = @ViewData["UserId"];
+            userId = @ViewData["UserId"];
             var url = '@Url.Action("FavoriteSlots", "User")' + '?userId=' + userId;
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(result) {
-                    console.log("AJAX Success. Result:", result);
-                    Init(result, 4);
+                    buildFavoriteSlotsTable();
+                    global_slot_object = result;
+                    SlotTreeInit(result);
+                    //SlotInit(global_slot_object, 4, @ViewData["UserId"]);
+                    console.log(result);
                     $('#partialContent').html(result);
                 },
                 error: function() {

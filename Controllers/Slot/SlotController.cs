@@ -20,7 +20,7 @@ namespace WebApplication2.Controllers {
         }
         [HttpPut("/slot/{id}/noteedit")]
         public IActionResult SlotNoteEdit(int id, [FromBody] HttpPutSlotNoteEdit request) {
-            Console.WriteLine("[HttpPut(/slot/{id}/edit)]");
+            Console.WriteLine("[HttpPut(/slot/{id}/noteedit)]");
             if (request != null) {
                 bool processingResult = request.Process();
                 if (processingResult) {

@@ -27,6 +27,7 @@ namespace WebApplication2.Models {
                             Model.InvitationCode = !reader.IsDBNull(8) ? reader.GetString(8) : string.Empty;
                             Model.Note = !reader.IsDBNull(9) ? reader.GetString(9) : string.Empty;
                             Model.ParentSlotId = root_id;
+                            Model.HostName = !reader.IsDBNull(10) ? reader.GetString(10) : string.Empty;
                         }
                     }
 
@@ -59,7 +60,8 @@ namespace WebApplication2.Models {
                     s.is_reservable AS slot_is_reservable,
                     u.name AS reserver_user_name,
                     inv.code AS slot_invitation_code,
-                    ft.note AS slot_note
+                    ft.note AS slot_note,
+                    h.name
                 FROM 
                     slot s 
                 LEFT JOIN 

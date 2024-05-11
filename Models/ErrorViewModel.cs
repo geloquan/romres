@@ -23,6 +23,7 @@ namespace WebApplication2.Models {
         public string? ReserverName { get; set; }
         public string? InvitationCode { get; set; }
         public string? Note { get; set; }
+        public string? HostName { get; set; }
         //public int? HostId { get; set; }
         //public int? EdgeId { get; set; }
         //public System.Data.SqlTypes.SqlDouble? EdgeX { get; set; }

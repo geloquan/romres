@@ -32,6 +32,16 @@ namespace WebApplication2.Controllers {
             }
             return BadRequest("UserId is missing or invalid.");
         }
+        [HttpGet]
+        public IActionResult HostedSlots() {
+            Console.WriteLine("HostedSlots()");
+            if (Request.Query.ContainsKey("userId") && int.TryParse(Request.Query["userId"], out int userId)) {
+                UserEntityData userEntityData = new UserEntityData();
+                userEntityData.HostedSlots(userId);
+                return new JsonResult(userEntityData.hostedSlots);
+            }
+            return BadRequest("UserId is missing or invalid.");
+        }
         public IActionResult Login(LoginModel User) {
             Console.WriteLine("2");
             UserEntityLogin userEntityLogin = new UserEntityLogin();

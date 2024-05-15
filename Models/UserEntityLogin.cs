@@ -6,7 +6,30 @@ namespace WebApplication2.Models {
         public string Name { get; set; }
         public string Password { get; set; }
         public bool Verified { get; set; }
-        public void DirectLogin(int UserId) {
+        public int FavoriteSlotsCount { get; set; }
+        private void GetFavoriteSlotCount(int UserId) {
+            string query = "select * from user_favorites where user_id = @user_id;";
+            try {
+                string ConnectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+                
+                using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
+                    using (SqlCommand command = new SqlCommand(query, conn)) {
+                        command.Parameters.Add("@user_id", System.Data.SqlDbType.Int).Value = UserId;
+                        conn.Open();
+                        using (SqlDataReader reader = command.ExecuteReader()) {
+                            while (reader.Read()) {
+                                FavoriteSlotsCount += 1;
+                            } 
+                            reader.Close();
+                        }
+                    }
+                }
+            } 
+            catch (Exception e) {
+                Console.WriteLine("UserEntityLogin.DirectLogin() : " + e.Message);
+            }
+        }
+        public bool DirectLogin(int UserId) {
             string query = "SELECT id, name, password FROM dbo.[user] WHERE id = @user_id;";
             try {
                 string ConnectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";

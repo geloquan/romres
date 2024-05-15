@@ -3,38 +3,30 @@
     ViewData["Title"] = "User Login Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-</div>
 
-<h3>Home Controller</h3>
-<h4>Action Index</h4>
-
-<h2>Loginnnn</h2>
-@using (Html.BeginForm("Login", "User", FormMethod.Post)) {
-    @Html.AntiForgeryToken()
-    <div class="form-horizontal">
-        <h3>user Model</h3>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger"})
-        <div class="form-group">
-            @Html.LabelFor(model => model.UserName)
-            <div>
-                @Html.EditorFor(model => model.UserName)
-                @Html.ValidationMessageFor(model => model.UserName)
-            </div>
-        </div>
-        <div class="form-group">
-            @Html.LabelFor(model => model.UserPassword)
-            <div>
-                @Html.EditorFor(model => model.UserPassword)
-                @Html.ValidationMessageFor(model => model.UserPassword)
-            </div>
-        </div>
-        <div class="form-group">
-            <div>
-                <input type="submit" value="Login">
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="card-title text-center">Login</h2>
+            @using (Html.BeginForm("Login", "User", FormMethod.Post, new { @class = "mt-4" })) {
+                @Html.AntiForgeryToken()
+                <div>
+                    <h3>User Login</h3>
+                    <hr />
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "font-weight-bold" })
+                        @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter your username" }})
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(model => model.UserPassword, htmlAttributes: new { @class = "font-weight-bold" })
+                        @Html.EditorFor(model => model.UserPassword, new { htmlAttributes = new { @class = "form-control", type = "password", placeholder = "Enter your password" }})
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </div>
+            }
+            <div class="text-center mt-3">
+                <a href="@Url.Action("Register", "User")">Register</a>
             </div>
         </div>
     </div>
-}
+</div>

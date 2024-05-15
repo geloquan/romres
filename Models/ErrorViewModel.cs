@@ -50,10 +50,11 @@ namespace WebApplication2.Models {
         }
     }
     public class SlotTree {
+        public int? RootId { get; set; }
+        public string? InvitationCode { get; set; }
         public List<int> SecondLayerId { get; set; } = new List<int>();
         public List<int> ThirdLayerId { get; set; } = new List<int>();
         public SlotModel? RootSlotModel { get; set; }
-        public int? RootId { get; set; }
         public List<SlotModel> SecondLayerChildren { get; set; } = new List<SlotModel>();
         public List<SlotModel> ThirdLayerChildren { get; set; } = new List<SlotModel>();
         public void AddSecondLayer(int SlotId) {

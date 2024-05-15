@@ -7,13 +7,19 @@ namespace WebApplication2.Models {
         public string Start { get; set; }
         public string End { get; set; }
     }
+    public class HostedSlots {
+        public List<SlotTree> SlotTrees { get; set; } = new List<SlotTree>();
+        public void AddSlotTree(SlotTree slotTree) {
+            this.SlotTrees.Add(slotTree);
+        }
+    }
     public class FavoriteSlots {
         public List<SlotTree> SlotTrees { get; set; } = new List<SlotTree>();
         public void AddSlotTree(SlotTree slotTree) {
             this.SlotTrees.Add(slotTree);
         }
     }
-        public class SlotModel {
+    public class SlotModel {
         public HashSet<EdgeMod> Edge { get; set; } = new HashSet<EdgeMod>();
         public HashSet<DateMod> Durations { get; set; } = new HashSet<DateMod>();
         public string? Name { get; set; }

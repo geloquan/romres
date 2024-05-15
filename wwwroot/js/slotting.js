@@ -60,7 +60,9 @@ function SlotScope(slot_id) {
     console.log("Final Matched Subtree with Unique Children:", matchedSubtree);
     return matchedSubtree;
 }
+function removeFaveSlot(slot_id) {
 
+}
 
 function addOrUpdateButton(slotDiv, buttonText, buttonId, clickHandler) {
     console.log("addOrUpdateButton() entered");
@@ -168,7 +170,7 @@ let toParentButtonAppended = false;
 let toRootButtonAppended = false;
 function processSlot(slot_id) {
     console.log("processSlot() entered");
-    buildSlotTreeTable();
+    buildFaveSlotTreeTable();
     const results = SlotScope(slot_id);
     console.log('results: ', results);
     const slotDiv = document.getElementById('slot');
@@ -260,9 +262,9 @@ function FavoriteSlots(slot_object) {
     slot_object.slotTrees.forEach(slot_tree => {
         const row = document.createElement('tr');
         
-        const slotIdCell = document.createElement('td');
-        slotIdCell.textContent = slot_tree.rootSlotModel.slotId;
-        row.appendChild(slotIdCell);
+        const slotInvitationCodeCell = document.createElement('td');
+        slotInvitationCodeCell.textContent = slot_tree.rootSlotModel.invitationCode || 'None';
+        row.appendChild(slotInvitationCodeCell);
         
         const nameCell = document.createElement('td');
         nameCell.textContent = slot_tree.rootSlotModel.name;
@@ -271,17 +273,26 @@ function FavoriteSlots(slot_object) {
         const hostNameCell = document.createElement('td');
         hostNameCell.textContent = slot_tree.rootSlotModel.hostName;
         row.appendChild(hostNameCell);
-
         
-        const buttonCell = document.createElement("td");
-        const button = document.createElement("button");
-        button.innerText = `"Enter Slot" : ${slot_tree.rootSlotModel.slotId}`; 
-        button.classList.add("btn", "btn-primary"); 
-        button.addEventListener("click", () => {
+        const entryCell = document.createElement("td");
+        const buttonCellButton = document.createElement("button");
+        buttonCellButton.innerText = `"Enter Slot" : ${slot_tree.rootSlotModel.slotId}`; 
+        buttonCellButton.classList.add("btn", "btn-primary"); 
+        buttonCellButton.addEventListener("click", () => {
             processSlot(slot_tree.rootSlotModel.slotId);
         });
-        buttonCell.appendChild(button);
-        row.appendChild(buttonCell);
+        entryCell.appendChild(buttonCellButton);
+        row.appendChild(entryCell);
+
+        const unfaveCell = document.createElement("td");
+        const unfaveBtn = document.createElement("button");
+        unfaveBtn.innerText = `Unfave : ${slot_tree.rootSlotModel.slotId}`; 
+        unfaveBtn.classList.add("btn", "btn-primary"); 
+        unfaveBtn.addEventListener("click", () => {
+            removeFaveSlot(slot_tree.rootSlotModel.slotId);
+        });
+        unfaveCell.appendChild(unfaveBtn);
+        row.appendChild(unfaveCell);
         
         tableBody.appendChild(row);
     }); 
@@ -291,7 +302,44 @@ function SlotInit(slot_object, slot_id, user_id) {
     console.log("SlotInit() entered");
     processSlot(slot_id);
 }
-function SlotTreeInit(slot_object) {
-    console.log("SlotInit() entered");
-    FavoriteSlots(slot_object);
+function HostedSlots(slot_object) {
+    const hostSlotTable = document.getElementById('hosted-slot-table');
+    const tableBody = document.createElement('tbody');
+    slot_object.slotTrees.forEach(slot_tree => {
+        const row = document.createElement('tr');
+        const slotInvitationCodeCell = document.createElement('td');
+        slotInvitationCodeCell.textContent = slot_tree.rootSlotModel.invitationCode || 'None';
+        row.appendChild(slotInvitationCodeCell);
+        
+        const nameCell = document.createElement('td');
+        nameCell.textContent = slot_tree.rootSlotModel.name;
+        row.appendChild(nameCell);
+        
+        const hostNameTagCell = document.createElement('td');
+        hostNameTagCell.textContent = slot_tree.rootSlotModel.hostName;
+        row.appendChild(hostNameTagCell);
+        
+        const entryCell = document.createElement("td");
+        const buttonCellButton = document.createElement("button");
+        buttonCellButton.innerText = `"Enter Slot" : ${slot_tree.rootSlotModel.slotId}`; 
+        buttonCellButton.classList.add("btn", "btn-primary"); 
+        buttonCellButton.addEventListener("click", () => {
+            processSlot(slot_tree.rootSlotModel.slotId);
+        });
+        entryCell.appendChild(buttonCellButton);
+        row.appendChild(entryCell);
+
+        const unhostCell = document.createElement("td");
+        const unhostBtn = document.createElement("button");
+        unhostBtn.innerText = `Unhost : ${slot_tree.rootSlotModel.slotId}`; 
+        unhostBtn.classList.add("btn", "btn-primary"); 
+        unhostBtn.addEventListener("click", () => {
+            removeHostSlot(slot_tree.rootSlotModel.slotId);
+        });
+        unhostCell.appendChild(unhostBtn);
+        row.appendChild(unhostCell);
+        
+        tableBody.appendChild(row);
+    }); 
+    hostSlotTable.appendChild(tableBody);
 }

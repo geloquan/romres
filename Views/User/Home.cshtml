@@ -2,51 +2,101 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-
-<div class="text-center">
-    <h1 class="display-4">Welcome User/Home!</h1>
-    <h2>Welcome, @ViewData["UserName"]!</h2>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Ceqweqweeee123eore</a>.</p>
+<div class="text-center p-4 bg-light border rounded">
+    <div id="user-options" class="row">
+        <div class="col-md-6" id="favoriteSlots">
+            <button id="show-favorite-slots" class="btn btn-primary btn-lg">Show Favorites</button>
+            <p class="mt-3 mb-0">Number of Favorites: @ViewData["UserFavoriteSlotCount"]</p>
+        </div>
+        <div class="col-md-6" id="hostedSlots">
+            <button id="show-hosted-slots" class="btn btn-primary btn-lg">Show Hosted Slots</button>
+            <p class="mt-3 mb-0">Number of Hosted Slots: @ViewData["UserHostedSlot"]</p>
+        </div>
+    </div>
 </div>
-<div id="partialContent">
-</div>
-<div id="slot" class="container mt-5">
+<div id="slot" class="container mt-5"></div>
 
-</div>
-<button id="updateButton">Say hello!</button>
-<h4>your id is: @ViewData["UserId"]</h4>
-
-<script src="/js/tables.js"></script>
 
 <script>
-    var global_slot_object;
-    var user_id;
+    var global_slot_object = [];
+    var userId = @ViewData["UserId"];
     var userId;
 </script>
+<script src="/js/dummy_objects.js"></script>
+<script src="/js/tables.js"></script>
 
 <script src="/js/slotting.js"></script>
 
 <script>
     $(document).ready(function() {
-        $('#updateButton').click(function() {
-            user_id = @ViewData["UserId"];
-            userId = @ViewData["UserId"];
+        var initialHtml = $('#user-options').html();
+        function showFavorites() {
+            console.log('showFavorites()');
             var url = '@Url.Action("FavoriteSlots", "User")' + '?userId=' + userId;
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(result) {
-                    buildFavoriteSlotsTable();
+                    buildRootSlotTable("Favorites", ['Invitation Code', 'Slot Name', 'Host Name', 'Entry', 'Unfave'], 'favorites-slot-table');
                     global_slot_object = result;
-                    SlotTreeInit(result);
-                    //SlotInit(global_slot_object, 4, @ViewData["UserId"]);
+                    FavoriteSlots(result);
                     console.log(result);
-                    $('#partialContent').html(result);
+                    $('#user-options').empty();
+                    $('#user-options').append('<button id="backButton" class="btn btn-secondary btn-lg">Back</button>');
+                    attachBackButtonClick();
                 },
                 error: function() {
                     alert('An error occurred while loading the content.');
                 }
             });
+        }
+        function showHosted() {
+            console.log('showHosted()');
+            var url = '@Url.Action("HostedSlots", "User")' + '?userId=' + userId;
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(result) {
+                    console.log(result);
+                    buildRootSlotTable("Hosted", ['Invitation Code', 'Slot Name', 'Host Name-tag', 'Entry', 'Unhost'], 'hosted-slot-table');
+                    global_slot_object = result;
+                    HostedSlots(result);
+                    $('#user-options').empty();
+                    $('#user-options').append('<button id="backButton" class="btn btn-secondary btn-lg">Back</button>');
+                    attachBackButtonClick();
+                },
+                error: function() {
+                    alert('An error occurred while loading the content.');
+                }
+            });
+        }
+        function attachBackButtonClick() {
+            $(document).on('click', '#backButton', function() {
+                console.log('#document #backButton()');
+                $('#slot').html(''); 
+                $('#user-options').empty();
+                $('#user-options').html(initialHtml);
+                $('#show-favorite-slots').click(function() {
+                    console.log('#show-favorite-slots()');
+                    $(this).closest('#user-options').find('button').not(this).prop('disabled', true);
+                    showFavorites();
+                });
+                $('#show-hosted-slots').click(function() {
+                    console.log('#show-hosted-slots()');
+                    $(this).closest('#user-options').find('button').not(this).prop('disabled', true);
+                    showHosted();
+                });
+            });
+        }
+        $('#show-favorite-slots').click(function() {
+            console.log('#show-favorite-slots()');
+            $(this).closest('#user-options').find('button').not(this).prop('disabled', true);
+            showFavorites();
+        });
+        $('#show-hosted-slots').click(function() {
+            console.log('#show-hosted-slots()');
+            $(this).closest('#user-options').find('button').not(this).prop('disabled', true);
+            showHosted();
         });
     });
 </script>

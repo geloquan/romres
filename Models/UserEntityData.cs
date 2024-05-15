@@ -4,6 +4,7 @@ namespace WebApplication2.Models {
     public class UserEntityData {
         public List<SlotModel> SlotTree = new List<SlotModel>();
         public FavoriteSlots favoriteSlots = new FavoriteSlots();
+        public HostedSlots hostedSlots = new HostedSlots();
         private List<Host> HostedTreeSlots = new List<Host>();
         private SlotModel SlotInfoQuery(string ConnectionQuery, string Query, int slot_id, int? root_id, int? user_id) {
             SlotModel Model = new SlotModel();
@@ -105,6 +106,7 @@ namespace WebApplication2.Models {
                                                 if (root_slot_id != Tree.RootId && root_slot_id != null) {
                                                     Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId);
                                                     Tree.RootId = root_slot_id;
+                                                    Tree.InvitationCode = Tree.RootSlotModel.InvitationCode;
                                                 } 
                                                 if (!Tree.SecondLayerExists(second_layer_slot_id.Value) && second_layer_slot_id != null) {
                                                     Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId));
@@ -145,6 +147,147 @@ namespace WebApplication2.Models {
                 slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
             WHERE 
                 sn1.primary_slot_id = @slot_id;";
+        }
+        public void HostedSlots(int UserId) {
+            string slot_user_hosted = @"
+                SELECT 
+                    sn.primary_slot_id AS root_slot_id,
+                    sn.child_slot_id AS second_layer_slot_id,
+                    sn2.child_slot_id AS third_layer_slot_id
+                FROM 
+                    slot_network sn
+                LEFT JOIN 
+                    slot_network sn2 ON sn.child_slot_id = sn2.primary_slot_id
+                LEFT JOIN 
+                    slot s ON sn.primary_slot_id = s.id
+                LEFT JOIN 
+                    host h ON s.host_id = h.id
+                LEFT JOIN 
+                    [user] u ON h.user_id = u.id
+                WHERE 
+                    sn.parent_slot_id is null
+                AND
+                    u.id = @user_id
+                ORDER BY 
+                    root_slot_id;";
+            string slot_info_query = @"
+                SELECT 
+                    e.x AS edge_X,
+                    e.y AS edge_Y,
+                    r.duration_start AS reserve_duration_start,
+                    r.duration_end AS reserve_duration_end,
+                    s.name AS slot_name,
+                    s.id AS slot_id,
+                    s.is_reservable AS slot_is_reservable,
+                    u.name AS reserver_user_name,
+                    inv.code AS slot_invitation_code,
+                    ft.note AS slot_note,
+                    h.name
+                FROM 
+                    slot s 
+                LEFT JOIN 
+                    slot_fnl sf ON sf.slot_id = s.id
+                LEFT JOIN 
+                    reserver r ON sf.reserver_id = r.id
+                LEFT JOIN 
+                    host h ON s.host_id = h.id
+                LEFT JOIN 
+                    [user] u ON r.user_id = u.id 
+                LEFT JOIN 
+                    edge e ON sf.slot_id = e.slot_id
+                LEFT JOIN
+                    invitation inv ON s.id = inv.slot_id
+                LEFT JOIN 
+                    favorites_tagging ft ON s.id = ft.slot_id AND ft.user_id = @user_id
+                WHERE 
+                    s.id = @slot_id;
+                ";
+            HostedSlots hostedSlotsContainer = new HostedSlots();
+            try {
+                string ConnectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+                using (SqlConnection conn_2 = new SqlConnection(ConnectionQuery)) {
+                    using (SqlCommand command_2 = new SqlCommand(slot_user_hosted, conn_2)) {
+                        command_2.Parameters.Add("@user_id", System.Data.SqlDbType.Int, 50).Value = UserId;
+                        conn_2.Open();
+                        using (SqlDataReader reader_2 = command_2.ExecuteReader()){
+                            SlotTree Tree = new SlotTree();
+                            int? prev_id = null;
+                            int? curr_id = null;
+                            Console.WriteLine(0);
+
+                            while (reader_2.Read()) {
+                                curr_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
+                                Console.WriteLine("prev_id: " + prev_id);
+                                Console.WriteLine("curr_id: " + curr_id);
+                                Console.WriteLine(1);
+
+                                if (curr_id == prev_id || prev_id == null) {
+                                    Console.WriteLine(2);
+                                    int? root_slot_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
+                                    int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
+                                    int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
+
+                                    if (root_slot_id != Tree.RootId && root_slot_id != null) {
+                                        Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId);
+                                        Tree.RootId = root_slot_id;
+                                        Tree.InvitationCode = Tree.RootSlotModel.InvitationCode;
+                                    }
+
+                                    if (second_layer_slot_id != null && !Tree.SecondLayerExists(second_layer_slot_id.Value)) {
+                                        Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId));
+                                        Tree.AddSecondLayer(second_layer_slot_id.Value);
+                                    }
+
+                                    if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
+                                        Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId));
+                                        Tree.AddThirdLayer(third_layer_slot_id.Value);
+                                    }
+                                } else if (curr_id != prev_id) {
+                                    Console.WriteLine(3);
+                                    hostedSlotsContainer.AddSlotTree(Tree);
+                                    Tree = new SlotTree();
+
+                                    int? root_slot_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
+                                    int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
+                                    int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
+
+                                    if (root_slot_id != Tree.RootId && root_slot_id != null) {
+                                        Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId);
+                                        Tree.RootId = root_slot_id;
+                                        Tree.InvitationCode = Tree.RootSlotModel.InvitationCode;
+                                    }
+
+                                    if (second_layer_slot_id != null && !Tree.SecondLayerExists(second_layer_slot_id.Value)) {
+                                        Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId));
+                                        Tree.AddSecondLayer(second_layer_slot_id.Value);
+                                    }
+
+                                    if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
+                                        Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId));
+                                        Tree.AddThirdLayer(third_layer_slot_id.Value);
+                                    }
+                                } else {
+                                    Console.WriteLine(4);
+                                }
+                                Console.WriteLine(8);
+                                prev_id = curr_id;
+                            }
+
+                            Console.WriteLine(6);
+
+                            if (Tree != null) {
+                                Console.WriteLine(7);
+                                hostedSlotsContainer.AddSlotTree(Tree);
+                            }
+
+                        }
+                    }
+                }
+            } 
+            catch (Exception e) {
+                Console.WriteLine("HostedSlots() " + e.Message);
+            }
+            hostedSlots = hostedSlotsContainer;
         }
         private class Host {
             public int? Id { get; set; }

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using WebApplication2.Models;
@@ -57,7 +57,7 @@ namespace WebApplication2.Controllers {
             }
         }
         public IActionResult Index() {
-            Console.WriteLine("0");
+        Console.WriteLine("0");
             return View("Index");
         }
         public IActionResult Home() {

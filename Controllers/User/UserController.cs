@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using WebApplication2.Models;
@@ -10,13 +10,17 @@ namespace WebApplication2.Controllers {
             Console.WriteLine("3");
             Console.WriteLine("user id: " + user_id);
             UserEntityLogin userEntityLogin = new UserEntityLogin();
-            userEntityLogin.DirectLogin(user_id);
-            
-            Console.WriteLine("user id: " + userEntityLogin.Id);
-            Console.WriteLine("user name: " + userEntityLogin.Name);
-            ViewData["UserId"] = userEntityLogin.Id;
-            ViewData["UserName"] = userEntityLogin.Name;
-            return View("Home");
+            bool success = userEntityLogin.DirectLogin(user_id);
+            if (success) {
+                Console.WriteLine("user id: " + userEntityLogin.Id);
+                Console.WriteLine("user name: " + userEntityLogin.Name);
+                ViewData["UserId"] = userEntityLogin.Id;
+                ViewData["UserFavoriteSlotCount"] = userEntityLogin.FavoriteSlotsCount;
+                ViewData["UserName"] = userEntityLogin.Name;
+                return View("Home");
+            } else {
+                return View("Error");
+            }
         }
         [HttpGet]
         public IActionResult FavoriteSlots() {

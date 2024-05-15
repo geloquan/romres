@@ -45,13 +45,9 @@ namespace WebApplication2.Models {
                 try {
                     using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
                         using (SqlCommand command = new SqlCommand(query, conn)) {
-                            Console.WriteLine(111);
                             command.Parameters.Add("@user_id", System.Data.SqlDbType.Int, 50).Value = this.UserId.Value;
-                            Console.WriteLine(222);
                             command.Parameters.Add("@slot_note", System.Data.SqlDbType.VarChar, 150).Value = this.Note;
-                            Console.WriteLine(333);
                             command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = this.SlotId.Value;
-                            Console.WriteLine(444);
                             conn.Open();
                             int rowsAffected = command.ExecuteNonQuery();
                             if (rowsAffected > 0) {
@@ -71,4 +67,6 @@ namespace WebApplication2.Models {
             }
         }
     }
+
+    
 }

@@ -178,33 +178,50 @@ function processSlot(slot_id) {
     buildFaveSlotTreeTable();
     const results = SlotScope(slot_id);
     console.log('results: ', results);
-    const slotDiv = document.getElementById('slot');
+    const slotDiv = document.getElementById('slot-parent-header-container');
+    const anchorContainer = document.createElement('div');
+    anchorContainer.classList.add('anchor-container');
     if (results) {
         ParentSlot(results);
         ChildrenSlots(results);
-        
-        const existingButton = document.getElementById('to-parent');
-        if (!existingButton && results.parentSlotId != null) {
-            const button = document.createElement('button');
-            button.textContent = `to parent ${results.parentSlotId}`;
-            button.id = 'to-parent';
+        console.log("resres: ", results);
+        const toRootButton = document.getElementById('to-root');
+        if (!toRootButton && results.parentSlotId != null) {
+            const button = document.createElement('a');
+            button.textContent = `back to ${results.rootSlotName}`;
+            button.classList.add('underline');
+            button.id = 'to-root';
             button.onclick = function() {
-                console.log("button.onclick = function() entered");
                 processSlot(results.parentSlotId);
             };
-            if (slotDiv.firstChild) {
-                slotDiv.insertBefore(button, slotDiv.firstChild);
-            } else {
-                slotDiv.appendChild(button); // If no child nodes, simply append the button
-            }
+            anchorContainer.appendChild(button);
         } else if (results.parentSlotId != null) {
-            existingButton.onclick = function() {
-                console.log("existingButton.onclick = function() entered");
+            toRootButton.onclick = function() {
                 processSlot(results.parentSlotId);
             };
-            existingButton.textContent = `to parent ${results.parentSlotId}`;
+            toRootButton.textContent = `To Parent ${results.parentSlotName}`;
         }
+        if (results.rootSlotName != results.parentSlotName) {
+            const toParentButton = document.getElementById('to-parent');
+            if (!toParentButton && results.parentSlotId != null) {
+                anchorContainer.appendChild(document.createTextNode(" | "));
+                const button = document.createElement('a');
+                button.textContent = `To Parent ${results.parentSlotName}`;
+                button.classList.add('underline');
+                button.id = 'to-parent';
+                button.onclick = function() {
+                    processSlot(results.parentSlotId);
+                };
+                anchorContainer.appendChild(button);
+            } else if (results.parentSlotId != null) {
+                toParentButton.onclick = function() {
+                    processSlot(results.parentSlotId);
+                };
+                toParentButton.textContent = `To Parent ${results.parentSlotName}`;
+            }
+        } 
 
+        slotDiv.appendChild(anchorContainer);
     } else {
         console.log("Slot not found.");
     }

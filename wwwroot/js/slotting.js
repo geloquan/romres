@@ -93,7 +93,35 @@ function ParentSlot(result, user_id) {
     console.log("ParentSlot() entered");
     const slotNameElement = document.getElementById("slot-parent-name");
     slotNameElement.innerText = result.name;
+
+
+    const headerContainerDiv = document.getElementById("header-container");
+
+    const headerParentNameContainerDiv = document.getElementById('slot-parent-header-container');
     
+    const toParentAnchor = document.createElement('a');
+    toParentAnchor.href = "#";
+    toParentAnchor.textContent = "Duplicate Slot";
+    toParentAnchor.classList.add('underline');
+    toParentAnchor.onclick = function() {
+        processSlot(result.rootSlotModel.slotId);
+    };
+
+    const anchorContainer = document.createElement('div');
+    anchorContainer.classList.add('anchor-container');
+
+    const duplicateSlotAnchor = document.createElement('a');
+    duplicateSlotAnchor.href = "#";
+    duplicateSlotAnchor.textContent = "Duplicate Slot";
+    duplicateSlotAnchor.classList.add('underline');
+    duplicateSlotAnchor.onclick = function() {
+        duplicateSlot(result.slotId);
+    };
+
+    headerContainerDiv.appendChild(duplicateSlotAnchor);
+    
+    headerParentNameContainerDiv.appendChild(slotNameElement)
+
     document.getElementById("slot-parent-id").innerText = result.slotId;
     document.getElementById("slot-parent-is-reservable").innerText = result.isReservable ? "Yes" : "No";
     document.getElementById("slot-parent-invitation-code").innerText = result.invitationCode || 'None'; 

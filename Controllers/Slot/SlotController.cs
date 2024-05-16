@@ -32,6 +32,21 @@ namespace WebApplication2.Controllers {
             }
             return StatusCode(500, "Invalid request data.");
         }
-
+        [HttpGet("/slot/{invitation_code}/exists")]
+        public IActionResult SlotSearch(string invitation_code) {
+            HttpGetSlotSearch httpGetSlotSearch = new HttpGetSlotSearch();
+            httpGetSlotSearch.InvitationCode = invitation_code;
+            Console.WriteLine("[HttpGet(/slot/{invitation_code}/exists)]");
+            if (invitation_code != null) {
+                bool processingResult = httpGetSlotSearch.Process();
+                if (processingResult) {
+                    return Ok(httpGetSlotSearch.favoriteSlots); 
+                }
+                else {
+                    return StatusCode(500, "Failed to process reservation."); 
+                }
+            }
+            return StatusCode(500, "Invalid request data.");
+        }
     }
 }

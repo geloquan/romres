@@ -3,26 +3,139 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
     const slotDiv = document.getElementById('slot');
     slotDiv.innerHTML = '';
 
-    // Create a parent div for the header
     const headerDiv = document.createElement('div');
     headerDiv.classList.add('header-container');
 
-    // Create header
     const header = document.createElement('h3');
     header.textContent = header_name;
 
-    // Create anchors
     const anchorContainer = document.createElement('div');
     anchorContainer.classList.add('anchor-container');
-    
-    const newHostAnchor = document.createElement('a');
-    newHostAnchor.href = "#";
-    newHostAnchor.textContent = "New Host";
-    newHostAnchor.classList.add('underline');
-    newHostAnchor.onclick = function() {
-        addNewRow(table_id, newHostAnchor);
-    };
+    switch (header_name) {
+        case "Hosted":
+            const newHostAnchor = document.createElement('a');
+            newHostAnchor.href = "#";
+            newHostAnchor.textContent = "New Host";
+            newHostAnchor.classList.add('underline');
+            newHostAnchor.onclick = function() {
+                addNewRow(table_id, newHostAnchor);
+            };
 
+            //const duplicateHost = document.createElement('a');
+            //duplicateHost.href = "#";
+            //duplicateHost.textContent = "Duplicate Host";
+            //duplicateHost.classList.add('underline');
+            //duplicateHost.onclick = function() {
+            //    const saveFunction = function() {
+            //        const method = 'PUT'; 
+    //
+            //        const requestBody = {
+            //        };
+            //        console.log('Request Body:', JSON.stringify(requestBody));
+    //
+            //        fetch(`/host/${host_id}/duplicate/parent/slot/${slot_id}`, {
+            //            method: method,
+            //            headers: {
+            //                'Content-Type': 'application/json'
+            //            },
+            //            body: JSON.stringify(requestBody)
+            //        })
+            //        .then(response => {
+            //            if (response.ok) {
+            //                
+            //                $('#confirmationModal').modal('hide'); 
+            //            } else {
+            //                console.error(`Error: Slot Edit request for ID ${slot_id} failed`);
+            //            }
+            //        })
+            //        .catch(error => {
+            //            console.error(`Error: Slot Edit request for ID ${slot_id} failed`);
+            //        });
+            //    };
+            //    showConfirmationModal(saveFunction, null, "Are you sure?", "This action will duplicate this slot with its succeeding children.", "Cancel", "Gow!");
+            //};
+//
+            //anchorContainer.appendChild(duplicateHost);
+            //anchorContainer.appendChild(document.createTextNode(" | "));
+            anchorContainer.appendChild(newHostAnchor);
+            break;
+        case "Favorites":
+            const findFaveAnchor = document.createElement('a');
+            findFaveAnchor.href = "#";
+            findFaveAnchor.textContent = "Find Host";
+            findFaveAnchor.classList.add('underline');
+            findFaveAnchor.onclick = function() {
+                const modalDialog = document.createElement('div');
+                modalDialog.classList.add('modal', 'fade');
+                modalDialog.id = 'findSlotModal';
+                modalDialog.tabIndex = '-1';
+                modalDialog.setAttribute('role', 'dialog');
+                modalDialog.setAttribute('aria-labelledby', 'findSlotModalLabel');
+                modalDialog.setAttribute('aria-hidden', 'true');
+
+                modalDialog.innerHTML = `
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="findSlotModalLabel">Find Slot</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Enter Invitation Code:</p>
+                                <input type="text" id="searchSlotInput" class="form-control" placeholder="Enter code...">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="searchButton">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modalDialog);
+
+                $('#findSlotModal').modal('show');
+
+                const searchButton = modalDialog.querySelector('#searchButton');
+                searchButton.addEventListener('click', function() {
+                    const invitation_code_input = $('#searchSlotInput').val();
+                    $.ajax({
+                        url: `/slot/${invitation_code_input}/exists`,
+                        method: 'GET',
+                        contentType: 'application/json',
+                        success: function(data) {
+                            console.log("Slot exists: ", data);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        },
+                        complete: function() {
+                            $('#findSlotModal').modal('hide'); // Hide the modal after executing search
+                        }
+                    });
+                    $('#findSlotModal').modal('hide'); // Hide the modal after executing search
+                });
+
+                const cancelButton = modalDialog.querySelector('#cancelButton');
+                cancelButton.addEventListener('click', function() {
+                    $('#findSlotModal').modal('hide'); // Hide the modal on cancel
+                });
+
+                const closeButton = modalDialog.querySelector('.close');
+                closeButton.addEventListener('click', function() {
+                    $('#findSlotModal').modal('hide'); // Hide the modal on close (X)
+                });
+
+                // Prevent default anchor behavior
+                return false;
+            };
+            anchorContainer.appendChild(findFaveAnchor);
+
+        default:
+            break;
+    }
     const unhostAnchor = document.createElement('a');
     unhostAnchor.href = "#";
     unhostAnchor.textContent = "Unhost";
@@ -32,7 +145,7 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
         console.log("Unhost clicked");
     };
 
-    anchorContainer.appendChild(newHostAnchor);
+    
     //anchorContainer.appendChild(document.createTextNode(" | "));
     //anchorContainer.appendChild(unhostAnchor);
 
@@ -191,20 +304,38 @@ function revertNewHostAnchor(newHostAnchor) {
 
 function buildFaveSlotTreeTable() {
     console.log(`buildFaveSlotTreeTable()`);
+
     const slotDiv = document.getElementById('slot');
     slotDiv.innerHTML = '';
+
+    const slotParentDiv = document.createElement('div');
+    slotParentDiv.classList.add('header-container');
+    slotParentDiv.id = 'header-container';
+    
     const slotParentName = document.createElement('h3');
     slotParentName.id = 'slot-parent-name';
-    slotParentName.classList.add('mb-4');
-    slotDiv.appendChild(slotParentName);
+    slotParentName.classList.add('mb-4', 'text-center');
+    
+
+    const slotParentNameDiv = document.createElement('div');
+    slotParentNameDiv.classList.add('header-container', 'd-flex', 'justify-content-center');
+    slotParentNameDiv.id = 'slot-parent-header-container';
+
+    slotParentNameDiv.appendChild(slotParentName);
+    slotParentDiv.appendChild(slotParentNameDiv);
+    slotDiv.appendChild(slotParentDiv);
+
     const slotParentTable = document.createElement('table');
     slotParentTable.id = 'slot-parent-table';
     slotParentTable.classList.add('table', 'table-bordered');
+
     const slotParentTableHead = document.createElement('thead');
     slotParentTableHead.classList.add('thead-dark');
     slotParentTable.appendChild(slotParentTableHead);
+
     const slotParentTableHeaderRow = document.createElement('tr');
     slotParentTableHead.appendChild(slotParentTableHeaderRow);
+
     const parentTableHeaders = ['Slot ID', 'Is Reservable', 'Invitation Code', 'Edge (x, y)', 'Note', 'edit'];
     parentTableHeaders.forEach(headerText => {
         const th = document.createElement('th');
@@ -234,10 +365,33 @@ function buildFaveSlotTreeTable() {
 
     slotDiv.appendChild(slotParentTable);
 
+    const headerDiv = document.createElement('div');
+    headerDiv.classList.add('header-container');
+
     const slotChildrenName = document.createElement('h4');
     slotChildrenName.id = 'slot-children-name';
     slotChildrenName.textContent = 'Children:';
-    slotDiv.appendChild(slotChildrenName);
+
+    const anchorContainer = document.createElement('div');
+    anchorContainer.classList.add('anchor-container');
+
+    const addSlotChildAnchor = document.createElement('a');
+    addSlotChildAnchor.href = "#";
+    addSlotChildAnchor.textContent = "Add child";
+    addSlotChildAnchor.classList.add('underline');
+    addSlotChildAnchor.onclick = function() {
+        addSlotChild(table_id, addSlotChildAnchor);
+    };
+    //anchorContainer.appendChild(duplicateHost);
+    //anchorContainer.appendChild(document.createTextNode(" | "));
+    anchorContainer.appendChild(addSlotChildAnchor);
+
+    //headerDiv.appendChild(header);
+    headerDiv.appendChild(slotChildrenName);
+    headerDiv.appendChild(anchorContainer);
+
+    slotDiv.appendChild(headerDiv);
+
     const slotChildrenTable = document.createElement('table');
     slotChildrenTable.id = 'slot-children-table';
     slotChildrenTable.classList.add('table', 'table-bordered');

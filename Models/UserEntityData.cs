@@ -6,7 +6,7 @@ namespace WebApplication2.Models {
         public FavoriteSlots favoriteSlots = new FavoriteSlots();
         public HostedSlots hostedSlots = new HostedSlots();
         private List<Host> HostedTreeSlots = new List<Host>();
-        private SlotModel SlotInfoQuery(string ConnectionQuery, string Query, int slot_id, int? root_id, int? user_id) {
+        private SlotModel SlotInfoQuery(string ConnectionQuery, string Query, int slot_id, int? root_id, int? user_id, string? parent_name, int? root_slot_id, string? root_slot_name) {
             SlotModel Model = new SlotModel();
             using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
                 using (SqlCommand command = new SqlCommand(Query, conn)) {
@@ -28,6 +28,9 @@ namespace WebApplication2.Models {
                             Model.InvitationCode = !reader.IsDBNull(8) ? reader.GetString(8) : string.Empty;
                             Model.Note = !reader.IsDBNull(9) ? reader.GetString(9) : string.Empty;
                             Model.ParentSlotId = root_id;
+                            Model.ParentSlotName = parent_name ?? "";
+                            Model.RootSlotId = root_slot_id ?? null;
+                            Model.RootSlotName = root_slot_name ?? "";
                             Model.HostName = !reader.IsDBNull(10) ? reader.GetString(10) : string.Empty;
                         }
                     }
@@ -40,14 +43,24 @@ namespace WebApplication2.Models {
             string slot_user_favorites = @"
             SELECT slot_id FROM user_favorites WHERE user_id = @user_id;
             ";
-            string slot_tree_query = @"SELECT 
+            string slot_tree_query = @"
+            SELECT 
                 sn1.primary_slot_id as root_slot_id,
                 sn1.child_slot_id AS second_layer_slot_id,
-                sn2.child_slot_id AS third_layer_slot_id
+                sn2.child_slot_id AS third_layer_slot_id,
+                s1.name as root_name,
+                s2.name as second_layer_name,
+                s3.name as third_layer_name
             FROM 
                 slot_network sn1
             JOIN 
                 slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
+            LEFT JOIN
+                slot s1 ON sn1.primary_slot_id = s1.id
+            LEFT JOIN
+                slot s2 ON sn1.child_slot_id = s2.id
+            LEFT JOIN
+                slot s3 ON sn2.child_slot_id = s3.id
             WHERE 
                 sn1.primary_slot_id = @slot_id;";
             string slot_info_query = @"
@@ -103,18 +116,23 @@ namespace WebApplication2.Models {
                                                 int? root_slot_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
                                                 int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
                                                 int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
+                                                string? root_slot_name = reader_2.IsDBNull(3) ? null : reader_2.GetString(3);
+                                                string? second_layer_slot_name = reader_2.IsDBNull(4) ? null : reader_2.GetString(4);
+                                                string? third_layer_slot_name = reader_2.IsDBNull(5) ? null : reader_2.GetString(5);
                                                 if (root_slot_id != Tree.RootId && root_slot_id != null) {
-                                                    Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId);
+                                                    Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId, null, null, root_slot_name);
                                                     Tree.RootId = root_slot_id;
                                                     Tree.InvitationCode = Tree.RootSlotModel.InvitationCode;
                                                 } 
                                                 if (!Tree.SecondLayerExists(second_layer_slot_id.Value) && second_layer_slot_id != null) {
-                                                    Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId));
+                                                    Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId, root_slot_name, root_slot_id, root_slot_name));
                                                     Tree.AddSecondLayer(second_layer_slot_id.Value);
+                                                    Tree.AddSecondLayerName(second_layer_slot_name ?? "");
                                                 } 
                                                 if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
-                                                    Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId));
+                                                    Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId, second_layer_slot_name, root_slot_id, root_slot_name));
                                                     Tree.AddThirdLayer(third_layer_slot_id.Value);
+                                                    Tree.AddThirdLayerName(third_layer_slot_name ?? "");
                                                     
                                                 } 
                                             }
@@ -140,11 +158,20 @@ namespace WebApplication2.Models {
             string slot_tree_query = @"SELECT 
                 sn1.primary_slot_id as root_slot_id,
                 sn1.child_slot_id AS second_layer_slot_id,
-                sn2.child_slot_id AS third_layer_slot_id
+                sn2.child_slot_id AS third_layer_slot_id,
+                s1.name as root_name,
+                s2.name as second_layer_name,
+                s3.name as third_layer_name
             FROM 
                 slot_network sn1
             JOIN 
                 slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
+            LEFT JOIN
+                slot s1 ON sn1.primary_slot_id = s1.id
+            LEFT JOIN
+                slot s2 ON sn1.child_slot_id = s2.id
+            LEFT JOIN
+                slot s3 ON sn2.child_slot_id = s3.id
             WHERE 
                 sn1.primary_slot_id = @slot_id;";
         }
@@ -226,20 +253,23 @@ namespace WebApplication2.Models {
                                     int? root_slot_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
                                     int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
                                     int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
+                                    string? root_slot_name = reader_2.IsDBNull(3) ? null : reader_2.GetString(3);
+                                    string? second_layer_slot_name = reader_2.IsDBNull(4) ? null : reader_2.GetString(4);
+                                    string? third_layer_slot_name = reader_2.IsDBNull(5) ? null : reader_2.GetString(5);
 
                                     if (root_slot_id != Tree.RootId && root_slot_id != null) {
-                                        Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId);
+                                        Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId, null, null, root_slot_name);
                                         Tree.RootId = root_slot_id;
                                         Tree.InvitationCode = Tree.RootSlotModel.InvitationCode;
                                     }
 
                                     if (second_layer_slot_id != null && !Tree.SecondLayerExists(second_layer_slot_id.Value)) {
-                                        Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId));
+                                        Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId, root_slot_name, root_slot_id, root_slot_name));
                                         Tree.AddSecondLayer(second_layer_slot_id.Value);
                                     }
 
                                     if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
-                                        Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId));
+                                        Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId, second_layer_slot_name, root_slot_id, root_slot_name));
                                         Tree.AddThirdLayer(third_layer_slot_id.Value);
                                     }
                                 } else if (curr_id != prev_id) {
@@ -250,20 +280,33 @@ namespace WebApplication2.Models {
                                     int? root_slot_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
                                     int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
                                     int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
+                                    string? root_slot_name = reader_2.IsDBNull(3) ? null : reader_2.GetString(3);
+                                    string? second_layer_slot_name = reader_2.IsDBNull(4) ? null : reader_2.GetString(4);
+                                    string? third_layer_slot_name = reader_2.IsDBNull(5) ? null : reader_2.GetString(5);
 
                                     if (root_slot_id != Tree.RootId && root_slot_id != null) {
-                                        Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId);
+                                        Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, UserId, null, null, root_slot_name);
                                         Tree.RootId = root_slot_id;
                                         Tree.InvitationCode = Tree.RootSlotModel.InvitationCode;
                                     }
 
                                     if (second_layer_slot_id != null && !Tree.SecondLayerExists(second_layer_slot_id.Value)) {
-                                        Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId));
+                                        Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId, root_slot_name, root_slot_id, root_slot_name));
                                         Tree.AddSecondLayer(second_layer_slot_id.Value);
                                     }
 
                                     if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
-                                        Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId));
+                                        Tree.AddThirdLayerChildren(
+                                            SlotInfoQuery(
+                                                ConnectionQuery, 
+                                                slot_info_query, 
+                                                third_layer_slot_id.Value, 
+                                                second_layer_slot_id.Value,
+                                                UserId, second_layer_slot_name, 
+                                                root_slot_id, 
+                                                root_slot_name
+                                            )
+                                        );
                                         Tree.AddThirdLayer(third_layer_slot_id.Value);
                                     }
                                 } else {

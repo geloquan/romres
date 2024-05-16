@@ -32,5 +32,13 @@ namespace WebApplication2.Controllers {
                 return StatusCode(500, "Invalid request data.");
             }
         }
+        [HttpPut("/host/{host_id}/duplicate/parent/slot/{slot_id}")]
+        public IActionResult DuplicateParentSlot(int host_id, int user_id, [FromBody] HttpPutParentSlotDuplication duplicationRequest) {
+            if (duplicationRequest != null) {
+                return Ok("Duplication successful.");
+            } else {
+                return StatusCode(500, "Invalid request data.");
+            }
+        }
     }
 }

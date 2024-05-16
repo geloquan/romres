@@ -1,15 +1,17 @@
-function showConfirmationModal(onConfirm, onCancel) {
+function showConfirmationModal(onConfirm, onCancel, confirmationModalLabelText, modalBodyText, cancelModalButtonText, confirmSaveButtonText) {
     $('#confirmationModal').modal('show'); // Show the modal
 
     const confirmSaveButton = document.getElementById('confirmSaveButton');
     const closeModalButton = document.getElementById('closeModalButton');
     const cancelModalButton = document.getElementById('cancelModalButton');
+    const confirmationModalLabel = document.getElementById('confirmationModalLabel');
+    const modalBody = document.getElementById('modal-body');
 
     // Remove any existing event listeners to avoid multiple bindings
     confirmSaveButton.onclick = null;
     closeModalButton.onclick = null;
     cancelModalButton.onclick = null;
-
+    
     // Assign new event listeners
     confirmSaveButton.onclick = function() {
         $('#confirmationModal').modal('hide'); // Hide the modal

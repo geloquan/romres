@@ -39,16 +39,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Programming VS/WebApplication2/Views/User/Branch.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxCcmFuY2guY3NodG1s
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Programming VS/WebApplication2/Views/User/Home.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxIb21lLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Programming VS/WebApplication2/Views/User/HostDashboard.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlclxIb3N0RGFzaGJvYXJkLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Programming VS/WebApplication2/Views/User/HostLogin.cshtml]

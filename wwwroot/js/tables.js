@@ -3,26 +3,102 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
     const slotDiv = document.getElementById('slot');
     slotDiv.innerHTML = '';
 
-    // Create a parent div for the header
     const headerDiv = document.createElement('div');
     headerDiv.classList.add('header-container');
 
-    // Create header
     const header = document.createElement('h3');
     header.textContent = header_name;
 
-    // Create anchors
     const anchorContainer = document.createElement('div');
     anchorContainer.classList.add('anchor-container');
-    
-    const newHostAnchor = document.createElement('a');
-    newHostAnchor.href = "#";
-    newHostAnchor.textContent = "New Host";
-    newHostAnchor.classList.add('underline');
-    newHostAnchor.onclick = function() {
-        addNewRow(table_id, newHostAnchor);
-    };
+    switch (header_name) {
+        case "Hosted":
+            const newHostAnchor = document.createElement('a');
+            newHostAnchor.href = "#";
+            newHostAnchor.textContent = "New Host";
+            newHostAnchor.classList.add('underline');
+            newHostAnchor.onclick = function() {
+                addNewRow(table_id, newHostAnchor);
+            };
+            anchorContainer.appendChild(newHostAnchor);
+            break;
+        case "Favorites":
+            const findFaveAnchor = document.createElement('a');
+            findFaveAnchor.href = "#";
+            findFaveAnchor.textContent = "Find Host";
+            findFaveAnchor.classList.add('underline');
+            findFaveAnchor.onclick = function() {
+                const modalDialog = document.createElement('div');
+                modalDialog.classList.add('modal', 'fade');
+                modalDialog.id = 'findSlotModal';
+                modalDialog.tabIndex = '-1';
+                modalDialog.setAttribute('role', 'dialog');
+                modalDialog.setAttribute('aria-labelledby', 'findSlotModalLabel');
+                modalDialog.setAttribute('aria-hidden', 'true');
 
+                modalDialog.innerHTML = `
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="findSlotModalLabel">Find Slot</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Enter Invitation Code:</p>
+                                <input type="text" id="searchSlotInput" class="form-control" placeholder="Enter code...">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" id="cancelButton">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="searchButton">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(modalDialog);
+
+                $('#findSlotModal').modal('show');
+
+                const searchButton = modalDialog.querySelector('#searchButton');
+                searchButton.addEventListener('click', function() {
+                    const invitation_code_input = $('#searchSlotInput').val();
+                    $.ajax({
+                        url: `/slot/${invitation_code_input}/exists`,
+                        method: 'GET',
+                        contentType: 'application/json',
+                        success: function(data) {
+                            console.log("Slot exists: ", data);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        },
+                        complete: function() {
+                            $('#findSlotModal').modal('hide'); // Hide the modal after executing search
+                        }
+                    });
+                    $('#findSlotModal').modal('hide'); // Hide the modal after executing search
+                });
+
+                const cancelButton = modalDialog.querySelector('#cancelButton');
+                cancelButton.addEventListener('click', function() {
+                    $('#findSlotModal').modal('hide'); // Hide the modal on cancel
+                });
+
+                const closeButton = modalDialog.querySelector('.close');
+                closeButton.addEventListener('click', function() {
+                    $('#findSlotModal').modal('hide'); // Hide the modal on close (X)
+                });
+
+                // Prevent default anchor behavior
+                return false;
+            };
+            anchorContainer.appendChild(findFaveAnchor);
+
+        default:
+            break;
+    }
     const unhostAnchor = document.createElement('a');
     unhostAnchor.href = "#";
     unhostAnchor.textContent = "Unhost";
@@ -32,7 +108,7 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
         console.log("Unhost clicked");
     };
 
-    anchorContainer.appendChild(newHostAnchor);
+    
     //anchorContainer.appendChild(document.createTextNode(" | "));
     //anchorContainer.appendChild(unhostAnchor);
 

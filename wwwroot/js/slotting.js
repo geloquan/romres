@@ -110,62 +110,67 @@ function ParentSlot(result, user_id) {
     const editButton = document.createElement("button");
     editButton.innerText = "Edit Slot";
     editButton.className = "btn btn-primary";
-    editButton.onclick = function() {
+
+    const initialEditButtonClickHandler = function() {
         console.log("editButton.onclick = function() entered");
         const slotNoteElement = document.getElementById("slot-parent-note");
     
         slotNoteElement.innerHTML = `<textarea id="edit-slot-note">${result.note || ''}</textarea>`;
             
+        console.log("slot_id: ", result.slotId);
+        console.log("userId: ", user_id);
 
         editButton.innerText = "Save";
         editButton.onclick = function() {
-            console.log("editButton.onclick = function() entered");
             const editedNote = document.getElementById("edit-slot-note").value;
-    
             const slot_id = result.slotId;
-    
-            const method = 'PUT'; 
-    
-            const requestBody = {
-                Note: editedNote,
-                UserId: userId,
-                SlotId: slot_id
-            };
-            console.log('Request Body:', JSON.stringify(requestBody));
-    
-            fetch(`/slot/${slot_id}/noteedit`, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            })
-            .then(response => {
-                if (response.ok) {
-                    slotNoteElement.innerText = editedNote || 'No note';
-                    editButton.innerText = "Edit Slot";
-                    editButton.onclick = initialEditButtonClickHandler; // Restore initial click handler
-                } else {
-                    console.error(`Error: Slot Edit request for ID ${slot_id} failed`);
-                }
-            })
-            .catch(error => {
-                console.error(`Error: Slot Edit request for ID ${slot_id} failed`);
-            });
-        };
-    
-        const initialEditButtonClickHandler = function() {
-            console.log("initialEditButtonClickHandler() entered");
-            slotNoteElement.innerText = result.note || 'No note';
+            if (editedNote === result.note) {
+                slotNoteElement.innerText = editedNote || 'No note';
+                editButton.innerText = "Edit Slot";
+                editButton.onclick = initialEditButtonClickHandler;
+                return; 
+            }
+            const saveFunction = function() {
+                const method = 'PUT'; 
 
-            editButton.innerText = "Edit Slot";
-            editButton.onclick = editButtonClickHandler; // Restore initial click handler
+                const requestBody = {
+                    Note: editedNote,
+                    UserId: userId,
+                    SlotId: slot_id
+                };
+                console.log('Request Body:', JSON.stringify(requestBody));
+
+                fetch(`/slot/${slot_id}/noteedit`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                })
+                .then(response => {
+                    if (response.ok) {
+                        slotNoteElement.innerText = editedNote || 'No note';
+                        editButton.innerText = "Edit Slot";
+                        editButton.onclick = initialEditButtonClickHandler; // Restore initial click handler
+                        $('#confirmationModal').modal('hide'); // Hide the modal after saving
+                    } else {
+                        console.error(`Error: Slot Edit request for ID ${slot_id} failed`);
+                    }
+                })
+                .catch(error => {
+                    console.error(`Error: Slot Edit request for ID ${slot_id} failed`);
+                });
+            };
+            showConfirmationModal(saveFunction);
         };
     };
+    editButton.onclick = initialEditButtonClickHandler;
     const slotEditTd = document.getElementById("slot-parent-edit");
     slotEditTd.innerHTML = ''; 
     slotEditTd.appendChild(editButton);
 }
+
+
 let toParentButtonAppended = false;
 let toRootButtonAppended = false;
 function processSlot(slot_id) {
@@ -205,55 +210,108 @@ function processSlot(slot_id) {
     }
 }
 function ChildrenSlots(ChildrenSlotsResult) {
-    console.log("entered ChildrenSlots()");
-    console.log("ChildrenSlotsResult length: ", ChildrenSlotsResult);
-    const tbody = document.getElementById("slot-children");
-    if (tbody) {
-        while (tbody.firstChild) {
-            tbody.removeChild(tbody.firstChild);
-        }
-    }
-    if (ChildrenSlotsResult.childrenSlot) {
-        ChildrenSlotsResult.childrenSlot.forEach(childSlot => {
-            const row = document.createElement("tr");
-    
-            const nameCell = document.createElement("td");
-            nameCell.innerText = childSlot.name;
-            row.appendChild(nameCell);
-    
-            const isReservableCell = document.createElement("td");
-            isReservableCell.innerText = childSlot.isReservable ? "Yes" : "No";
-            row.appendChild(isReservableCell);
-    
-            const invitationCodeCell = document.createElement("td");
-            invitationCodeCell.innerText = childSlot.invitationCode || 'None';
-            row.appendChild(invitationCodeCell);
-            
-            let childEdgesText = '';
-            if (childSlot.edges && Array.isArray(childSlot.edges)) {
-                childEdgesText = childSlot.edges.map(coord => `(${coord.x}, ${coord.y})`).join(', ');
+    if (entity_type == 'favorites') {
+        console.log("entered ChildrenSlots(favorites)");
+        console.log("ChildrenSlotsResult length: ", ChildrenSlotsResult);
+        const tbody = document.getElementById("slot-children");
+        if (tbody) {
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.firstChild);
             }
-            const edgesCell = document.createElement("td");
-            edgesCell.innerText = childEdgesText;
-            row.appendChild(edgesCell);
-            
-            const noteCell = document.createElement("td");
-            noteCell.innerText = childSlot.note || 'No note';
-            row.appendChild(noteCell);
-            
-            const buttonCell = document.createElement("td");
-            const button = document.createElement("button");
-            button.innerText = "Enter Slot"; 
-            button.classList.add("btn", "btn-primary"); 
-            button.addEventListener("click", () => {
-                processSlot(childSlot.slotId);
+        }
+        if (ChildrenSlotsResult.childrenSlot) {
+            ChildrenSlotsResult.childrenSlot.forEach(childSlot => {
+                const row = document.createElement("tr");
+        
+                const nameCell = document.createElement("td");
+                nameCell.innerText = childSlot.name;
+                row.appendChild(nameCell);
+        
+                const isReservableCell = document.createElement("td");
+                isReservableCell.innerText = childSlot.isReservable ? "Yes" : "No";
+                row.appendChild(isReservableCell);
+        
+                const invitationCodeCell = document.createElement("td");
+                invitationCodeCell.innerText = childSlot.invitationCode || 'None';
+                row.appendChild(invitationCodeCell);
+                
+                let childEdgesText = '';
+                if (childSlot.edges && Array.isArray(childSlot.edges)) {
+                    childEdgesText = childSlot.edges.map(coord => `(${coord.x}, ${coord.y})`).join(', ');
+                }
+                const edgesCell = document.createElement("td");
+                edgesCell.innerText = childEdgesText;
+                row.appendChild(edgesCell);
+                
+                const noteCell = document.createElement("td");
+                noteCell.innerText = childSlot.note || 'No note';
+                row.appendChild(noteCell);
+                
+                const buttonCell = document.createElement("td");
+                const button = document.createElement("button");
+                button.innerText = "Enter Slot"; 
+                button.classList.add("btn", "btn-primary"); 
+                button.addEventListener("click", () => {
+                    processSlot(childSlot.slotId);
+                });
+                buttonCell.appendChild(button);
+                row.appendChild(buttonCell);
+                
+                tbody.appendChild(row);
+        
             });
-            buttonCell.appendChild(button);
-            row.appendChild(buttonCell);
-            
-            tbody.appendChild(row);
-    
-        });
+        }
+    } else if (entity_type == 'hosted') {
+        console.log("entered ChildrenSlots(hosted)");
+        console.log("ChildrenSlotsResult length: ", ChildrenSlotsResult);
+        const tbody = document.getElementById("slot-children");
+        if (tbody) {
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.firstChild);
+            }
+        }
+        if (ChildrenSlotsResult.childrenSlot) {
+            ChildrenSlotsResult.childrenSlot.forEach(childSlot => {
+                const row = document.createElement("tr");
+        
+                const nameCell = document.createElement("td");
+                nameCell.innerText = childSlot.name;
+                row.appendChild(nameCell);
+        
+                const isReservableCell = document.createElement("td");
+                isReservableCell.innerText = childSlot.isReservable ? "Yes" : "No";
+                row.appendChild(isReservableCell);
+        
+                const invitationCodeCell = document.createElement("td");
+                invitationCodeCell.innerText = childSlot.invitationCode || 'None';
+                row.appendChild(invitationCodeCell);
+                
+                let childEdgesText = '';
+                if (childSlot.edges && Array.isArray(childSlot.edges)) {
+                    childEdgesText = childSlot.edges.map(coord => `(${coord.x}, ${coord.y})`).join(', ');
+                }
+                const edgesCell = document.createElement("td");
+                edgesCell.innerText = childEdgesText;
+                row.appendChild(edgesCell);
+                
+                const noteCell = document.createElement("td");
+                noteCell.innerText = childSlot.note || 'No note';
+                row.appendChild(noteCell);
+                
+                const buttonCell = document.createElement("td");
+                const button = document.createElement("button");
+                button.innerText = "Enter Slot"; 
+                button.classList.add("btn", "btn-primary"); 
+                button.addEventListener("click", () => {
+                    processSlot(childSlot.slotId);
+                });
+                buttonCell.appendChild(button);
+                row.appendChild(buttonCell);
+                
+                tbody.appendChild(row);
+        
+            });
+        }
     }
 }
 function FavoriteSlots(slot_object) {

@@ -14,6 +14,7 @@
         </div>
     </div>
 </div>
+<script src="/js/catch.js"></script>
 <div id="slot" class="container mt-5"></div>
 
 
@@ -21,6 +22,7 @@
     var global_slot_object = [];
     var userId = @ViewData["UserId"];
     var userId;
+    var entity_type = "";
 </script>
 <script src="/js/dummy_objects.js"></script>
 <script src="/js/tables.js"></script>
@@ -37,6 +39,7 @@
                 url: url,
                 type: 'GET',
                 success: function(result) {
+                    entity_type = 'favorites';
                     buildRootSlotTable("Favorites", ['Invitation Code', 'Slot Name', 'Host Name', 'Entry', 'Unfave'], 'favorites-slot-table');
                     global_slot_object = result;
                     FavoriteSlots(result);
@@ -57,6 +60,7 @@
                 url: url,
                 type: 'GET',
                 success: function(result) {
+                    entity_type = 'hosted';
                     console.log(result);
                     buildRootSlotTable("Hosted", ['Invitation Code', 'Slot Name', 'Host Name-tag', 'Entry', 'Unhost'], 'hosted-slot-table');
                     global_slot_object = result;
@@ -72,6 +76,7 @@
         }
         function attachBackButtonClick() {
             $(document).on('click', '#backButton', function() {
+                entity_type = "";
                 console.log('#document #backButton()');
                 $('#slot').html(''); 
                 $('#user-options').empty();

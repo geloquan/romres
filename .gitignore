@@ -22,3 +22,5 @@ obj/Debug/net6.0/WebApplication2.csproj.AssemblyReference.cache
 obj/Debug/net6.0/WebApplication2.GeneratedMSBuildEditorConfig.editorconfig
 obj/Debug/net6.0/WebApplication2.RazorAssemblyInfo.cache
 obj/Debug/net6.0/WebApplication2.RazorAssemblyInfo.cs
+obj/*
+bin/*

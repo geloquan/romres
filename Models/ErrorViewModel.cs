@@ -24,7 +24,10 @@ namespace WebApplication2.Models {
         public HashSet<DateMod> Durations { get; set; } = new HashSet<DateMod>();
         public string? Name { get; set; }
         public int? SlotId { get; set; }
+        public int? RootSlotId { get; set; }
+        public string? RootSlotName { get; set; }
         public int? ParentSlotId { get; set; }
+        public string? ParentSlotName { get; set; }
         public bool? IsReservable { get; set; }
         public string? ReserverName { get; set; }
         public string? InvitationCode { get; set; }
@@ -54,6 +57,8 @@ namespace WebApplication2.Models {
         public string? InvitationCode { get; set; }
         public List<int> SecondLayerId { get; set; } = new List<int>();
         public List<int> ThirdLayerId { get; set; } = new List<int>();
+        public List<string> SecondLayerName { get; set; } = new List<string>();
+        public List<string> ThirdLayerName { get; set; } = new List<string>();
         public SlotModel? RootSlotModel { get; set; }
         public List<SlotModel> SecondLayerChildren { get; set; } = new List<SlotModel>();
         public List<SlotModel> ThirdLayerChildren { get; set; } = new List<SlotModel>();
@@ -62,6 +67,11 @@ namespace WebApplication2.Models {
         }
         public void AddThirdLayer(int SlotId) {
             this.ThirdLayerId.Add(SlotId);
+        }public void AddSecondLayerName(string SlotName) {
+            this.SecondLayerName.Add(SlotName);
+        }
+        public void AddThirdLayerName(string SlotName) {
+            this.ThirdLayerName.Add(SlotName);
         }
         public bool SecondLayerExists(int SlotId) {
             if (this.SecondLayerId.Contains(SlotId)) {

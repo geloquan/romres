@@ -20,6 +20,43 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
             newHostAnchor.onclick = function() {
                 addNewRow(table_id, newHostAnchor);
             };
+
+            const duplicateHost = document.createElement('a');
+            duplicateHost.href = "#";
+            duplicateHost.textContent = "Duplicate Host";
+            duplicateHost.classList.add('underline');
+            duplicateHost.onclick = function() {
+                const saveFunction = function() {
+                    const method = 'PUT'; 
+    
+                    const requestBody = {
+                    };
+                    console.log('Request Body:', JSON.stringify(requestBody));
+    
+                    fetch(`/host/${host_id}/duplicate/parent/slot/${slot_id}`, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            
+                            $('#confirmationModal').modal('hide'); 
+                        } else {
+                            console.error(`Error: Slot Edit request for ID ${slot_id} failed`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error: Slot Edit request for ID ${slot_id} failed`);
+                    });
+                };
+                showConfirmationModal(saveFunction);
+            };
+
+            anchorContainer.appendChild(duplicateHost);
+            anchorContainer.appendChild(document.createTextNode(" | "));
             anchorContainer.appendChild(newHostAnchor);
             break;
         case "Favorites":

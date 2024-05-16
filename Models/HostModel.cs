@@ -1,6 +1,110 @@
 using System.Data.SqlClient;
 
 namespace WebApplication2.Models {
+    public class HttpPutParentSlotDuplication {
+        public string? hostId { get; set; }
+        public string? parentSlotId { get; set;}
+        public HostedSlots newHostedSlots = new HostedSlots();
+        private SlotModel SlotDuplication(string ConnectionQuery, string Query, int slot_id, string get_info_query, int? root_id) {
+            SlotModel Model = new SlotModel();
+            using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
+                using (SqlCommand command = new SqlCommand(Query, conn)) {
+                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = slot_id;
+                    conn.Open();
+                    using (SqlDataReader reader = command.ExecuteReader()){
+                        while (reader.Read()) {
+                            double x = reader.IsDBNull(0) ? 0 : reader.GetSqlDouble(0).Value;
+                            double y = reader.IsDBNull(1) ? 0 : reader.GetSqlDouble(1).Value;
+                            Model.AddEdge((x, y));
+                            DateTime startDate = reader.IsDBNull(2) ? DateTime.MinValue : reader.GetDateTime(2);
+                            DateTime endDate = reader.IsDBNull(3) ? DateTime.MinValue : reader.GetDateTime(3);
+                            Model.AddDuration((startDate, endDate));           
+                            Model.Name = reader.GetString(4);
+                            Model.SlotId = reader.GetInt32(5);
+                            Model.IsReservable = !reader.IsDBNull(6) ? reader.GetByte(6) != 0 : false;
+                            Model.ReserverName = !reader.IsDBNull(7) ? reader.GetString(7) : string.Empty;
+                            Model.InvitationCode = !reader.IsDBNull(8) ? reader.GetString(8) : string.Empty;
+                            Model.ParentSlotId = root_id;
+                            Model.HostName = !reader.IsDBNull(9) ? reader.GetString(9) : string.Empty;
+                        }
+                    }
+                }
+            }
+            return Model;
+        }
+        public bool Process() {
+            string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            string new_info_query = @"
+                INSERT INTO 
+            ";
+            string get_info_query = @"
+                SELECT 
+                    e.x AS edge_X,
+                    e.y AS edge_Y,
+                    r.duration_start AS reserve_duration_start,
+                    r.duration_end AS reserve_duration_end,
+                    s.name AS slot_name,
+                    s.id AS slot_id,
+                    s.is_reservable AS slot_is_reservable,
+                    u.name AS reserver_user_name,
+                    inv.code AS slot_invitation_code,
+                    h.name
+                FROM 
+                    slot s 
+                LEFT JOIN 
+                    slot_fnl sf ON sf.slot_id = s.id
+                LEFT JOIN 
+                    reserver r ON sf.reserver_id = r.id
+                LEFT JOIN 
+                    host h ON s.host_id = h.id
+                LEFT JOIN 
+                    [user] u ON r.user_id = u.id 
+                LEFT JOIN 
+                    edge e ON sf.slot_id = e.slot_id
+                LEFT JOIN
+                    invitation inv ON s.id = inv.slot_id
+                WHERE 
+                    s.id = @slot_id";
+            string get_parent_query = @"
+                SELECT 
+                    sn1.primary_slot_id as root_slot_id,
+                    sn1.child_slot_id AS second_layer_slot_id,
+                    sn2.child_slot_id AS third_layer_slot_id
+                FROM 
+                    slot_network sn1
+                LEFT JOIN 
+                    slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
+                WHERE 
+                    sn1.primary_slot_id = @slot_id;
+            ";
+            using (SqlConnection conn = new SqlConnection(connectionQuery)) {
+                conn.Open();
+                using (SqlCommand command = new SqlCommand(get_parent_query, conn)) {
+                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = parentSlotId;
+                    using (SqlDataReader reader = command.ExecuteReader()){
+                        SlotTree Tree = new SlotTree();
+                        List<int> visited = new List<int>();
+                        while (reader.Read()) {
+                            int? root_slot_id = reader.IsDBNull(0) ? (int?)null : reader.GetInt32(0);
+                            int? second_layer_slot_id = reader.IsDBNull(1) ? (int?)null : reader.GetInt32(1);
+                            int? third_layer_slot_id = reader.IsDBNull(2) ? (int?)null : reader.GetInt32(2);
+                            if (root_slot_id != Tree.RootId && root_slot_id != null && !visited.Contains(root_slot_id.Value)) {
+                                Tree.RootId = root_slot_id;
+                                Tree.InvitationCode = Tree.RootSlotModel.InvitationCode;
+                                visited.Add(root_slot_id.Value);
+                            } 
+                            if (!Tree.SecondLayerExists(second_layer_slot_id.Value) && second_layer_slot_id != null && !visited.Contains(second_layer_slot_id.Value)) {
+                            
+                            } 
+                            if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value) && !visited.Contains(third_layer_slot_id.Value)) {
+                                
+                            } 
+                        }
+                    }
+                }
+            }
+        }
+    }
     public class HttpPutNewHost {
         public string? invitationCode { get; set; }
         public string? slotName { get; set; }

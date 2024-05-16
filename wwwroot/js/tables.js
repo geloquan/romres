@@ -304,20 +304,38 @@ function revertNewHostAnchor(newHostAnchor) {
 
 function buildFaveSlotTreeTable() {
     console.log(`buildFaveSlotTreeTable()`);
+
     const slotDiv = document.getElementById('slot');
     slotDiv.innerHTML = '';
+
+    const slotParentDiv = document.createElement('div');
+    slotParentDiv.classList.add('header-container');
+    slotParentDiv.id = 'header-container';
+    
     const slotParentName = document.createElement('h3');
     slotParentName.id = 'slot-parent-name';
-    slotParentName.classList.add('mb-4');
-    slotDiv.appendChild(slotParentName);
+    slotParentName.classList.add('mb-4', 'text-center');
+    
+
+    const slotParentNameDiv = document.createElement('div');
+    slotParentNameDiv.classList.add('header-container', 'd-flex', 'justify-content-center');
+    slotParentNameDiv.id = 'slot-parent-header-container';
+
+    slotParentNameDiv.appendChild(slotParentName);
+    slotParentDiv.appendChild(slotParentNameDiv);
+    slotDiv.appendChild(slotParentDiv);
+
     const slotParentTable = document.createElement('table');
     slotParentTable.id = 'slot-parent-table';
     slotParentTable.classList.add('table', 'table-bordered');
+
     const slotParentTableHead = document.createElement('thead');
     slotParentTableHead.classList.add('thead-dark');
     slotParentTable.appendChild(slotParentTableHead);
+
     const slotParentTableHeaderRow = document.createElement('tr');
     slotParentTableHead.appendChild(slotParentTableHeaderRow);
+
     const parentTableHeaders = ['Slot ID', 'Is Reservable', 'Invitation Code', 'Edge (x, y)', 'Note', 'edit'];
     parentTableHeaders.forEach(headerText => {
         const th = document.createElement('th');
@@ -347,10 +365,33 @@ function buildFaveSlotTreeTable() {
 
     slotDiv.appendChild(slotParentTable);
 
+    const headerDiv = document.createElement('div');
+    headerDiv.classList.add('header-container');
+
     const slotChildrenName = document.createElement('h4');
     slotChildrenName.id = 'slot-children-name';
     slotChildrenName.textContent = 'Children:';
-    slotDiv.appendChild(slotChildrenName);
+
+    const anchorContainer = document.createElement('div');
+    anchorContainer.classList.add('anchor-container');
+
+    const addSlotChildAnchor = document.createElement('a');
+    addSlotChildAnchor.href = "#";
+    addSlotChildAnchor.textContent = "Add child";
+    addSlotChildAnchor.classList.add('underline');
+    addSlotChildAnchor.onclick = function() {
+        addSlotChild(table_id, addSlotChildAnchor);
+    };
+    //anchorContainer.appendChild(duplicateHost);
+    //anchorContainer.appendChild(document.createTextNode(" | "));
+    anchorContainer.appendChild(addSlotChildAnchor);
+
+    //headerDiv.appendChild(header);
+    headerDiv.appendChild(slotChildrenName);
+    headerDiv.appendChild(anchorContainer);
+
+    slotDiv.appendChild(headerDiv);
+
     const slotChildrenTable = document.createElement('table');
     slotChildrenTable.id = 'slot-children-table';
     slotChildrenTable.classList.add('table', 'table-bordered');

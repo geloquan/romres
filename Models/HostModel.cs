@@ -33,6 +33,7 @@ namespace WebApplication2.Models {
             return Model;
         }
         public bool Process() {
+            return true;
             string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
             string new_info_query = @"
                 INSERT INTO 
@@ -69,11 +70,20 @@ namespace WebApplication2.Models {
                 SELECT 
                     sn1.primary_slot_id as root_slot_id,
                     sn1.child_slot_id AS second_layer_slot_id,
-                    sn2.child_slot_id AS third_layer_slot_id
+                    sn2.child_slot_id AS third_layer_slot_id,
+                    s1.name as root_name,
+                    s2.name as second_layer_name,
+                    s3.name as third_layer_name
                 FROM 
                     slot_network sn1
                 LEFT JOIN 
                     slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
+                LEFT JOIN
+                    slot s1 ON sn1.primary_slot_id = s1.id
+                LEFT JOIN
+                    slot s2 ON sn1.child_slot_id = s2.id
+                LEFT JOIN
+                    slot s3 ON sn2.child_slot_id = s3.id
                 WHERE 
                     sn1.primary_slot_id = @slot_id;
             ";

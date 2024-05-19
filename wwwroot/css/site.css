@@ -16,3 +16,10 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.selected {
+  background-color: #f8d7da !important;
+}
+.pointer {
+  cursor: pointer;
+}

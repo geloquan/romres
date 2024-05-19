@@ -1,30 +1,32 @@
-function validateRequiredFields() {
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-        const requiredFields = form.querySelectorAll('[required]');
+function showConfirmationModal(onConfirm, onCancel, confirmationModalLabelText, modalBodyText, cancelModalButtonText, confirmSaveButtonText) {
+    $('#confirmationModal').modal('show'); // Show the modal
 
-        requiredFields.forEach(function(field) {
-            if (!field.value.trim()) {
-                field.classList.add('required-field'); 
-                event.preventDefault(); 
-                alert(`${field.name} cannot be null.`); 
-            } else {
-                field.classList.remove('required-field'); 
-            }
-        });
-    });
-    form.addEventListener('input', function(event) {
-        const target = event.target;
-        if (target.hasAttribute('required')) {
-            if (target.value.trim()) {
-                target.classList.remove('required-field');
-            } else {
-                target.classList.add('required-field');
-            }
+    const confirmSaveButton = document.getElementById('confirmSaveButton');
+    const closeModalButton = document.getElementById('closeModalButton');
+    const cancelModalButton = document.getElementById('cancelModalButton');
+    const confirmationModalLabel = document.getElementById('confirmationModalLabel');
+    const modalBody = document.getElementById('modal-body');
+
+    // Remove any existing event listeners to avoid multiple bindings
+    confirmSaveButton.onclick = null;
+    closeModalButton.onclick = null;
+    cancelModalButton.onclick = null;
+    
+    // Assign new event listeners
+    confirmSaveButton.onclick = function() {
+        $('#confirmationModal').modal('hide'); // Hide the modal
+        if (typeof onConfirm === 'function') {
+            onConfirm(); // Call the confirm callback function
         }
-    });
-}
+    };
 
-document.addEventListener('DOMContentLoaded', function() {
-    validateRequiredFields();
-});
+    const cancelAction = function() {
+        $('#confirmationModal').modal('hide'); // Hide the modal
+        if (typeof onCancel === 'function') {
+            onCancel(); // Call the cancel callback function if provided
+        }
+    };
+
+    closeModalButton.onclick = cancelAction;
+    cancelModalButton.onclick = cancelAction;
+}

@@ -32,11 +32,35 @@ namespace WebApplication2.Controllers {
                 return StatusCode(500, "Invalid request data.");
             }
         }
-        [HttpPut("/host/{host_id}/duplicate/parent/slot/{slot_id}")]
-        public IActionResult DuplicateParentSlot(int host_id, int user_id, [FromBody] HttpPutParentSlotDuplication duplicationRequest) {
+        [HttpPut("/host/duplicate/slot")]
+        public IActionResult DuplicateParentSlot(int userId, [FromBody] HttpPutParentSlotDuplication duplicationRequest) {
+            Console.WriteLine("DuplicateParentSlot()");
             if (duplicationRequest != null) {
-                return Ok("Duplication successful.");
+                bool processingResult = duplicationRequest.Process();
+                if (processingResult) {
+                    return Ok("errmm");
+                }
+                else {
+                    return StatusCode(500, "Failed to process new host.");  // Return appropriate error status
+                }
             } else {
+                Console.WriteLine("Invalid request data()");
+                return StatusCode(500, "Invalid request data.");
+            }
+        }
+        [HttpPost("/host/delete")]
+        public IActionResult DeleteHosts([FromBody] HttpPostDeleteSelectedHosts deletionRequest) {
+            Console.WriteLine("DuplicateParentSlot()");
+            if (deletionRequest != null) {
+                bool processingResult = deletionRequest.Process();
+                if (processingResult) {
+                    return Ok("success DeleteHosts");
+                }
+                else {
+                    return StatusCode(500, "Failed to process DeleteHosts.");  // Return appropriate error status
+                }
+            } else {
+                Console.WriteLine("Invalid request data()");
                 return StatusCode(500, "Invalid request data.");
             }
         }

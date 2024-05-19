@@ -20,6 +20,15 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
             newHostAnchor.onclick = function() {
                 addNewRow(table_id, newHostAnchor);
             };
+            const deleteHostAnchor = document.createElement('a');
+            deleteHostAnchor.id = "delete-multipl-host"
+            deleteHostAnchor.href = "#";
+            deleteHostAnchor.textContent = "Delete multiple hosts";
+            deleteHostAnchor.classList.add('underline');
+            deleteHostAnchor.onclick = function() {
+                deleteMode = !deleteMode;
+                toggleDeleteMode(deleteMode);
+            };
 
             //const duplicateHost = document.createElement('a');
             //duplicateHost.href = "#";
@@ -28,11 +37,11 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
             //duplicateHost.onclick = function() {
             //    const saveFunction = function() {
             //        const method = 'PUT'; 
-    //
+            //
             //        const requestBody = {
             //        };
             //        console.log('Request Body:', JSON.stringify(requestBody));
-    //
+            //
             //        fetch(`/host/${host_id}/duplicate/parent/slot/${slot_id}`, {
             //            method: method,
             //            headers: {
@@ -54,9 +63,9 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
             //    };
             //    showConfirmationModal(saveFunction, null, "Are you sure?", "This action will duplicate this slot with its succeeding children.", "Cancel", "Gow!");
             //};
-//
-            //anchorContainer.appendChild(duplicateHost);
-            //anchorContainer.appendChild(document.createTextNode(" | "));
+            //
+            anchorContainer.appendChild(deleteHostAnchor);
+            anchorContainer.appendChild(document.createTextNode(" | "));
             anchorContainer.appendChild(newHostAnchor);
             break;
         case "Favorites":

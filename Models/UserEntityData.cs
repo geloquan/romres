@@ -180,7 +180,10 @@ namespace WebApplication2.Models {
                 SELECT 
                     sn.primary_slot_id AS root_slot_id,
                     sn.child_slot_id AS second_layer_slot_id,
-                    sn2.child_slot_id AS third_layer_slot_id
+                    sn2.child_slot_id AS third_layer_slot_id,
+                    s1.name as root_name,
+                    s2.name as second_layer_name,
+                    s3.name as third_layer_name
                 FROM 
                     slot_network sn
                 LEFT JOIN 
@@ -191,6 +194,12 @@ namespace WebApplication2.Models {
                     host h ON s.host_id = h.id
                 LEFT JOIN 
                     [user] u ON h.user_id = u.id
+                LEFT JOIN
+                    slot s1 ON sn.primary_slot_id = s1.id
+                LEFT JOIN
+                    slot s2 ON sn.child_slot_id = s2.id
+                LEFT JOIN
+                    slot s3 ON sn2.child_slot_id = s3.id
                 WHERE 
                     sn.parent_slot_id is null
                 AND
@@ -266,11 +275,13 @@ namespace WebApplication2.Models {
                                     if (second_layer_slot_id != null && !Tree.SecondLayerExists(second_layer_slot_id.Value)) {
                                         Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, UserId, root_slot_name, root_slot_id, root_slot_name));
                                         Tree.AddSecondLayer(second_layer_slot_id.Value);
+                                        Tree.AddSecondLayerName(second_layer_slot_name ?? "");
                                     }
 
                                     if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
                                         Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, UserId, second_layer_slot_name, root_slot_id, root_slot_name));
                                         Tree.AddThirdLayer(third_layer_slot_id.Value);
+                                        Tree.AddThirdLayerName(third_layer_slot_name ?? "");
                                     }
                                 } else if (curr_id != prev_id) {
                                     Console.WriteLine(3);
@@ -322,7 +333,6 @@ namespace WebApplication2.Models {
                                 Console.WriteLine(7);
                                 hostedSlotsContainer.AddSlotTree(Tree);
                             }
-
                         }
                     }
                 }

@@ -89,7 +89,7 @@ function addOrUpdateButton(slotDiv, buttonText, buttonId, clickHandler) {
         button.addEventListener('click', clickHandler);
     }
 }
-function ParentSlot(result, user_id) {
+function ParentSlot(result, parent_slot_id) {
     console.log("ParentSlot() entered");
     const slotNameElement = document.getElementById("slot-parent-name");
     slotNameElement.innerText = result.name;
@@ -115,7 +115,7 @@ function ParentSlot(result, user_id) {
     duplicateSlotAnchor.textContent = "Duplicate Slot";
     duplicateSlotAnchor.classList.add('underline');
     duplicateSlotAnchor.onclick = function() {
-        duplicateSlot(result.slotId);
+        duplicateSlot(result.slotId, parent_slot_id);
     };
 
     headerContainerDiv.appendChild(duplicateSlotAnchor);
@@ -210,7 +210,7 @@ function processSlot(slot_id) {
     const anchorContainer = document.createElement('div');
     anchorContainer.classList.add('anchor-container');
     if (results) {
-        ParentSlot(results);
+        ParentSlot(results, results.parentSlotId);
         ChildrenSlots(results);
         console.log("resres: ", results);
         const toRootButton = document.getElementById('to-root');
@@ -408,8 +408,10 @@ function SlotInit(slot_object, slot_id, user_id) {
 function HostedSlots(slot_object) {
     const hostSlotTable = document.getElementById('hosted-slot-table');
     const tableBody = document.createElement('tbody');
+    console.log("sloted objects: ", slot_object);
     slot_object.slotTrees.forEach(slot_tree => {
         const row = document.createElement('tr');
+        row.id = slot_tree.rootId;
         const slotInvitationCodeCell = document.createElement('td');
         slotInvitationCodeCell.textContent = slot_tree.rootSlotModel.invitationCode || 'None';
         row.appendChild(slotInvitationCodeCell);

@@ -11,9 +11,11 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
 
     const anchorContainer = document.createElement('div');
     anchorContainer.classList.add('anchor-container');
+    anchorContainer.id = "anchor-container";
     switch (header_name) {
         case "Hosted":
             const newHostAnchor = document.createElement('a');
+            newHostAnchor.id = "new-host";
             newHostAnchor.href = "#";
             newHostAnchor.textContent = "New Host";
             newHostAnchor.classList.add('underline');
@@ -21,7 +23,7 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
                 addNewRow(table_id, newHostAnchor);
             };
             const deleteHostAnchor = document.createElement('a');
-            deleteHostAnchor.id = "delete-multipl-host"
+            deleteHostAnchor.id = "delete-multiple-host"
             deleteHostAnchor.href = "#";
             deleteHostAnchor.textContent = "Delete multiple hosts";
             deleteHostAnchor.classList.add('underline');

@@ -2,4 +2,19 @@
 @{
     ViewData["Title"] = "Home";
 }
-<h1>HOME PAGE</h1>
+<style>
+    body {
+        background-image: url('img/blueprint_.jpg');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: 100% 100%;
+    }
+</style>
+<div class="search-container text-center">
+    <h2>Enter Invitation Code</h2>
+    <div class="form-group">
+        <input type="text" class="form-control" id="invitationCode" placeholder="Enter invitation code">
+    </div>
+    <button id="searchButton" class="btn btn-primary">Search</button>
+</div>
+<script src="js/home.js">

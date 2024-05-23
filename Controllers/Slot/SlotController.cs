@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using WebApplication2.Models;
+using Newtonsoft.Json;
 
 namespace WebApplication2.Controllers {
     public class SlotController : Controller {
@@ -40,13 +41,30 @@ namespace WebApplication2.Controllers {
             if (invitation_code != null) {
                 bool processingResult = httpGetSlotSearch.Process();
                 if (processingResult) {
-                    return Ok(httpGetSlotSearch.favoriteSlots); 
+                    return Ok(httpGetSlotSearch.slotTree); 
                 }
                 else {
                     return StatusCode(500, "Failed to process reservation."); 
                 }
             }
             return StatusCode(500, "Invalid request data.");
+        }
+        public IActionResult InvitationCode(string invitation_code) {
+            HttpGetSlotSearch httpGetSlotSearch = new HttpGetSlotSearch();
+            httpGetSlotSearch.InvitationCode = invitation_code;
+            Console.WriteLine("Slot/InvitationCode()");
+            if (invitation_code != null) {
+                bool processingResult = httpGetSlotSearch.Process();
+                if (processingResult) {
+                    var slotTreeJson = JsonConvert.SerializeObject(httpGetSlotSearch.slotTree);
+                    ViewBag.SlotTreeJson = slotTreeJson;
+                    return View("InvitationCode"); 
+                }
+                else {
+                    return View("Error");
+                }
+            }
+            return View("Error");
         }
     }
 }

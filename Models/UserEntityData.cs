@@ -104,7 +104,6 @@ namespace WebApplication2.Models {
                         conn.Open();
                         using (SqlDataReader reader_1 = command_1.ExecuteReader()){
                             while (reader_1.Read()) {
-                                Console.WriteLine("umm" + reader_1.GetInt32(0));
                                 int slot_id = reader_1.GetInt32(0);
                                 using (SqlConnection conn_2 = new SqlConnection(ConnectionQuery)) {
                                     using (SqlCommand command_2 = new SqlCommand(slot_tree_query, conn_2)) {
@@ -249,16 +248,11 @@ namespace WebApplication2.Models {
                             SlotTree Tree = new SlotTree();
                             int? prev_id = null;
                             int? curr_id = null;
-                            Console.WriteLine(0);
 
                             while (reader_2.Read()) {
                                 curr_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
-                                Console.WriteLine("prev_id: " + prev_id);
-                                Console.WriteLine("curr_id: " + curr_id);
-                                Console.WriteLine(1);
 
                                 if (curr_id == prev_id || prev_id == null) {
-                                    Console.WriteLine(2);
                                     int? root_slot_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
                                     int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
                                     int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
@@ -284,7 +278,6 @@ namespace WebApplication2.Models {
                                         Tree.AddThirdLayerName(third_layer_slot_name ?? "");
                                     }
                                 } else if (curr_id != prev_id) {
-                                    Console.WriteLine(3);
                                     hostedSlotsContainer.AddSlotTree(Tree);
                                     Tree = new SlotTree();
 
@@ -321,16 +314,12 @@ namespace WebApplication2.Models {
                                         Tree.AddThirdLayer(third_layer_slot_id.Value);
                                     }
                                 } else {
-                                    Console.WriteLine(4);
                                 }
-                                Console.WriteLine(8);
                                 prev_id = curr_id;
                             }
 
-                            Console.WriteLine(6);
 
                             if (Tree != null) {
-                                Console.WriteLine(7);
                                 hostedSlotsContainer.AddSlotTree(Tree);
                             }
                         }
@@ -338,7 +327,6 @@ namespace WebApplication2.Models {
                 }
             } 
             catch (Exception e) {
-                Console.WriteLine("HostedSlots() " + e.Message);
             }
             hostedSlots = hostedSlotsContainer;
         }

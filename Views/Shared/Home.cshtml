@@ -2,19 +2,84 @@
 @{
     ViewData["Title"] = "Home";
 }
-<style>
-    body {
-        background-image: url('img/blueprint_.jpg');
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-size: 100% 100%;
-    }
-</style>
-<div class="search-container text-center">
-    <h2>Enter Invitation Code</h2>
-    <div class="form-group">
-        <input type="text" class="form-control" id="invitationCode" placeholder="Enter invitation code">
+<div class="modal fade" id="noSlotsModal" tabindex="-1" aria-labelledby="noSlotsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="noSlotsModalLabel">Not Found</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Invitation code does not match to any slot.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="continueButton">Continue</button>
+            </div>
+        </div>
     </div>
-    <button id="searchButton" class="btn btn-primary">Search</button>
 </div>
-<script src="js/home.js">
+<div class="center-container">
+    <img src="img/logo.svg" alt="" class="mb-4">
+    <div class="search-container">
+        <h2>Enter Invitation Code</h2>
+        <div class="form-group">
+            <input type="text" class="form-control" id="invitationCode" placeholder="Enter invitation code">
+        </div>
+        <button id="searchButton" class="btn btn-primary">Search</button>
+    </div>
+</div>
+
+<script src="js/home.js"></script>
+<script>
+    $(document).ready(function(){
+        console.log("home.js loeaded");
+        var bgDiv = $('<div></div>').css({
+            'content': '',
+            'position': 'fixed',
+            'top': '0',
+            'left': '0',
+            'right': '0',
+            'bottom': '0',
+            'background-image': 'url(img/background.jpg)',
+            'background-repeat': 'no-repeat',
+            'background-attachment': 'fixed',
+            'background-size': 'cover',
+            'opacity': '0.3',
+            'z-index': '-1'
+        });
+        $('body').append(bgDiv);
+        $('#searchButton').click(function(){
+            var invitationCode = $('#invitationCode').val();
+            if(invitationCode) {
+                $.ajax({
+                    url: `/slot/${invitationCode}/exists`,
+                    method: 'GET',
+                    contentType: 'application/json',
+                    success: function(data) {
+                        console.log("Slot exists: ", data);
+                        if (data.rootId) {
+                            $('main').empty();
+                            var newUrl = `/slot/${invitationCode}`;
+                            history.pushState(null, '', newUrl);
+                            processSlot(data.rootId, data);
+                        } else {
+                            $('#noSlotsModal').modal('show');
+                            $('#continueButton').on('click', function() {
+                                window.location.href = '/home'; // Replace '/home' with your desired URL
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                    },
+                    complete: function() {
+                    }
+                });
+            } else {
+                alert('Please enter an invitation code');
+            }
+        });
+    });
+</script>

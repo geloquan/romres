@@ -1,4 +1,40 @@
+function sendNewHost(newHost) {
+    $.ajax({
+        url: '/host/newhost',
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify(newHost),
+        success: function(result) {
+            console.log('Successfully saved new slot: ', result);
+            var dummy_tree = createDummyRootTrees(newHost.invitationCode, newHost.slotName, newHost.hostNameTag, result.new_slot_id);
+            console.log('dummy tree: ', dummy_tree);
+            console.log('original tree struct: ', global_slot_object);
+            global_slot_object.slotTrees.push(dummy_tree.slotTrees[0]);
+            console.log('after push struct: ', global_slot_object);
+            HostedSlots(dummy_tree);
+        },
+        error: function() {
+            alert('An error occurred while loading the content.');
+        }
+    });
+}
+
 function confirmNewHost(slotName, invitationCode, hostNameTag, newSlot) {
+    console.log("confirmNewHost()");
+    if (!invitationCode.value || !slotName.value || !hostNameTag.value) {
+        alert('Please fill in all the required fields.');
+        return false;
+    }
+    invitationCode.disabled = true;
+    slotName.disabled = true;
+    hostNameTag.disabled = true;
+    
+    var newHost = {
+        hostNameTag: hostNameTag.value,
+        invitationCode: invitationCode.value,
+        slotName: slotName.value,
+        userId: userId
+    };
 
     $('#confirmationModal').remove();
 
@@ -33,7 +69,7 @@ function confirmNewHost(slotName, invitationCode, hostNameTag, newSlot) {
     $('#confirmationModal').modal('show');
 
     $('#confirmationModal').on('hidden.bs.modal', function () {
-        $(this).remove(); // Remove the modal from the DOM after it is closed
+        $(this).remove(); 
     });
 
     $('#confirmationModal').find('[data-dismiss="modal"]').on('click', function() {
@@ -41,77 +77,12 @@ function confirmNewHost(slotName, invitationCode, hostNameTag, newSlot) {
     });
 
     $('#confirmButton').on('click', function() {
-        performAjaxSave(newSlot);
+        sendNewHost(newHost);
         $('#confirmationModal').modal('hide');
     });
 }
 
 function newRow() {
-    const table = document.getElementById('hosted-slot-table');
-    const newRow = document.createElement('tr');
-    newRow.id = 'temporary-row';
-
-    const invitationCodeCell = document.createElement('td');
-    const invitationCodeInput = document.createElement('input');
-    invitationCodeInput.type = 'text';
-    invitationCodeInput.placeholder = 'Enter Invitation Code';
-    invitationCodeInput.classList.add('form-control');
-    invitationCodeCell.appendChild(invitationCodeInput);
-    const generateCodeAnchor = document.createElement('a');
-    generateCodeAnchor.href = '#';
-    generateCodeAnchor.textContent = 'Generate Code';
-    generateCodeAnchor.onclick = function(e) {
-        e.preventDefault();
-        invitationCodeInput.value = generateRandomCode();
-        checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
-    };
-    invitationCodeCell.appendChild(document.createElement('br'));
-    invitationCodeCell.appendChild(generateCodeAnchor);
-    
-    const entryCell = document.createElement('td');
-    const entryButton = document.createElement('button');
-    entryButton.textContent = 'Enter Slot';
-    entryButton.classList.add('btn', 'btn-primary');
-    entryButton.disabled = true; // Initially disabled
-    entryButton.onclick = function() {
-    };
-    entryCell.appendChild(entryButton);
-
-    const slotNameCell = document.createElement('td');
-    const slotNameInput = document.createElement('input');
-    slotNameInput.type = 'text';
-    slotNameInput.placeholder = 'Enter Slot Name';
-    slotNameInput.classList.add('form-control');
-    slotNameInput.oninput = function() {
-        checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
-    };
-    slotNameCell.appendChild(slotNameInput);
-
-    
-    const hostNameTagCell = document.createElement('td');
-    const hostNameTagInput = document.createElement('input');
-    hostNameTagInput.type = 'text';
-    hostNameTagInput.placeholder = 'Enter Host Name-tag';
-    hostNameTagInput.classList.add('form-control');
-    hostNameTagInput.oninput = function() {
-        checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
-    };
-    hostNameTagCell.appendChild(hostNameTagInput);
-
-    const unhostCell = document.createElement('td');
-    const unhostButton = document.createElement('button');
-    unhostButton.textContent = 'Unhost';
-    unhostButton.classList.add('btn', 'btn-primary');
-    unhostButton.disabled = true; // Initially disabled
-    unhostCell.appendChild(unhostButton);
-
-    newRow.appendChild(invitationCodeCell);
-    newRow.appendChild(slotNameCell);
-    newRow.appendChild(hostNameTagCell);
-    newRow.appendChild(entryCell);
-    newRow.appendChild(unhostCell);
-
-    table.querySelector('tbody').appendChild(newRow);
 }
 function toogleNewHostMode(enable) {
     console.log("toogleNewHostMode()");
@@ -119,25 +90,93 @@ function toogleNewHostMode(enable) {
     const $rows = $('#hosted-slot-table tbody tr');
     
     var original = $('#anchor-container').html();
+    $('#temporary-row').empty().html();
     console.log("original: ", original);
 
     if (enable) {
         $buttons.prop('disabled', true);
-        newRow();
+        const table = document.getElementById('hosted-slot-table');
+        var newRow = document.getElementById('temporary-row');
+        if (!newRow) {
+            newRow = document.createElement('tr');
+            newRow.id = 'temporary-row';
+        }
+    
+        const invitationCodeCell = document.createElement('td');
+        const invitationCodeInput = document.createElement('input');
+        invitationCodeInput.type = 'text';
+        invitationCodeInput.placeholder = 'Enter Invitation Code';
+        invitationCodeInput.classList.add('form-control');
+        invitationCodeCell.appendChild(invitationCodeInput);
+        const generateCodeAnchor = document.createElement('a');
+        generateCodeAnchor.href = '#';
+        generateCodeAnchor.textContent = 'Generate Code';
+        generateCodeAnchor.onclick = function(e) {
+            e.preventDefault();
+            invitationCodeInput.value = generateRandomCode();
+            checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
+        };
+        invitationCodeCell.appendChild(document.createElement('br'));
+        invitationCodeCell.appendChild(generateCodeAnchor);
+        
+        const entryCell = document.createElement('td');
+        const entryButton = document.createElement('button');
+        entryButton.textContent = 'Enter Slot';
+        entryButton.classList.add('btn', 'btn-primary');
+        entryButton.disabled = true; 
+        entryButton.onclick = function() {
+        };
+        entryCell.appendChild(entryButton);
+    
+        const slotNameCell = document.createElement('td');
+        const slotNameInput = document.createElement('input');
+        slotNameInput.type = 'text';
+        slotNameInput.placeholder = 'Enter Slot Name';
+        slotNameInput.classList.add('form-control');
+        slotNameInput.oninput = function() {
+            checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
+        };
+        slotNameCell.appendChild(slotNameInput);
+    
+        
+        const hostNameTagCell = document.createElement('td');
+        const hostNameTagInput = document.createElement('input');
+        hostNameTagInput.type = 'text';
+        hostNameTagInput.placeholder = 'Enter Host Name-tag';
+        hostNameTagInput.classList.add('form-control');
+        hostNameTagInput.oninput = function() {
+            checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
+        };
+        hostNameTagCell.appendChild(hostNameTagInput);
+    
+        const unhostCell = document.createElement('td');
+        const unhostButton = document.createElement('button');
+        unhostButton.textContent = 'Unhost';
+        unhostButton.classList.add('btn', 'btn-primary');
+        unhostButton.disabled = true; 
+        unhostCell.appendChild(unhostButton);
+    
+        newRow.appendChild(invitationCodeCell);
+        newRow.appendChild(slotNameCell);
+        newRow.appendChild(hostNameTagCell);
+        newRow.appendChild(entryCell);
+        newRow.appendChild(unhostCell);
+    
+        table.querySelector('tbody').appendChild(newRow);
         
         const saveAnchor = $('<a href="#" id="save-selected-rows">Save New Host</a>');
         saveAnchor.click(function() {
+            console.log("Save New Host.click()");
             if (!invitationCodeInput.value || !slotNameInput.value || !hostNameTagInput.value) {
                 console.log("may be empty: {invitationCodeInput, slotNameInput, hostNameTagInput}");
                 return;
             } 
-            confirmNewHost(invitationCodeInput.value, slotNameInput.value, hostNameTagInput.value);
-            console.log("Save New Host.click()");
+            confirmNewHost(invitationCodeInput, slotNameInput, hostNameTagInput);
         });
         
         const backAnchor = $('<a href="#" id="back-to-original">Back</a>');
         backAnchor.click(function() {
-            toggleDeleteMode(false);
+            toogleNewHostMode(false);
             $('#anchor-container').html(original);
             $('#delete-multiple-host').click(function() {
                 toggleDeleteMode(true);
@@ -150,9 +189,8 @@ function toogleNewHostMode(enable) {
         $('#anchor-container').empty().append(saveAnchor).append(" | ").append(backAnchor);
         $rows.addClass('pointer').on('click', selectRow);
     } else {
+        console.log("else{}");
         $buttons.prop('disabled', false);
         $('#anchor-container').html(original);
-        $rows.removeClass('pointer selected').off('click', selectRow);
-        selectedRows.length = 0; 
     }
 }

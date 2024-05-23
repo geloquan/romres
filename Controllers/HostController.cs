@@ -33,10 +33,10 @@ namespace WebApplication2.Controllers {
             }
         }
         [HttpPut("/host/duplicate/slot")]
-        public IActionResult DuplicateParentSlot(int userId, [FromBody] HttpPutParentSlotDuplication duplicationRequest) {
+        public IActionResult DuplicateParentSlot([FromBody] HttpPutParentSlotDuplication duplicationRequest) {
             Console.WriteLine("DuplicateParentSlot()");
             if (duplicationRequest != null) {
-                bool processingResult = duplicationRequest.Process();
+                bool processingResult = duplicationRequest.Process2();
                 if (processingResult) {
                     return Ok("errmm");
                 }
@@ -50,7 +50,7 @@ namespace WebApplication2.Controllers {
         }
         [HttpPost("/host/delete")]
         public IActionResult DeleteHosts([FromBody] HttpPostDeleteSelectedHosts deletionRequest) {
-            Console.WriteLine("DuplicateParentSlot()");
+            Console.WriteLine("DeleteHosts()");
             if (deletionRequest != null) {
                 bool processingResult = deletionRequest.Process();
                 if (processingResult) {

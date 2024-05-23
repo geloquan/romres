@@ -1,32 +1,59 @@
 ﻿@model WebApplication2.Models.LoginModel
 @{
-    ViewData["Title"] = "User Login Page";
+    ViewData["Title"] = "Login";
 }
 
-
-<div class="container mt-5">
-    <div class="card shadow">
-        <div class="card-body">
-            <h2 class="card-title text-center">Login</h2>
-            @using (Html.BeginForm("Login", "User", FormMethod.Post, new { @class = "mt-4" })) {
-                @Html.AntiForgeryToken()
-                <div>
-                    <h3>User Login</h3>
-                    <hr />
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "font-weight-bold" })
-                        @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter your username" }})
+<div class="center-container">
+    <img src="img/logo.svg" alt="" class="mb-4">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body custom-row">
+                        <h2 class="card-title text-center">Login</h2>
+                        @using (Html.BeginForm("Login", "User", FormMethod.Post, new { @class = "mt-4" })) {
+                            @Html.AntiForgeryToken()
+                            <div>
+                                <hr />
+                                <div class="form-group">
+                                    <label for="UserName" class="font-weight-bold">@ViewBag.UsernameLabel</label>
+                                    @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control", placeholder = "Enter your username or email" }})
+                                </div>
+                                <div class="form-group">
+                                    <label for="UserPassword" class="font-weight-bold">@ViewBag.PasswordLabel</label>
+                                    @Html.EditorFor(model => model.UserPassword, new { htmlAttributes = new { @class = "form-control", type = "password", placeholder = "Enter your password" }})
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Login</button>
+                            </div>
+                        }
+                        <div class="text-center mt-3">
+                            <a href="@Url.Action("Register", "User")">Register</a>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        @Html.LabelFor(model => model.UserPassword, htmlAttributes: new { @class = "font-weight-bold" })
-                        @Html.EditorFor(model => model.UserPassword, new { htmlAttributes = new { @class = "form-control", type = "password", placeholder = "Enter your password" }})
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Login</button>
                 </div>
-            }
-            <div class="text-center mt-3">
-                <a href="@Url.Action("Register", "User")">Register</a>
             </div>
         </div>
     </div>
 </div>
+
+
+<script>
+    $(document).ready(function(){
+        console.log("home.js loeaded");
+        var bgDiv = $('<div></div>').css({
+            'content': '',
+            'position': 'fixed',
+            'top': '0',
+            'left': '0',
+            'right': '0',
+            'bottom': '0',
+            'background-image': 'url(img/background.jpg)',
+            'background-repeat': 'no-repeat',
+            'background-attachment': 'fixed',
+            'background-size': 'cover',
+            'opacity': '0.3',
+            'z-index': '-1'
+        });
+        $('body').append(bgDiv);
+    });
+</script>

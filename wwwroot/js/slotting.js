@@ -99,26 +99,30 @@ function ParentSlot(result, parent_slot_id) {
 
     const headerParentNameContainerDiv = document.getElementById('slot-parent-header-container');
     
-    const toParentAnchor = document.createElement('a');
-    toParentAnchor.href = "#";
-    toParentAnchor.textContent = "Duplicate Slot";
-    toParentAnchor.classList.add('underline');
-    toParentAnchor.onclick = function() {
-        processSlot(result.rootSlotModel.slotId);
-    };
-
-    const anchorContainer = document.createElement('div');
-    anchorContainer.classList.add('anchor-container');
-
     const duplicateSlotAnchor = document.createElement('a');
     duplicateSlotAnchor.href = "#";
     duplicateSlotAnchor.textContent = "Duplicate Slot";
     duplicateSlotAnchor.classList.add('underline');
     duplicateSlotAnchor.onclick = function() {
-        duplicateSlot(result.slotId, parent_slot_id);
+        duplicateSlot(result.slotId, user_id);
     };
+    
+    const anchorContainer = document.createElement('div');
+    anchorContainer.classList.add('anchor-container');
+    
+    if (entity_type == 'favorites') {
+    } else {
+        const duplicateSlotAnchor = document.createElement('a');
+        duplicateSlotAnchor.href = "#";
+        duplicateSlotAnchor.textContent = "Duplicate Slot";
+        duplicateSlotAnchor.classList.add('underline');
+        duplicateSlotAnchor.onclick = function() {
+            duplicateSlot(result.slotId, userId);
+        };
+        
+        headerContainerDiv.appendChild(duplicateSlotAnchor);
+    }
 
-    headerContainerDiv.appendChild(duplicateSlotAnchor);
     
     headerParentNameContainerDiv.appendChild(slotNameElement)
 
@@ -267,6 +271,7 @@ function ChildrenSlots(ChildrenSlotsResult) {
         if (ChildrenSlotsResult.childrenSlot) {
             ChildrenSlotsResult.childrenSlot.forEach(childSlot => {
                 const row = document.createElement("tr");
+                row.id = childSlot.slotId;
         
                 const nameCell = document.createElement("td");
                 nameCell.innerText = childSlot.name;
@@ -318,6 +323,7 @@ function ChildrenSlots(ChildrenSlotsResult) {
         if (ChildrenSlotsResult.childrenSlot) {
             ChildrenSlotsResult.childrenSlot.forEach(childSlot => {
                 const row = document.createElement("tr");
+                row.id = childSlot.slotId;
         
                 const nameCell = document.createElement("td");
                 nameCell.innerText = childSlot.name;

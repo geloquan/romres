@@ -7,6 +7,7 @@ namespace WebApplication2.Models {
         public string Password { get; set; }
         public bool Verified { get; set; }
         public int FavoriteSlotsCount { get; set; }
+        public int HostedSlotsCount { get; set; }
         private void GetFavoriteSlotCount(int UserId) {
             string query = "select * from user_favorites where user_id = @user_id;";
             try {
@@ -29,9 +30,55 @@ namespace WebApplication2.Models {
                 Console.WriteLine("UserEntityLogin.DirectLogin() : " + e.Message);
             }
         }
+        private void GetHostedSlotCount(int UserId) {
+            string query = @"
+            SELECT 
+                DISTINCT sn.primary_slot_id
+            FROM 
+                slot_network sn
+                
+            LEFT JOIN
+                slot s ON sn.primary_slot_id = s.host_id
+                
+            left JOIN
+                host h on s.host_id = h.id
+                
+            left JOIN
+                [user] u on h.id = u.id
+                
+            WHERE 
+                sn.parent_slot_id IS NULL
+            OR 
+                (sn.parent_slot_id IS NULL 
+                    AND
+                sn.child_slot_id IS NULL)
+            AND
+                u.id = @user_id;
+            ";
+            try {
+                string ConnectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+                
+                using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
+                    using (SqlCommand command = new SqlCommand(query, conn)) {
+                        command.Parameters.Add("@user_id", System.Data.SqlDbType.Int).Value = UserId;
+                        conn.Open();
+                        using (SqlDataReader reader = command.ExecuteReader()) {
+                            while (reader.Read()) {
+                                HostedSlotsCount += 1;
+                            } 
+                            reader.Close();
+                        }
+                    }
+                }
+            } 
+            catch (Exception e) {
+                Console.WriteLine("UserEntityLogin.DirectLogin() : " + e.Message);
+            }
+        }
         public bool DirectLogin(int UserId) {
             string query = "SELECT id, name, password FROM dbo.[user] WHERE id = @user_id;";
             GetFavoriteSlotCount(UserId);
+            GetHostedSlotCount(UserId);
             bool loginSuccess = false;
             try {
                 string ConnectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";

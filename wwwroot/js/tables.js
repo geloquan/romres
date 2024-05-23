@@ -20,7 +20,9 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
             newHostAnchor.textContent = "New Host";
             newHostAnchor.classList.add('underline');
             newHostAnchor.onclick = function() {
-                addNewRow(table_id, newHostAnchor);
+                newHostMode = !newHostMode;
+                //addNewRow(table_id, newHostAnchor);
+                toogleNewHostMode(newHostMode);
             };
             const deleteHostAnchor = document.createElement('a');
             deleteHostAnchor.id = "delete-multiple-host"
@@ -31,7 +33,6 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
                 deleteMode = !deleteMode;
                 toggleDeleteMode(deleteMode);
             };
-
             //const duplicateHost = document.createElement('a');
             //duplicateHost.href = "#";
             //duplicateHost.textContent = "Duplicate Host";
@@ -186,6 +187,7 @@ function buildRootSlotTable(header_name, column_headers, table_id) {
 function addNewRow(table_id, newHostAnchor) {
     const table = document.getElementById(table_id);
     const newRow = document.createElement('tr');
+    newRow.id = 'temporary-row';
 
     const invitationCodeCell = document.createElement('td');
     const invitationCodeInput = document.createElement('input');
@@ -248,13 +250,36 @@ function addNewRow(table_id, newHostAnchor) {
     newRow.appendChild(unhostCell);
 
     table.querySelector('tbody').appendChild(newRow);
+    
+    const original_anchor_container = $('#anchor-container').clone();
 
-    // Change Enter Slot anchor to Save anchor
-    newHostAnchor.textContent = 'Save';
-    newHostAnchor.onclick = function() {
-        saveNewRow(newRow, invitationCodeInput, slotNameInput, hostNameTagInput);
-        revertNewHostAnchor(newHostAnchor);
+    const cancelNewHostAnchor = document.createElement('a');
+    cancelNewHostAnchor.onclick = function() {
+        const table = document.getElementById('hosted-slot-table');
+        if (table.rows.length > 0) {
+            table.deleteRow(0); // delete the first row
+        }
+        $('#anchor-container').html(original_anchor_container.html());
+        revertNewHostAnchor(newHostAnchor, cancelNewHostAnchor);
     };
+
+    newHostAnchor.textContent = 'Save New Host';
+    newHostAnchor.onclick = function() {
+        console.log('newHostAnchor.onclick()');
+        if (!invitationCodeInput.value || !slotNameInput.value || !hostNameTagInput.value) {
+            console.log("may be empty: {invitationCodeInput, slotNameInput, hostNameTagInput}");
+            return;
+        } 
+        var res = confirmNewHost(invitationCodeInput.value, slotNameInput.value, hostNameTagInput.value);
+        if (res) {
+            saveNewRow(null, invitationCodeInput, slotNameInput, hostNameTagInput);
+            revertNewHostAnchor(newHostAnchor, cancelNewHostAnchor);
+            const temporaryRow = document.getElementById('temporary-row');
+                table.deleteRow(0); // delete the first row
+        } else {
+        }
+    };
+    
 }
 
 function generateRandomCode() {
@@ -290,10 +315,10 @@ function saveNewRow(row, invitationCodeInput, slotNameInput, hostNameTagInput) {
         data: JSON.stringify(newSlot),
         success: function(result) {
             console.log('Successfully saved new slot: ', result);
-            var dummy_tree = createDummyRootTrees(invitationCodeInput.value, slotNameInput.value, hostNameTagInput.value, result.new_slot_id);
+            var dummy_tree = createDummyRootTrees(newSlot.invitationCode, newSlot.slotName, newSlot.hostNameTag, result.new_slot_id);
             console.log('dummy tree: ', dummy_tree);
             console.log('original tree struct: ', global_slot_object);
-            global_slot_object.slotTrees.push(dummy_tree.slotTrees[0])
+            global_slot_object.slotTrees.push(dummy_tree.slotTrees[0]);
             console.log('after push struct: ', global_slot_object);
             HostedSlots(dummy_tree);
         },
@@ -305,15 +330,19 @@ function saveNewRow(row, invitationCodeInput, slotNameInput, hostNameTagInput) {
     slotNameInput.disabled = true;
     hostNameTagInput.disabled = true;
 }
-function revertNewHostAnchor(newHostAnchor) {
+
+function revertNewHostAnchor(newHostAnchor, cancelNewHostAnchor) {
     console.log('revertNewHostAnchor()');
     newHostAnchor.textContent = 'New Host';
     newHostAnchor.onclick = function() {
-        addNewRow(newHostAnchor.parentElement.parentElement.querySelector('table').id, newHostAnchor);
+        addNewRow('hosted-slot-table', newHostAnchor);
+    };
+    cancelNewHostAnchor.onclick = function() {
+        addNewRow('hosted-slot-table', newHostAnchor);
     };
 }
 
-function buildFaveSlotTreeTable() {
+function buildFaveSlotTreeTable(tree) {
     console.log(`buildFaveSlotTreeTable()`);
 
     const slotDiv = document.getElementById('slot');
@@ -386,16 +415,19 @@ function buildFaveSlotTreeTable() {
     const anchorContainer = document.createElement('div');
     anchorContainer.classList.add('anchor-container');
 
-    const addSlotChildAnchor = document.createElement('a');
-    addSlotChildAnchor.href = "#";
-    addSlotChildAnchor.textContent = "Add child";
-    addSlotChildAnchor.classList.add('underline');
-    addSlotChildAnchor.onclick = function() {
-        addSlotChild(table_id, addSlotChildAnchor);
-    };
-    //anchorContainer.appendChild(duplicateHost);
-    //anchorContainer.appendChild(document.createTextNode(" | "));
-    anchorContainer.appendChild(addSlotChildAnchor);
+    if (entity_type == 'favorites') {
+    } else {
+        const addSlotChildAnchor = document.createElement('a');
+        addSlotChildAnchor.href = "#";
+        addSlotChildAnchor.textContent = "Add child";
+        addSlotChildAnchor.classList.add('underline');
+        addSlotChildAnchor.onclick = function() {
+            addSlotChild(table_id, addSlotChildAnchor);
+        };
+        //anchorContainer.appendChild(duplicateHost);
+        //anchorContainer.appendChild(document.createTextNode(" | "));
+        anchorContainer.appendChild(addSlotChildAnchor);
+    }
 
     //headerDiv.appendChild(header);
     headerDiv.appendChild(slotChildrenName);

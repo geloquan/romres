@@ -1,5 +1,4 @@
 let deleteMode = false;
-let newHostMode = false;
 const selectedRows = [];
 function successDeleteHosts() {
     console.log("successDeleteHosts()");

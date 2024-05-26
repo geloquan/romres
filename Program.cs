@@ -41,6 +41,11 @@ namespace WebApplication2
                 defaults: new { controller = "User", action = "Id" }
             );
             app.MapControllerRoute(
+                name: "userWithIdWithHostId",
+                pattern: "User/{user_id}/Host/{host_id}",
+                defaults: new { controller = "Host", action = "Index" }
+            );
+            app.MapControllerRoute(
                 name: "userWithId",
                 pattern: "Slot/{invitation_code}",
                 defaults: new { controller = "Slot", action = "InvitationCode" }

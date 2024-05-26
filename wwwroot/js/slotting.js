@@ -1,9 +1,9 @@
+
 function SlotScope(slot_id) {
     console.log("SlotScope() entered");
     let matchedSubtree = null;
 
     function traverse(obj) {
-        console.log("traverse() entered");
         if (typeof obj !== 'object' || obj === null) {
             return;
         }
@@ -216,6 +216,7 @@ function processSlot(slot_id) {
     if (results) {
         ParentSlot(results, results.parentSlotId);
         ChildrenSlots(results);
+        displayTable(1);
         console.log("resres: ", results);
         const toRootButton = document.getElementById('to-root');
         if (!toRootButton && results.parentSlotId != null) {
@@ -303,6 +304,7 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 button.classList.add("btn", "btn-primary"); 
                 button.addEventListener("click", () => {
                     processSlot(childSlot.slotId);
+                    
                 });
                 buttonCell.appendChild(button);
                 row.appendChild(buttonCell);
@@ -440,15 +442,15 @@ function HostedSlots(slot_object) {
         entryCell.appendChild(buttonCellButton);
         row.appendChild(entryCell);
 
-        const unhostCell = document.createElement("td");
-        const unhostBtn = document.createElement("button");
-        unhostBtn.innerText = `Unhost : ${slot_tree.rootSlotModel.slotId}`; 
-        unhostBtn.classList.add("btn", "btn-primary"); 
-        unhostBtn.addEventListener("click", () => {
-            removeHostSlot(slot_tree.rootSlotModel.slotId);
+        const editCell = document.createElement("td");
+        const editBtn = document.createElement("button");
+        editBtn.innerText = `Edit : ${slot_tree.rootSlotModel.slotId}`; 
+        editBtn.classList.add("btn", "btn-primary"); 
+        editBtn.addEventListener("click", () => {
+            Edit(slot_tree.rootSlotModel.slotId);
         });
-        unhostCell.appendChild(unhostBtn);
-        row.appendChild(unhostCell);
+        editCell.appendChild(editBtn);
+        row.appendChild(editCell);
         
         tableBody.appendChild(row);
     }); 

@@ -16,6 +16,7 @@ namespace WebApplication2.Controllers {
                 Console.WriteLine("user name: " + userEntityLogin.Name);
                 ViewData["UserId"] = userEntityLogin.Id;
                 ViewData["UserFavoriteSlotCount"] = userEntityLogin.FavoriteSlotsCount;
+                ViewData["UserHostedSlotCount"] = userEntityLogin.HostedSlotsCount;
                 ViewData["UserName"] = userEntityLogin.Name;
                 return View("Home");
             } else {

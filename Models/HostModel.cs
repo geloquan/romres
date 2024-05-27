@@ -33,6 +33,26 @@ namespace WebApplication2.Models {
         private string delete_slot_query = @"";
         private string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
         private string GetDeleteQuery(string table_name) {
+            if ("slot_network" == table_name) {
+                return @"
+                    DELETE FROM
+                        slot_network
+                    WHERE
+                        primary_slot_id = @slot_id
+                    OR 
+                        parent_slot_id = @slot_id
+                    OR
+                        child_slot_id = @slot_id;
+                ";
+             };
+            if ("slot" == table_name) {
+                return @"
+                    DELETE FROM
+                        slot
+                    WHERE
+                        id = @slot_id;
+                ";
+             };
             string delete_query = $@"
                 DELETE FROM
                     {table_name}
@@ -42,99 +62,120 @@ namespace WebApplication2.Models {
             return delete_query;
         }
         private void Delete(int slot_id, SqlConnection conn, SqlTransaction transaction) {
+            Console.WriteLine("delete()");
             List<string> table_list = new List<string> { 
                 "edge", "favorites_tagging",
                 "invitation", "slot_fnl",
                 "user_favorites", "slot_network",
                 "slot"
             };
-            foreach (string table in table_list) {
-                string query = GetDeleteQuery(table);
-                using (SqlCommand deleteQueryCommand = new SqlCommand(query, conn, transaction)) {
-                    deleteQueryCommand.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = slot_id;
-                    deleteQueryCommand.ExecuteNonQuery();
-                }
-                transaction.Commit();
-            };
+            try {
+                foreach (string table in table_list) {
+                    string query = GetDeleteQuery(table);
+                    using (SqlCommand deleteQueryCommand = new SqlCommand(query, conn, transaction)) {
+                        deleteQueryCommand.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = slot_id;
+                        deleteQueryCommand.ExecuteNonQuery();
+                    }
+                };
+            } catch (Exception ex) {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+            Console.WriteLine("delete() END");
         }
         public bool Process() {
-            foreach (int slot_id in this.primarySlotId) {
-                using (SqlConnection conn = new SqlConnection(this.connectionQuery)) {
-                    conn.Open();
-                    using (SqlCommand command = new SqlCommand(this.get_slot_network_query, conn)) {
-                        command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = slot_id;
-                        List<int> visited = new List<int>();
-                        using (SqlDataReader readere = command.ExecuteReader()){
-                            while (readere.Read()) {
-                                int? first = readere.IsDBNull(0) ? (int?)null : readere.GetInt32(0);
-                                int? second = readere.IsDBNull(1) ? (int?)null : readere.GetInt32(1);
-                                int? third = readere.IsDBNull(2) ? (int?)null : readere.GetInt32(2);
-                                int? fourth = readere.IsDBNull(3) ? (int?)null : readere.GetInt32(3);
-                                
-                                using (SqlConnection conn2 = new SqlConnection(connectionQuery)) {
-                                    conn2.Open();
-                                    Console.WriteLine("q");
-                                    if (first == 0 || visited.Contains(first.Value)) {
-                                        continue;
-                                    }
-                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
-                                        try {
-                                            Delete(first.Value, conn, transaction);
-                                            transaction.Commit();
-                                        } catch (Exception ex) {
-                                            transaction.Rollback();
-                                            return false;
-                                        }
-                                    }
-                                    Console.WriteLine("w");
-                                    if (second == 0 || visited.Contains(second.Value)) {
-                                        continue;
-                                    }
-                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
-                                        try {
-                                            Delete(second.Value, conn, transaction);
-                                            transaction.Commit();
-                                        } catch (Exception ex) {
-                                            transaction.Rollback();
-                                            return false;
-                                        }
-                                    }
+            Console.WriteLine("'process()'");
+            try {
+                foreach (int slot_id in this.primarySlotId) {
+                    Console.WriteLine("slot_id: " + slot_id);
+                    using (SqlConnection conn = new SqlConnection(this.connectionQuery)) {
+                        conn.Open();
+                        using (SqlCommand command = new SqlCommand(this.get_slot_network_query, conn)) {
+                            command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = slot_id;
+                            List<int> visited = new List<int>();
+                            using (SqlDataReader readere = command.ExecuteReader()){
+                                while (readere.Read()) {
+                                    int? first = readere.IsDBNull(0) ? (int?)null : readere.GetInt32(0);
+                                    int? second = readere.IsDBNull(1) ? (int?)null : readere.GetInt32(1);
+                                    int? third = readere.IsDBNull(2) ? (int?)null : readere.GetInt32(2);
+                                    int? fourth = readere.IsDBNull(3) ? (int?)null : readere.GetInt32(3);
                                     
-                                    Console.WriteLine("e");
-                                    if (third == 0 || visited.Contains(third.Value)) {
-                                        continue;
-                                    }
-                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
-                                        try {
-                                            Delete(second.Value, conn, transaction);
-                                            transaction.Commit();
-                                        } catch (Exception ex) {
-                                            transaction.Rollback();
-                                            return false;
+                                    using (SqlConnection conn2 = new SqlConnection(connectionQuery)) {
+                                        conn2.Open();
+                                        Console.WriteLine("q first: ");
+                                        if (!first.HasValue || visited.Contains(first.Value)) {
+                                            Console.WriteLine("continue");
+                                            continue;
                                         }
-                                    }
-                                    Console.WriteLine("r");
-                                    if (fourth == 0 || visited.Contains(fourth.Value)) {
-                                        continue;
-                                    }
-                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
-                                        try {
-                                            Delete(fourth.Value, conn, transaction);
-                                            transaction.Commit();
-                                        } catch (Exception ex) {
-                                            transaction.Rollback();
-                                            return false;
+                                        using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                            try {
+                                                Console.WriteLine("try");
+                                                Delete(first.Value, conn2, transaction);
+                                                transaction.Commit();
+                                            } catch (Exception ex) {
+                                                transaction.Rollback();
+                                                Console.WriteLine("Error: " + ex.Message);
+                                                return false;
+                                            }
                                         }
+                                        Console.WriteLine("w second: " );
+                                        if (!second.HasValue || visited.Contains(second.Value)) {
+                                            Console.WriteLine("continue");
+                                            continue;
+                                        }
+                                        using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                            try {
+                                                Delete(second.Value, conn2, transaction);
+                                                transaction.Commit();
+                                            } catch (Exception ex) {
+                                                transaction.Rollback();
+                                                Console.WriteLine("Error: " + ex.Message);
+                                                return false;
+                                            }
+                                        }
+                                        
+                                        Console.WriteLine("e third: ");
+                                        if (!third.HasValue || visited.Contains(third.Value)) {
+                                            Console.WriteLine("continue");
+                                            continue;
+                                        }
+                                        using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                            try {
+                                                Delete(second.Value, conn2, transaction);
+                                                Console.WriteLine("continue");
+                                                transaction.Commit();
+                                            } catch (Exception ex) {
+                                                transaction.Rollback();
+                                                Console.WriteLine("Error: " + ex.Message);
+                                                return false;
+                                            }
+                                        }
+                                        Console.WriteLine("r fourth: ");
+                                        if (!fourth.HasValue || visited.Contains(fourth.Value)) {
+                                            Console.WriteLine("continue");
+                                            continue;
+                                        }
+                                        using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                            try {
+                                                Delete(fourth.Value, conn2, transaction);
+                                                transaction.Commit();
+                                            } catch (Exception ex) {
+                                                transaction.Rollback();
+                                                Console.WriteLine("Error: " + ex.Message);
+                                                return false;
+                                            }
+                                        }
+                                        Console.WriteLine("t");
                                     }
-                                    Console.WriteLine("t");
-                                    return true; 
                                 }
                             }
                         }
                     }
                 }
+                return true; 
+            } catch (Exception ex) {
+                Console.WriteLine("Error: " + ex.Message);
+                return false;
             }
-            return true;
         }
     }
     public class HttpPutParentSlotDuplication {
@@ -234,13 +275,13 @@ namespace WebApplication2.Models {
 
         public int? hostId { get; set; }
         public int? rootId { get; set; }
-        public int? slotId { get; set;}
-        public int? parentSlotId { get; set;}
+        private int? parentSlotId { get; set;}
+        public int? primarySlotId { get; set; }
         public HostedSlots newHostedSlots = new HostedSlots();
         private int Duplication(string ConnectionQuery, int slot_id) {
+            Console.WriteLine("Duplication()");
             if (slot_id == null) return 0;
             if (slot_id == 0) return 0;
-            Console.WriteLine("Duplication()");
             int newSlotId = 0;
             using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
                 conn.Open();
@@ -295,25 +336,25 @@ namespace WebApplication2.Models {
             Console.WriteLine("process()");
             string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
             string get_network_query_2 = @"
-            SELECT 
-                sn1.primary_slot_id AS root_slot_id,
-                sn1.child_slot_id AS second_layer_slot_id,
-                sn2.child_slot_id AS third_layer_slot_id,
-                sn3.child_slot_id AS fourth_layer_slot_id
-            FROM 
-                slot_network sn1
-            LEFT JOIN 
-                slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
-            LEFT JOIN 
-                slot_network sn3 ON sn2.child_slot_id = sn3.primary_slot_id
-            WHERE 
-                sn1.primary_slot_id = @slot_id";
-            Console.WriteLine(00);
+                SELECT 
+                    sn1.primary_slot_id AS root_slot_id,
+                    sn1.child_slot_id AS second_layer_slot_id,
+                    sn2.child_slot_id AS third_layer_slot_id,
+                    sn3.child_slot_id AS fourth_layer_slot_id
+                FROM 
+                    slot_network sn1
+                LEFT JOIN 
+                    slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
+                LEFT JOIN 
+                    slot_network sn3 ON sn2.child_slot_id = sn3.primary_slot_id
+                WHERE 
+                    sn1.primary_slot_id = @slot_id";
+            Console.WriteLine("00");
             using (SqlConnection conn = new SqlConnection(connectionQuery)) {
                 conn.Open();
-                Console.WriteLine(11);
+                Console.WriteLine("11");
                 using (SqlCommand command = new SqlCommand(get_network_query_2, conn)) {
-                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = this.slotId;
+                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = this.primarySlotId;
                     Console.WriteLine("22");
                     using (SqlDataReader readere = command.ExecuteReader()){
                         List<int> visited = new List<int>();
@@ -329,9 +370,39 @@ namespace WebApplication2.Models {
                             int new_third = third.HasValue ? Duplication(connectionQuery, third.Value) : 0; 
                             int new_fourth = fourth.HasValue ? Duplication(connectionQuery, fourth.Value) : 0;
                             
+                            if (this.parentSlotId == null) {
+                                using (SqlConnection conn2 = new SqlConnection(connectionQuery)) {
+                                    conn2.Open();
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            using (SqlCommand command2 = new SqlCommand(get_parent_query, conn2, transaction)) {
+                                                command2.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = this.primarySlotId;
+                                                using (SqlDataReader readeres = command2.ExecuteReader()){
+                                                    if (readeres.HasRows) {
+                                                        if (readeres.Read()) {
+                                                            this.parentSlotId = readeres.GetInt32(0);
+                                                        } else {
+                                                            this.parentSlotId = null;
+                                                        }
+                                                    } else {
+                                                        this.parentSlotId = null;
+                                                    }
+                                                }
+                                            }
+                                            transaction.Commit();
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine($"Error processing HttpPutSlotEdit.Process() during get_parent_query: {ex.Message}");
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                            Console.WriteLine("thisparentslotid: " + this.parentSlotId);
                             using (SqlConnection conn2 = new SqlConnection(connectionQuery)) {
                                 conn2.Open();
                                 Console.WriteLine("q");
+                                
                                 if (new_first == 0 || visited.Contains(new_first)) {
                                     continue;
                                 }
@@ -351,6 +422,27 @@ namespace WebApplication2.Models {
                                         Console.WriteLine($"Error processing HttpPutSlotEdit.Process() during network creation: {ex.Message}");
                                         return false;
                                     }
+                                }
+                                Console.WriteLine("q11");
+                                if (new_first != 0 || new_second != 0) {
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = parentSlotId;
+                                                newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = (object)null ?? DBNull.Value;
+                                                newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = (object)null ?? DBNull.Value;
+                                                newNetworkCommand.ExecuteNonQuery();
+                                            }
+                                            visited.Add(new_first);
+                                            Console.WriteLine("First Network creation successful."); 
+                                            transaction.Commit();
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine($"Error processing HttpPutSlotEdit.Process() during network creation: {ex.Message}");
+                                            return false;
+                                        }
+                                    }
+                                    continue;
                                 }
                                 Console.WriteLine("w");
                                 if (new_second == 0 || visited.Contains(new_second)) {
@@ -425,6 +517,272 @@ namespace WebApplication2.Models {
                 }
             }
             return false; 
+        }
+        public bool Process2() {
+            Console.WriteLine("process()");
+            string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+            string get_network_query_2 = @"
+                SELECT 
+                    sn1.primary_slot_id AS root_slot_id,
+                    sn1.child_slot_id AS second_layer_slot_id,
+                    sn2.child_slot_id AS third_layer_slot_id,
+                    sn3.child_slot_id AS fourth_layer_slot_id
+                FROM 
+                    slot_network sn1
+                LEFT JOIN 
+                    slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
+                LEFT JOIN 
+                    slot_network sn3 ON sn2.child_slot_id = sn3.primary_slot_id
+                WHERE 
+                    sn1.primary_slot_id = @slot_id";
+            Console.WriteLine("00");
+            using (SqlConnection conn = new SqlConnection(connectionQuery)) {
+                conn.Open();
+                Console.WriteLine("11");
+                using (SqlCommand command = new SqlCommand(get_parent_query, conn)) {
+                    Console.WriteLine("get_parent_query");
+                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = this.primarySlotId;
+                    using (SqlDataReader readere = command.ExecuteReader()){
+                        if (readere.HasRows) {
+                            if (readere.Read()) {
+                                this.parentSlotId = readere.GetInt32(0);
+                            } else {
+                                this.parentSlotId = null;
+                            }
+                        } else {
+                            this.parentSlotId = null;
+                        }
+                    }
+                }
+                using (SqlCommand command = new SqlCommand(get_network_query_2, conn)) {
+                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = this.primarySlotId;
+                    Console.WriteLine("22");
+                    using (SqlDataReader readere = command.ExecuteReader()){
+                        Dictionary<int, int> duplicatedValues = new Dictionary<int, int>();
+                        while (readere.Read()) {
+                            Console.WriteLine("readere.Read()");
+                            int? first = readere.IsDBNull(0) ? (int?)null : readere.GetInt32(0);
+                            int? second = readere.IsDBNull(1) ? (int?)null : readere.GetInt32(1);
+                            int? third = readere.IsDBNull(2) ? (int?)null : readere.GetInt32(2);
+                            int? fourth = readere.IsDBNull(3) ? (int?)null : readere.GetInt32(3);
+                            
+                            int new_first;
+                            if (first.HasValue) {
+                                if (duplicatedValues.TryGetValue(first.Value, out int duplicatedValue)) {
+                                    new_first = duplicatedValue;
+                                }
+                                else {
+                                    new_first = Duplication(connectionQuery, first.Value);
+                                    duplicatedValues.Add(first.Value, new_first);
+                                }
+                            }
+                            else {
+                                new_first = 0;
+                            }
+                            
+                            int new_second;
+                            if (second.HasValue) {
+                                if (duplicatedValues.TryGetValue(second.Value, out int duplicatedValue)) {
+                                    new_second = duplicatedValue;
+                                }
+                                else {
+                                    new_second = Duplication(connectionQuery, second.Value);
+                                    duplicatedValues.Add(second.Value, new_second);
+                                }
+                            }
+                            else {
+                                new_second = 0;
+                            }
+                            
+                            int new_third;
+                            if (third.HasValue) {
+                                if (duplicatedValues.TryGetValue(third.Value, out int duplicatedValue)) {
+                                    new_third = duplicatedValue;
+                                }
+                                else {
+                                    new_third = Duplication(connectionQuery, third.Value);
+                                    duplicatedValues.Add(third.Value, new_third);
+                                }
+                            }
+                            else {
+                                new_third = 0;
+                            }
+                            
+                            int new_fourth;
+                            if (fourth.HasValue) {
+                                if (duplicatedValues.TryGetValue(fourth.Value, out int duplicatedValue)) {
+                                    new_fourth = duplicatedValue;
+                                }
+                                else {
+                                    new_fourth = Duplication(connectionQuery, fourth.Value);
+                                    duplicatedValues.Add(fourth.Value, new_fourth);
+                                }
+                            }
+                            else {
+                                new_fourth = 0;
+                            }
+                            
+                            if (this.parentSlotId != null) {
+                                Console.WriteLine("thisparentslotid: " + this.parentSlotId);
+                                Console.WriteLine("first: " + new_first + " - second: " + new_second + " - third: " + new_third + " - fourth: " + new_fourth);
+                                using (SqlConnection conn2 = new SqlConnection(connectionQuery)) {
+                                    conn2.Open();
+                                    Console.WriteLine("q");
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = new_first;
+                                                newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = this.parentSlotId;
+                                                newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = new_second;
+                                                newNetworkCommand.ExecuteNonQuery();
+                                            }
+                                            Console.WriteLine("First Network creation successful."); 
+                                            transaction.Commit();
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine($"Error processing new_first new_second: {ex.Message}");
+                                        }
+                                    }
+                                    
+                                    Console.WriteLine("q11");
+                                    if (new_first != 0 || new_second != 0) {
+                                        using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                            try {
+                                                using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                    newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = parentSlotId;
+                                                    newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = (object)null ?? DBNull.Value;
+                                                    newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = (object)null ?? DBNull.Value;
+                                                    newNetworkCommand.ExecuteNonQuery();
+                                                }
+                                                Console.WriteLine("First Network creation successful."); 
+                                                transaction.Commit();
+                                            } catch (Exception ex) {
+                                                transaction.Rollback();
+                                                Console.WriteLine($"Error processing HttpPutSlotEdit.Process() during network creation: {ex.Message}");
+                                                return false;
+                                            }
+                                        }
+                                        continue;
+                                    }
+                                    Console.WriteLine("w");
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = new_second;
+                                                newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = new_first;
+                                                newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = new_third;
+                                                newNetworkCommand.ExecuteNonQuery();
+                                            }
+                                            Console.WriteLine("second Network creation successful."); 
+                                            transaction.Commit(); // Commit the transaction for host creation
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine($"Error processing new_second new_third: {ex.Message}");
+                                        }
+                                    }
+                                    
+                                    
+                                    Console.WriteLine("e");
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = new_third;
+                                                newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = new_second;
+                                                newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = new_fourth;
+                                                newNetworkCommand.ExecuteNonQuery();
+                                            }
+                                            Console.WriteLine("third Network creation successful."); 
+                                            transaction.Commit(); // Commit the transaction for host creation
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine($"Error processing new_third new_fourth: {ex.Message}");
+                                        }
+                                    }
+                                    Console.WriteLine("t");
+                                }
+                            } else {
+                                Console.WriteLine("thisparentslotid: <null>");
+                                Console.WriteLine("first: " + new_first + " - second: " + new_second + " - third: " + new_third + " - fourth: " + new_fourth);
+                                using (SqlConnection conn2 = new SqlConnection(connectionQuery)) {
+                                    conn2.Open();
+                                    Console.WriteLine("q");
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = new_first;
+                                                newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = (object)null ?? DBNull.Value;
+                                                newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = new_second;
+                                                newNetworkCommand.ExecuteNonQuery();
+                                            }
+                                            Console.WriteLine("First Network creation successful."); 
+                                            transaction.Commit();
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine($"Error processing new_first new_second: {ex.Message}");
+                                        }
+                                    }
+                                    Console.WriteLine("q11");
+                                    if (new_first != 0 || new_second != 0) {
+                                        using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                            try {
+                                                using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                    newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = new_first;
+                                                    newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = (object)null ?? DBNull.Value;
+                                                    newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = (object)null ?? DBNull.Value;
+                                                    newNetworkCommand.ExecuteNonQuery();
+                                                }
+                                                Console.WriteLine("First Network creation successful."); 
+                                                transaction.Commit();
+                                            } catch (Exception ex) {
+                                                transaction.Rollback();
+                                                Console.WriteLine($"Error processing HttpPutSlotEdit.Process() during network creation: {ex.Message}");
+                                                return false;
+                                            }
+                                        }
+                                        continue;
+                                    }
+                                    Console.WriteLine("w");
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = new_second;
+                                                newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = new_first;
+                                                newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = new_third;
+                                                newNetworkCommand.ExecuteNonQuery();
+                                            }
+                                            Console.WriteLine("second Network creation successful."); 
+                                            transaction.Commit(); // Commit the transaction for host creation
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine($"Error processing new_second new_third: {ex.Message}");
+                                        }
+                                    }
+                                    
+                                    
+                                    Console.WriteLine("e");
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            using (SqlCommand newNetworkCommand = new SqlCommand(this.new_network_query, conn2, transaction)) {
+                                                newNetworkCommand.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = new_third;
+                                                newNetworkCommand.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = new_second;
+                                                newNetworkCommand.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = new_fourth;
+                                                newNetworkCommand.ExecuteNonQuery();
+                                            }
+                                            Console.WriteLine("third Network creation successful."); 
+                                            transaction.Commit(); // Commit the transaction for host creation
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine($"Error processing new_third new_fourth: {ex.Message}");
+                                        }
+                                    }
+                                    Console.WriteLine("t");
+                                }
+                            }
+                        }
+                        return true; 
+                    }
+                }
+            }
         }
     }
     public class HttpPutNewHost {

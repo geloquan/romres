@@ -1,0 +1,15 @@
+@{
+    ViewData["Title"] = "Invitation";
+    var data = ViewBag.SlotTree;
+}
+<script src="../js/home.js"></script>
+<script>
+    var data = @Html.Raw(ViewBag.SlotTreeJson);
+    console.log("data: ", data);
+    $(document).ready(function(){
+        if (data.rootId) {
+            $('main').empty();
+            processSlot(data.rootId, data);
+        }
+    });
+</script>

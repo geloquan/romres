@@ -28,7 +28,7 @@ namespace WebApplication2
             //    pattern: "{action=HostDashboard}/{HostId?}");
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=User}/{action=Index}"
+                pattern: "{controller=Home}/{action=Index}"
             );
             //app.MapControllerRoute(
             //    name: "hostDashboard",
@@ -39,6 +39,11 @@ namespace WebApplication2
                 name: "userWithId",
                 pattern: "User/{user_id}",
                 defaults: new { controller = "User", action = "Id" }
+            );
+            app.MapControllerRoute(
+                name: "userWithId",
+                pattern: "Slot/{invitation_code}",
+                defaults: new { controller = "Slot", action = "InvitationCode" }
             );
             //app.MapControllerRoute(
             //    name: "hostDashboardWithIdWithSlotWithId",

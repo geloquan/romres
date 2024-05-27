@@ -21,9 +21,8 @@ namespace WebApplication2.Models {
     }
     public class HttpGetSlotSearch {
         public string? InvitationCode { get; set; }
-        public FavoriteSlots favoriteSlots = new FavoriteSlots();
-        
-        private SlotModel SlotInfoQuery(string ConnectionQuery, string Query, int slot_id, int? root_id) {
+        public SlotTree slotTree = new SlotTree();
+        private SlotModel SlotInfoQuery(string ConnectionQuery, string Query, int slot_id, int? parent_id, string? parent_name, string? root_slot_name, int? root_slot_id) {
             SlotModel Model = new SlotModel();
             using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
                 using (SqlCommand command = new SqlCommand(Query, conn)) {
@@ -42,7 +41,10 @@ namespace WebApplication2.Models {
                             Model.IsReservable = !reader.IsDBNull(6) ? reader.GetByte(6) != 0 : false;
                             Model.ReserverName = !reader.IsDBNull(7) ? reader.GetString(7) : string.Empty;
                             Model.InvitationCode = !reader.IsDBNull(8) ? reader.GetString(8) : string.Empty;
-                            Model.ParentSlotId = root_id;
+                            Model.ParentSlotId = parent_id;
+                            Model.ParentSlotName = parent_name ?? "";
+                            Model.RootSlotId = root_slot_id ?? null;
+                            Model.RootSlotName = root_slot_name ?? "";
                             Model.HostName = !reader.IsDBNull(9) ? reader.GetString(9) : string.Empty;
                         }
                     }
@@ -106,8 +108,8 @@ namespace WebApplication2.Models {
                 WHERE 
                     s.id = @slot_id;
             ";
-            FavoriteSlots favoriteSlotsContainer = new FavoriteSlots();
             try {
+                SlotTree Tree = new SlotTree();
                 using (SqlConnection conn = new SqlConnection(ConnectionQuery)) {
                     using (SqlCommand command_1 = new SqlCommand(check_code_exists_query, conn)) {
                         command_1.Parameters.Add("@invitation_code", System.Data.SqlDbType.VarChar, 150).Value = this.InvitationCode;
@@ -121,35 +123,36 @@ namespace WebApplication2.Models {
                                         command_2.Parameters.Add("@slot_id", System.Data.SqlDbType.Int, 50).Value = slot_id;
                                         conn_2.Open();
                                         using (SqlDataReader reader_2 = command_2.ExecuteReader()){
-                                            SlotTree Tree = new SlotTree();
                                             while (reader_2.Read()) {
                                                 int? root_slot_id = reader_2.IsDBNull(0) ? (int?)null : reader_2.GetInt32(0);
                                                 int? second_layer_slot_id = reader_2.IsDBNull(1) ? (int?)null : reader_2.GetInt32(1);
                                                 int? third_layer_slot_id = reader_2.IsDBNull(2) ? (int?)null : reader_2.GetInt32(2);
+                                                string? root_slot_name = reader_2.IsDBNull(3) ? null : reader_2.GetString(3);
+                                                string? second_layer_slot_name = reader_2.IsDBNull(4) ? null : reader_2.GetString(4);
+                                                string? third_layer_slot_name = reader_2.IsDBNull(5) ? null : reader_2.GetString(5);
+                                                
                                                 if (root_slot_id != null && root_slot_id != Tree.RootId) {
-                                                    Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null);
+                                                    Tree.RootSlotModel = SlotInfoQuery(ConnectionQuery, slot_info_query, root_slot_id.Value, null, null, root_slot_name, root_slot_id);
                                                     Tree.RootId = root_slot_id;
                                                     Tree.InvitationCode = Tree.RootSlotModel.InvitationCode;
                                                 } 
                                                 if (second_layer_slot_id != null && !Tree.SecondLayerExists(second_layer_slot_id.Value)) {
-                                                    Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId));
+                                                    Tree.AddSecondLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, second_layer_slot_id.Value, Tree.RootId, root_slot_name, root_slot_name, root_slot_id));
                                                     Tree.AddSecondLayer(second_layer_slot_id.Value);
                                                 } 
                                                 if (third_layer_slot_id != null && !Tree.ThirdLayerExists(third_layer_slot_id.Value)) {
-                                                    Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value));
+                                                    Tree.AddThirdLayerChildren(SlotInfoQuery(ConnectionQuery, slot_info_query, third_layer_slot_id.Value, second_layer_slot_id.Value, second_layer_slot_name, root_slot_name, root_slot_id));
                                                     Tree.AddThirdLayer(third_layer_slot_id.Value);
                                                 } 
                                             }
-                                            favoriteSlotsContainer.AddSlotTree(Tree);
                                         }
                                     }
                                 }
                             }
-
                         };
                     };
                 };
-                favoriteSlots = favoriteSlotsContainer;
+                this.slotTree = Tree;
                 return true;
             } 
             catch (Exception e) {

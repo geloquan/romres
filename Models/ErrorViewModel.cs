@@ -1,37 +1,77 @@
+using Newtonsoft.Json;
 namespace WebApplication2.Models {
     public class EdgeMod {
+        [JsonProperty("x")]
+
         public double X { get; set; }
+        [JsonProperty("y")]
+
         public double Y { get; set; }
     }
     public class DateMod {
+        [JsonProperty("start")]
         public string Start { get; set; }
+        [JsonProperty("end")]
         public string End { get; set; }
     }
     public class HostedSlots {
+        [JsonProperty("slotTrees")]
         public List<SlotTree> SlotTrees { get; set; } = new List<SlotTree>();
         public void AddSlotTree(SlotTree slotTree) {
             this.SlotTrees.Add(slotTree);
         }
     }
     public class FavoriteSlots {
+        [JsonProperty("slotTrees")]
+        public List<SlotTree> SlotTrees { get; set; } = new List<SlotTree>();
+        public void AddSlotTree(SlotTree slotTree) {
+            this.SlotTrees.Add(slotTree);
+        }
+    }
+    public class SearchSlots {
         public List<SlotTree> SlotTrees { get; set; } = new List<SlotTree>();
         public void AddSlotTree(SlotTree slotTree) {
             this.SlotTrees.Add(slotTree);
         }
     }
     public class SlotModel {
+        [JsonProperty("edge")]
         public HashSet<EdgeMod> Edge { get; set; } = new HashSet<EdgeMod>();
+
+        [JsonProperty("durations")]
         public HashSet<DateMod> Durations { get; set; } = new HashSet<DateMod>();
+
+        [JsonProperty("name")]
         public string? Name { get; set; }
+
+        [JsonProperty("slotId")]
         public int? SlotId { get; set; }
+
+        [JsonProperty("rootSlotId")]
         public int? RootSlotId { get; set; }
+
+        [JsonProperty("rootSlotName")]
         public string? RootSlotName { get; set; }
+
+        [JsonProperty("parentSlotId")]
         public int? ParentSlotId { get; set; }
+
+        [JsonProperty("parentSlotName")]
         public string? ParentSlotName { get; set; }
+
+        [JsonProperty("isReservable")]
         public bool? IsReservable { get; set; }
+
+        [JsonProperty("reserverName")]
         public string? ReserverName { get; set; }
+
+        [JsonProperty("invitationCode")]
         public string? InvitationCode { get; set; }
+
+        [JsonProperty("note")]
         public string? Note { get; set; }
+
+        [JsonProperty("hostName")]
         public string? HostName { get; set; }
         //public int? HostId { get; set; }
         //public int? EdgeId { get; set; }
@@ -53,14 +93,31 @@ namespace WebApplication2.Models {
         }
     }
     public class SlotTree {
+        [JsonProperty("rootId")]
         public int? RootId { get; set; }
+
+        [JsonProperty("invitationCode")]
         public string? InvitationCode { get; set; }
+
+        [JsonProperty("secondLayerId")]
         public List<int> SecondLayerId { get; set; } = new List<int>();
+
+        [JsonProperty("thirdLayerId")]
         public List<int> ThirdLayerId { get; set; } = new List<int>();
+
+        [JsonProperty("secondLayerName")]
         public List<string> SecondLayerName { get; set; } = new List<string>();
+
+        [JsonProperty("thirdLayerName")]
         public List<string> ThirdLayerName { get; set; } = new List<string>();
+
+        [JsonProperty("rootSlotModel")]
         public SlotModel? RootSlotModel { get; set; }
+
+        [JsonProperty("secondLayerChildren")]
         public List<SlotModel> SecondLayerChildren { get; set; } = new List<SlotModel>();
+
+        [JsonProperty("thirdLayerChildren")]
         public List<SlotModel> ThirdLayerChildren { get; set; } = new List<SlotModel>();
         public void AddSecondLayer(int SlotId) {
             this.SecondLayerId.Add(SlotId);

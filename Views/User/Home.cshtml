@@ -39,7 +39,6 @@
     $(document).ready(function() {
         var initialHtml = $('#user-options').html();
         function showFavorites() {
-            console.log('showFavorites()');
             var url = '@Url.Action("FavoriteSlots", "User")' + '?userId=' + userId;
             $.ajax({
                 url: url,
@@ -49,7 +48,6 @@
                     buildRootSlotTable("Favorites", ['Invitation Code', 'Slot Name', 'Host Name', 'Entry', 'Unfave'], 'favorites-slot-table');
                     global_slot_object = result;
                     FavoriteSlots(result);
-                    console.log(result);
                     $('#user-options').empty();
                     $('#user-options').append('<button id="backButton" class="btn btn-secondary btn-lg">Back</button>');
                     attachBackButtonClick();
@@ -60,14 +58,12 @@
             });
         }
         function showHosted() {
-            console.log('showHosted()');
             var url = '@Url.Action("HostedSlots", "User")' + '?userId=' + userId;
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(result) {
                     entity_type = 'hosted';
-                    console.log(result);
                     buildRootSlotTable("Hosted", ['Invitation Code', 'Slot Name', 'Host Name-tag', 'Entry', 'Unhost'], 'hosted-slot-table');
                     global_slot_object = result;
                     HostedSlots(result);
@@ -83,29 +79,24 @@
         function attachBackButtonClick() {
             $(document).on('click', '#backButton', function() {
                 entity_type = "";
-                console.log('#document #backButton()');
                 $('#slot').html(''); 
                 $('#user-options').empty();
                 $('#user-options').html(initialHtml);
                 $('#show-favorite-slots').click(function() {
-                    console.log('#show-favorite-slots()');
                     $(this).closest('#user-options').find('button').not(this).prop('disabled', true);
                     showFavorites();
                 });
                 $('#show-hosted-slots').click(function() {
-                    console.log('#show-hosted-slots()');
                     $(this).closest('#user-options').find('button').not(this).prop('disabled', true);
                     showHosted();
                 });
             });
         }
         $('#show-favorite-slots').click(function() {
-            console.log('#show-favorite-slots()');
             $(this).closest('#user-options').find('button').not(this).prop('disabled', true);
             showFavorites();
         });
         $('#show-hosted-slots').click(function() {
-            console.log('#show-hosted-slots()');
             $(this).closest('#user-options').find('button').not(this).prop('disabled', true);
             showHosted();
         });

@@ -1,6 +1,7 @@
 let newHostMode = false;
 
 function sendNewHost(newHost) {
+    console.log('sendNewHost()()()');
     $.ajax({
         url: '/host/newhost',
         type: 'PUT',
@@ -64,9 +65,9 @@ function confirmNewHost(invitationCode, slotName, hostNameTag, newSlot, original
 
     $('body').append(modalHtml);
 
-    document.getElementById('confirmSlotName').textContent = slotName;
-    document.getElementById('confirmInvitationCode').textContent = invitationCode;
-    document.getElementById('confirmHostNameTag').textContent = hostNameTag;
+    document.getElementById('confirmSlotName').textContent = slotName.value;
+    document.getElementById('confirmInvitationCode').textContent = invitationCode.value;
+    document.getElementById('confirmHostNameTag').textContent = hostNameTag.value;
 
     $('#confirmationModal').modal('show');
 

@@ -1,13 +1,132 @@
 let addChildMode = false;
+function successDeleteHosts() {
+    console.log("successDeleteHosts()");
+    $('#confirmationModal').remove();
+
+    var modalHtml = `
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">Success!</h5>
+                    </div>
+                    <div class="modal-body">
+                        Slot has been added to database.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="confirmButton">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    $('body').append(modalHtml);
+
+    $('#confirmationModal').modal('show');
+
+    $('#confirmationModal').find('[data-dismiss="modal"]').on('click', function() {
+        $('#confirmationModal').modal('hide');
+    });
+
+    $('#confirmButton').on('click', function() {
+        setTimeout(function() {
+            $('#confirmationModal').modal('hide');
+            window.location.reload();
+          }, 250);
+    });
+}
+
+function sendAddChild(newChild) {
+    console.log('new child: ', newChild);
+    console.log(JSON.stringify(newChild, null, 2));
+    $.ajax({
+        url: '/host/add/child',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(newChild),
+        success: function(result) {
+            console.log('Successfully saved new slot: ', result);
+            global_slot_object = result;
+            processSlot(1);
+        },
+        error: function() {
+            alert('An error occurred while loading the content.');
+        }
+    });
+}
+function confirmAddChild(invitationCode, slotName, radio, original_anchor_container) {
+    console.log("confirmAddChild()");
+    if (!invitationCode.value || !slotName.value) {
+        alert('Please fill in all the required fields.');
+        return false;
+    }
+    var newChild = {
+        slot_id: parseInt(document.getElementById('slot-parent-id').innerText),
+        user_id: userId,
+        child_slot_invitation_code: invitationCode.value,
+        child_slot_name: slotName.value,
+        child_slot_is_reservable: isReservableCheckbox.checked ? true : false
+    }
+    console.log('new child: ', newChild);
+    
+    $('#confirmationModal').remove();
+    
+    var modalHtml = `
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">Confirm Add Slot</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to add new slot named <span id="confirmSlotName"></span>, invitation code <span id="confirmInvitationCode"></span>, and Is Reservable to <span id="confirmIsReservable"></span>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmButton">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('body').append(modalHtml);
+    
+    document.getElementById('confirmSlotName').textContent = slotName.value;
+    document.getElementById('confirmInvitationCode').textContent = invitationCode.value;
+    document.getElementById('confirmIsReservable').textContent = isReservableCheckbox.checked ? 'Yes' : 'No';
+    
+    $('#confirmationModal').modal('show');
+    
+    $('#confirmationModal').on('hidden.bs.modal', function () {
+        $(this).remove(); 
+    });
+    
+    $('#confirmationModal').find('[data-dismiss="modal"]').on('click', function() {
+        $('#confirmationModal').modal('hide');
+    });
+    
+    $('#confirmButton').on('click', function() {
+        sendAddChild(newChild);
+        $('#confirmationModal').modal('hide');
+        toogleAddChildMode(false);
+        $('#child-anchor-container').html(original_anchor_container);
+        $('#add-child').click(function() {
+            toogleAddChildMode(true);
+        });
+    });
+}
 
 function toogleAddChildMode(enable) {
-    console.log("toogleNewHostMode()");
+    console.log("toogleAddChildMode()");
     
     var original = $('#child-anchor-container').html();
     if (enable) {
         const table = document.getElementById('slot-children-table');
-        const firstRow = table.querySelector('tbody tr:first-child');
-        const firstCell = firstRow.querySelector('td:first-child'); 
         var newRow = document.getElementById('temporary-child-row');
         if (!newRow) {
             newRow = document.createElement('tr');
@@ -22,25 +141,25 @@ function toogleAddChildMode(enable) {
             
             const isReservableCell = document.createElement('td');
             
-            const radioWrapper = document.createElement('div');
-            radioWrapper.classList.add('form-check');
+            const checkboxWrapper = document.createElement('div');
+            checkboxWrapper.classList.add('form-check');
             
-            const isReservableRadioBtn = document.createElement('input');
-            isReservableRadioBtn.type = 'radio';
-            isReservableRadioBtn.id = 'isReservableRadio';
-            isReservableRadioBtn.name = 'isReservable';
-            isReservableRadioBtn.value = 'yes'; // Set the value as needed
-            isReservableRadioBtn.classList.add('form-check-input');
+            const isReservableCheckbox = document.createElement('input');
+            isReservableCheckbox.type = 'checkbox';
+            isReservableCheckbox.id = 'isReservableCheckbox';
+            isReservableCheckbox.name = 'isReservable';
+            isReservableCheckbox.value = 1; 
+            isReservableCheckbox.classList.add('form-check-input');
             
-            const radioLabel = document.createElement('label');
-            radioLabel.setAttribute('for', 'isReservableRadio');
-            radioLabel.textContent = 'Reservable'; // Set the label text as needed
-            radioLabel.classList.add('form-check-label');
+            const checkboxLabel = document.createElement('label');
+            checkboxLabel.setAttribute('for', 'isReservableCheckbox');
+            checkboxLabel.textContent = 'Reservable'; // Set the label text as needed
+            checkboxLabel.classList.add('form-check-label');
             
-            radioWrapper.appendChild(isReservableRadioBtn);
-            radioWrapper.appendChild(radioLabel);
+            checkboxWrapper.appendChild(isReservableCheckbox);
+            checkboxWrapper.appendChild(checkboxLabel);
             
-            isReservableCell.appendChild(radioWrapper);
+            isReservableCell.appendChild(checkboxWrapper);
             
             const invitationCodeCell = document.createElement('td');
             const invitationCodeInput = document.createElement('input');
@@ -67,6 +186,26 @@ function toogleAddChildMode(enable) {
             
             table.querySelector('tbody').appendChild(newRow);
             
+            const saveAnchor = $('<a href="#" id="save-selected-rows">Save New Child</a>');
+            saveAnchor.click(function() {
+                console.log("Save New Child.click()");
+                if (!invitationCodeInput.value || !slotNameInput.value) {
+                    console.log("may be empty: {invitationCodeInput, slotNameInput}");
+                    return;
+                } 
+                confirmAddChild(invitationCodeInput, slotNameInput, isReservableCheckbox, original);
+            });
+        
+            const backAnchor = $('<a href="#" id="back-to-original">Back</a>');
+            backAnchor.click(function() {
+                toogleAddChildMode(false);
+                $('#child-anchor-container').html(original);
+                $('#add-child').click(function() {
+                    toogleAddChildMode(true);
+                });
+            });
+            
+            $('#child-anchor-container').empty().append(saveAnchor).append(" | ").append(backAnchor);
         }
     }
 }

@@ -83,17 +83,20 @@ namespace WebApplication2.Controllers {
             }
         }
         [HttpPost("/host/add/child")]
-        public IActionResult AddChild([FromBody] HttpPutAddChild deletionRequest) {
-            if (deletionRequest != null) {
-                bool processingResult = deletionRequest.Process();
+        public IActionResult AddChild([FromBody] HttpPostAddChild addChildRequest) {
+            Console.WriteLine("AddChild()");
+            UserEntityData userEntityData = new UserEntityData();
+            if (addChildRequest != null) {
+                bool processingResult = addChildRequest.Process();
                 if (processingResult) {
-                    return Ok("success AddChild");
+                    userEntityData.HostedSlots(addChildRequest.user_id.Value);
+                    return new JsonResult(userEntityData.hostedSlots);
                 }
                 else {
                     return StatusCode(500, "Failed to process AddChild.");  // Return appropriate error status
                 }
             } else {
-                Console.WriteLine("Invalid request data()");
+                Console.WriteLine("Invalid request data AddChild()");
                 return StatusCode(500, "Invalid request data.");
             }
         }

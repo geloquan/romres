@@ -34,7 +34,7 @@ function successDeleteHosts() {
         setTimeout(function() {
             $('#confirmationModal').modal('hide');
             window.location.reload();
-          }, 500);
+          }, 250);
     });
 }
 
@@ -62,7 +62,6 @@ function sendDeleteHosts(slot_id_list) {
         contentType: 'application/json',
         data: JSON.stringify(object),
         success: function(result) {
-        
             successDeleteHosts();
         },
         error: function() {

@@ -1,15 +1,18 @@
 using System.Data.SqlClient;
 
 namespace WebApplication2.Models {
-    public class HttpPutAddChild {
+    public class HttpPostAddChild {
         private string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-        private string add_child_query = @"
-            
+        private string get_parent_slot_id_query = @"
+            SELECT TOP 1 parent_slot_id FROM slot_network WHERE primary_slot_id = @primary_slot_id;
         ";
         private string slot_creation_query = @"
             INSERT INTO slot(name, host_id, is_reservable) 
             OUTPUT INSERTED.id 
             VALUES (@slot_name, @host_id, @is_reservable);
+        ";
+        private string get_host_id_query = @"
+            SELECT host_id FROM slot WHERE id = @slot_id;
         ";
         private string invitationCreationQuery = @"
             INSERT INTO invitation(generated_by, slot_id, is_one_time_usage, code) 
@@ -17,33 +20,80 @@ namespace WebApplication2.Models {
         ";
         private string slot_network_insertion_query = @"
             INSERT INTO slot_network(primary_slot_id, parent_slot_id, child_slot_id)
-            VALUES (@slot_id, NULL, NULL);
+            VALUES (@primary_slot_id, @parent_slot_id, @child_slot_id);
         ";
         
         public int? slot_id { get; set; }
-        public int? host_id {get; set;}
+        public int? user_id {get;set;}
         public string? child_slot_invitation_code {get; set;}
         public string? child_slot_name {get; set;}
         public bool? child_slot_is_reservable {get; set;}
+        private int? parent_slot_id { get; set; }
+        private int? host_id {get; set;}
+        private int? new_child_slot_id {get;set;}
         public bool Process() {
+            Console.WriteLine("process() ");
             if (slot_id.HasValue &&
-                host_id.HasValue &&
                 !string.IsNullOrEmpty(child_slot_invitation_code) &&
                 !string.IsNullOrEmpty(child_slot_name) &&
                 child_slot_is_reservable.HasValue
                 ) {
                 try {
                     using (SqlConnection conn = new SqlConnection(connectionQuery)) {
-                        int slot_id;
+                        conn.Open();
+                        Console.WriteLine("get_host_id_query...");
+                        using (SqlTransaction transaction = conn.BeginTransaction()) {
+                            try {
+                                using (SqlCommand command = new SqlCommand(get_host_id_query, conn, transaction)) {
+                                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = this.slot_id;
+                                    using (SqlDataReader reader = command.ExecuteReader()) {
+                                        if (reader.Read()) {
+                                            this.host_id = reader.GetInt32(0);
+                                        } else {
+                                            throw new Exception("Failed to retrieve the new host ID.");
+                                        }
+                                    }
+                                }
+                                transaction.Commit();
+                            } catch (Exception ex) {
+                                transaction.Rollback();
+                                Console.WriteLine($"Error processing get_host_id_query: {ex.Message}");
+                            }
+                        }
+                        Console.WriteLine("get_parent_slot_id_query...");
+                        using (SqlTransaction transaction = conn.BeginTransaction()) {
+                            try {
+                                using (SqlCommand command = new SqlCommand(get_parent_slot_id_query, conn, transaction)) {
+                                    command.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = this.slot_id;
+                                    using (SqlDataReader reader = command.ExecuteReader()) {
+                                        if (reader.Read()) {
+                                            if (!reader.IsDBNull(0)) {
+                                                this.parent_slot_id = reader.GetInt32(0);
+                                            }
+                                            else {
+                                                this.parent_slot_id = null;
+                                            }
+                                        } else {
+                                            this.parent_slot_id = null;
+                                        }
+                                    }
+                                }
+                                transaction.Commit();
+                            } catch (Exception ex) {
+                                transaction.Rollback();
+                                Console.WriteLine($"Error processing get_host_id_query: {ex.Message}");
+                            }
+                        }
+                        Console.WriteLine("slot_creation_query...");
                         using (SqlTransaction transaction = conn.BeginTransaction()) {
                             try {
                                 using (SqlCommand command = new SqlCommand(slot_creation_query, conn, transaction)) {
-                                    command.Parameters.Add("@slot_name", System.Data.SqlDbType.Int).Value = this.child_slot_name;
-                                    command.Parameters.Add("@host_id", System.Data.SqlDbType.Int).Value = this.host_id;
-                                    command.Parameters.Add("@is_reservable", System.Data.SqlDbType.Int).Value = this.child_slot_is_reservable.Value ? 1 : 0;
+                                    command.Parameters.Add("@slot_name", System.Data.SqlDbType.VarChar, 150).Value = this.child_slot_name;
+                                    command.Parameters.Add("@host_id", System.Data.SqlDbType.Int).Value = (object)this.host_id ?? DBNull.Value;
+                                    command.Parameters.Add("@is_reservable", System.Data.SqlDbType.Bit).Value = this.child_slot_is_reservable.Value ? 1 : 0;
                                     using (SqlDataReader reader = command.ExecuteReader()) {
                                         if (reader.Read()) {
-                                            slot_id = reader.GetInt32(0);
+                                            this.new_child_slot_id = reader.GetInt32(0);
                                         } else {
                                             throw new Exception("Failed to retrieve the new host ID.");
                                         }
@@ -56,20 +106,15 @@ namespace WebApplication2.Models {
                                 return false;
                             }
                         }
+                        Console.WriteLine("invitationCreationQuery...");
                         using (SqlTransaction transaction = conn.BeginTransaction()) {
                             try {
                                 using (SqlCommand command = new SqlCommand(invitationCreationQuery, conn, transaction)) {
-                                    command.Parameters.Add("@generated_by", System.Data.SqlDbType.Int).Value = this.host_id;
-                                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = slot_id;
+                                    command.Parameters.Add("@generated_by", System.Data.SqlDbType.Int).Value = (object)this.host_id ?? DBNull.Value;
+                                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = this.new_child_slot_id;
                                     command.Parameters.Add("@is_one_time_usage", System.Data.SqlDbType.Int).Value = 0;
                                     command.Parameters.Add("@code", System.Data.SqlDbType.VarChar, 150).Value = this.child_slot_invitation_code;
-                                    using (SqlDataReader reader = command.ExecuteReader()) {
-                                        if (reader.Read()) {
-                                            slot_id = reader.GetInt32(0);
-                                        } else {
-                                            throw new Exception("Failed to retrieve the new host ID.");
-                                        }
-                                    }
+                                    command.ExecuteNonQuery();
                                 }
                                 transaction.Commit();
                             } catch (Exception ex) {
@@ -78,20 +123,30 @@ namespace WebApplication2.Models {
                                 return false;
                             }
                         }
+                        Console.WriteLine("slot_network_insertion_query...");
                         using (SqlTransaction transaction = conn.BeginTransaction()) {
                             try {
                                 using (SqlCommand command = new SqlCommand(slot_network_insertion_query, conn, transaction)) {
-                                    command.Parameters.Add("@generated_by", System.Data.SqlDbType.Int).Value = this.host_id;
-                                    command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = slot_id;
-                                    command.Parameters.Add("@is_one_time_usage", System.Data.SqlDbType.Int).Value = 0;
-                                    command.Parameters.Add("@code", System.Data.SqlDbType.VarChar, 150).Value = this.child_slot_invitation_code;
-                                    using (SqlDataReader reader = command.ExecuteReader()) {
-                                        if (reader.Read()) {
-                                            slot_id = reader.GetInt32(0);
-                                        } else {
-                                            throw new Exception("Failed to retrieve the new host ID.");
-                                        }
-                                    }
+                                    command.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = this.slot_id;
+                                    command.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = this.parent_slot_id.HasValue ? (object)this.parent_slot_id.Value : DBNull.Value;
+                                    command.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = this.new_child_slot_id;
+                                    command.ExecuteNonQuery();
+                                }
+                                transaction.Commit();
+                            } catch (Exception ex) {
+                                transaction.Rollback();
+                                Console.WriteLine($"Error processing slot_network_insertion_query: {ex.Message}");
+                                return false;
+                            }
+                        }
+                        Console.WriteLine("slot_network_insertion_query...");
+                        using (SqlTransaction transaction = conn.BeginTransaction()) {
+                            try {
+                                using (SqlCommand command = new SqlCommand(slot_network_insertion_query, conn, transaction)) {
+                                    command.Parameters.Add("@primary_slot_id", System.Data.SqlDbType.Int).Value = this.new_child_slot_id;
+                                    command.Parameters.Add("@parent_slot_id", System.Data.SqlDbType.Int).Value = this.slot_id;
+                                    command.Parameters.Add("@child_slot_id", System.Data.SqlDbType.Int).Value = DBNull.Value;
+                                    command.ExecuteNonQuery();
                                 }
                                 transaction.Commit();
                             } catch (Exception ex) {
@@ -431,6 +486,7 @@ namespace WebApplication2.Models {
                                         newEdgeCommand.Parameters.Add("@x", System.Data.SqlDbType.Float).Value = x;
                                         newEdgeCommand.Parameters.Add("@y", System.Data.SqlDbType.Float).Value = y;
                                         newEdgeCommand.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = newSlotId;
+                                        newEdgeCommand.ExecuteNonQuery();
                                     }
                                     transaction.Commit();
                                 } catch (Exception ex) {

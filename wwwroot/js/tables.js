@@ -272,7 +272,6 @@ function addNewRow(table_id, newHostAnchor) {
         } 
         var res = confirmNewHost(invitationCodeInput.value, slotNameInput.value, hostNameTagInput.value);
         if (res) {
-            saveNewRow(null, invitationCodeInput, slotNameInput, hostNameTagInput);
             revertNewHostAnchor(newHostAnchor, cancelNewHostAnchor);
             const temporaryRow = document.getElementById('temporary-row');
                 table.deleteRow(0); // delete the first row
@@ -291,36 +290,6 @@ function generateRandomCode() {
     return code;
 }
 
-function saveNewRow(row, invitationCodeInput, slotNameInput, hostNameTagInput) {
-    var newSlot = {
-        hostNameTag: hostNameTagInput.value,
-        invitationCode: invitationCodeInput.value,
-        slotName: slotNameInput.value,
-        userId: userId
-    };
-    console.log(newSlot);
-    $.ajax({
-        url: '/host/newhost',
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify(newSlot),
-        success: function(result) {
-            console.log('Successfully saved new slot: ', result);
-            var dummy_tree = createDummyRootTrees(newSlot.invitationCode, newSlot.slotName, newSlot.hostNameTag, result.new_slot_id);
-            console.log('dummy tree: ', dummy_tree);
-            console.log('original tree struct: ', global_slot_object);
-            global_slot_object.slotTrees.push(dummy_tree.slotTrees[0]);
-            console.log('after push struct: ', global_slot_object);
-            HostedSlots(dummy_tree);
-        },
-        error: function() {
-            alert('An error occurred while loading the content.');
-        }
-    });
-    invitationCodeInput.disabled = true;
-    slotNameInput.disabled = true;
-    hostNameTagInput.disabled = true;
-}
 
 function revertNewHostAnchor(newHostAnchor, cancelNewHostAnchor) {
     console.log('revertNewHostAnchor()');
@@ -410,6 +379,7 @@ function buildFaveSlotTreeTable(tree) {
     if (entity_type == 'favorites') {
     } else {
         const addSlotChildAnchor = document.createElement('a');
+        addSlotChildAnchor.id = 'add-child'
         addSlotChildAnchor.href = "#";
         addSlotChildAnchor.textContent = "Add child";
         addSlotChildAnchor.classList.add('underline');
@@ -436,7 +406,7 @@ function buildFaveSlotTreeTable(tree) {
     slotChildrenTable.appendChild(slotChildrenTableHead);
     const slotChildrenTableHeaderRow = document.createElement('tr');
     slotChildrenTableHead.appendChild(slotChildrenTableHeaderRow);
-    const childrenTableHeaders = ['Slot Name', 'Is Reservable', 'Invitation Code', 'Edge (x, y)', 'Note', 'Entry'];
+    const childrenTableHeaders = ['Slot Name', 'Is Reservable', 'Invitation Code', 'Schedule', 'Edge (x, y)', 'Note', 'Entry', 'Edit'];
     childrenTableHeaders.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;

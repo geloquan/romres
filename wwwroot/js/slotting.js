@@ -196,6 +196,7 @@ let toRootButtonAppended = false;
 function processSlot(slot_id) {
     buildFaveSlotTreeTable();
     const results = SlotScope(slot_id);
+    console.log('slot scope: ', results);
     const slotDiv = document.getElementById('slot-parent-header-container');
     const anchorContainer = document.createElement('div');
     anchorContainer.classList.add('anchor-container');
@@ -245,6 +246,7 @@ function processSlot(slot_id) {
     }
 }
 function ChildrenSlots(ChildrenSlotsResult) {
+    console.log('childrenslots(): ');
     if (entity_type == 'favorites') {
         const tbody = document.getElementById("slot-children");
         if (tbody) {
@@ -300,6 +302,24 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 buttonCell.appendChild(button);
                 row.appendChild(buttonCell);
                 
+                const editCell = document.createElement("td");
+                const buttonEditCell = document.createElement("button");
+                const imgEditIcon = document.createElement("img");
+                imgEditIcon.onload = () => {
+                    // Once the image is loaded, set the dimensions
+                    imgEditIcon.width = 24; // Set the desired width
+                    imgIcon.height = 24; // Set the desired height
+                };
+                imgEditIcon.src = "../img/pencil.svg"; 
+                imgEditIcon.alt = "Edit Slot";
+                buttonEditCell.appendChild(imgEditIcon);
+                buttonEditCell.classList.add("btn", "btn-primary"); 
+                buttonEditCell.addEventListener("click", () => {
+                    editSlot(childSlot.slotId);
+                });
+                editCell.appendChild(buttonEditCell);
+                row.appendChild(editCell);
+                
                 tbody.appendChild(row);
         
             });
@@ -329,7 +349,20 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 row.appendChild(invitationCodeCell);
                 
                 const scheduleEntryCell = document.createElement("td");
-                scheduleEntryCell.innerText = 'Calendar Entry';
+                const scheduleEntryBtn = document.createElement("button");
+                const imgCalendarIcon = document.createElement("img");
+                imgCalendarIcon.onload = () => {
+                    imgCalendarIcon.width = 24; 
+                    imgCalendarIcon.height = 24; 
+                };
+                imgCalendarIcon.src = "../img/calendar.svg"; 
+                imgCalendarIcon.alt = "Edit Slot";
+                scheduleEntryBtn.appendChild(imgCalendarIcon);
+                scheduleEntryBtn.classList.add("btn", "btn-primary"); 
+                scheduleEntryBtn.addEventListener("click", () => {
+                
+                });
+                scheduleEntryCell.appendChild(scheduleEntryBtn);
                 row.appendChild(scheduleEntryCell);
                 
                 let childEdgesText = '';
@@ -348,7 +381,6 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 const button = document.createElement("button");
                 const imgIcon = document.createElement("img");
                 imgIcon.onload = () => {
-                    // Once the image is loaded, set the dimensions
                     imgIcon.width = 24; // Set the desired width
                     imgIcon.height = 24; // Set the desired height
                 };
@@ -361,6 +393,41 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 });
                 buttonCell.appendChild(button);
                 row.appendChild(buttonCell);
+                
+                const editCell = document.createElement("td");
+                const buttonEditCell = document.createElement("button");
+                const imgEditIcon = document.createElement("img");
+                imgEditIcon.onload = () => {
+                    // Once the image is loaded, set the dimensions
+                    imgEditIcon.width = 24; // Set the desired width
+                    imgIcon.height = 24; // Set the desired height
+                };
+                imgEditIcon.src = "../img/pencil.svg"; 
+                imgEditIcon.alt = "Edit Slot";
+                buttonEditCell.appendChild(imgEditIcon);
+                buttonEditCell.classList.add("btn", "btn-primary"); 
+                buttonEditCell.addEventListener("click", () => {
+                    editSlot(childSlot.slotId);
+                });
+                editCell.appendChild(buttonEditCell);
+                row.appendChild(editCell);
+                
+                const trashCell = document.createElement("td");
+                const trashBtn = document.createElement("button");
+                const imgTrashIcon = document.createElement("img");
+                imgTrashIcon.onload = () => {
+                    imgTrashIcon.width = 24; 
+                    imgTrashIcon.height = 24;
+                };
+                imgTrashIcon.src = "../img/trash.svg"; 
+                imgTrashIcon.alt = "Delete Slot";
+                trashBtn.appendChild(imgTrashIcon);
+                trashBtn.classList.add("btn", "btn-primary"); 
+                trashBtn.addEventListener("click", () => {
+                    confirmDeleteSlot(childSlot.name, childSlot.invitationCode || 'None', childSlot.slotId, ChildrenSlotsResult.slotId);
+                });
+                trashCell.appendChild(trashBtn);
+                row.appendChild(trashCell);
                 
                 tbody.appendChild(row);
         
@@ -388,7 +455,14 @@ function FavoriteSlots(slot_object) {
         
         const entryCell = document.createElement("td");
         const buttonCellButton = document.createElement("button");
-        buttonCellButton.innerText = `"Enter Slot" : ${slot_tree.rootSlotModel.slotId}`; 
+        const imgIcon = document.createElement("img");
+        imgIcon.onload = () => {
+            imgIcon.width = 24;
+            imgIcon.height = 24;
+        };
+        imgIcon.src = "../img/arrowin.svg"; 
+        imgIcon.alt = "Enter Slot";
+        buttonCellButton.appendChild(imgIcon);
         buttonCellButton.classList.add("btn", "btn-primary"); 
         buttonCellButton.addEventListener("click", () => {
             processSlot(slot_tree.rootSlotModel.slotId);
@@ -434,7 +508,14 @@ function HostedSlots(slot_object) {
         
         const entryCell = document.createElement("td");
         const buttonCellButton = document.createElement("button");
-        buttonCellButton.innerText = `"Enter Slot" : ${slot_tree.rootSlotModel.slotId}`; 
+        const imgIcon = document.createElement("img");
+        imgIcon.onload = () => {
+            imgIcon.width = 24;
+            imgIcon.height = 24;
+        };
+        imgIcon.src = "../img/arrowin.svg"; 
+        imgIcon.alt = "Enter Slot";
+        buttonCellButton.appendChild(imgIcon);
         buttonCellButton.classList.add("btn", "btn-primary"); 
         buttonCellButton.addEventListener("click", () => {
             processSlot(slot_tree.rootSlotModel.slotId);
@@ -444,13 +525,37 @@ function HostedSlots(slot_object) {
 
         const editCell = document.createElement("td");
         const editBtn = document.createElement("button");
-        editBtn.innerText = `Edit : ${slot_tree.rootSlotModel.slotId}`; 
+        const imgEditIcon = document.createElement("img");
+        imgEditIcon.onload = () => {
+            imgEditIcon.width = 24;
+            imgEditIcon.height = 24; 
+        };
+        imgEditIcon.src = "../img/pencil.svg"; 
+        imgEditIcon.alt = "Edit Slot";
+        editBtn.appendChild(imgEditIcon);
         editBtn.classList.add("btn", "btn-primary"); 
         editBtn.addEventListener("click", () => {
             Edit(slot_tree.rootSlotModel.slotId);
         });
         editCell.appendChild(editBtn);
         row.appendChild(editCell);
+        
+        const trashCell = document.createElement("td");
+        const trashBtn = document.createElement("button");
+        const imgTrashIcon = document.createElement("img");
+        imgTrashIcon.onload = () => {
+            imgTrashIcon.width = 24; 
+            imgTrashIcon.height = 24;
+        };
+        imgTrashIcon.src = "../img/trash.svg"; 
+        imgTrashIcon.alt = "Delete Slot";
+        trashBtn.appendChild(imgTrashIcon);
+        trashBtn.classList.add("btn", "btn-primary"); 
+        trashBtn.addEventListener("click", () => {
+            confirmDeleteSlot(slot_tree.rootSlotModel.name, slot_tree.rootSlotModel.invitationCode || 'None', slot_tree.rootSlotModel.slotId);
+        });
+        trashCell.appendChild(trashBtn);
+        row.appendChild(trashCell);
         
         tableBody.appendChild(row);
     }); 

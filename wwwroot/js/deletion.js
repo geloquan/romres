@@ -176,3 +176,5 @@ function toggleDeleteMode(enable) {
         selectedRows.length = 0; 
     }
 }
+function deleteHosted(slot_id) {
+}

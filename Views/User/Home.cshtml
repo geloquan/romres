@@ -29,6 +29,9 @@
 <script src="/js/duplication.js"></script>
 <script src="/js/dummy_objects.js"></script>
 <script src="/js/tables.js"></script>
+<script src="/js/remove_slot.js"></script>
+<script src="/js/delete_slot.js"></script>
+<script src="/js/edit_slot_row.js"></script>
 <script src="/js/add_child.js"></script>
 <script src="/js/new_host.js"></script>
 <script src="/js/pagination_slots.js"></script>
@@ -64,8 +67,9 @@
                 type: 'GET',
                 success: function(result) {
                     entity_type = 'hosted';
-                    buildRootSlotTable("Hosted", ['Invitation Code', 'Slot Name', 'Host Name-tag', 'Entry', 'Unhost'], 'hosted-slot-table');
+                    buildRootSlotTable("Hosted", ['Invitation Code', 'Slot Name', 'Host Name-tag', 'Entry', 'Edit', 'Delete'], 'hosted-slot-table');
                     global_slot_object = result;
+                    console.log(result);
                     HostedSlots(result);
                     $('#user-options').empty();
                     $('#user-options').append('<button id="backButton" class="btn btn-secondary btn-lg">Back</button>');

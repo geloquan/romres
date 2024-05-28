@@ -406,7 +406,7 @@ function buildFaveSlotTreeTable(tree) {
     slotChildrenTable.appendChild(slotChildrenTableHead);
     const slotChildrenTableHeaderRow = document.createElement('tr');
     slotChildrenTableHead.appendChild(slotChildrenTableHeaderRow);
-    const childrenTableHeaders = ['Slot Name', 'Is Reservable', 'Invitation Code', 'Schedule', 'Edge (x, y)', 'Note', 'Entry', 'Edit'];
+    const childrenTableHeaders = ['Slot Name', 'Is Reservable', 'Invitation Code', 'Schedule', 'Edge (x, y)', 'Note', '', '', ''];
     childrenTableHeaders.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;

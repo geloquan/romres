@@ -9,11 +9,13 @@ var table_copy;
 function displayTable(page) {
     const table = document.getElementById('slot-children');
     const rows = table.getElementsByTagName('tr');
-    console.log('displayTable() rows', rows);
+    
+    console.log('displayTable() rows');
     row_copy = rows;
     table_copy = table;
     var page_info = `0 / 0`;
     if (rows.length == 0) {
+    
         document.getElementById('page-info').innerText = page_info;
     } else {
         totalPages = Math.ceil(rows.length / rowsPerPage);
@@ -37,6 +39,11 @@ function displayTable(page) {
 }
 
 function prevPage() {
+    console.log('prev: ', currentPage);
+    const table = document.getElementById('slot-children');
+    const rows = table.getElementsByTagName('tr');
+    const totalPages = Math.ceil(rows.length / rowsPerPage);
+    
     if (currentPage > 1) {
         currentPage--;
         displayTable(currentPage);
@@ -44,6 +51,7 @@ function prevPage() {
 }
 
 function nextPage() {
+    console.log('next', currentPage);
     const table = document.getElementById('slot-children');
     const rows = table.getElementsByTagName('tr');
     const totalPages = Math.ceil(rows.length / rowsPerPage);

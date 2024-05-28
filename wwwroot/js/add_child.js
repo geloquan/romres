@@ -48,7 +48,8 @@ function sendAddChild(newChild) {
         success: function(result) {
             console.log('Successfully saved new slot: ', result);
             global_slot_object = result;
-            processSlot(1);
+            processSlot(newChild.slot_id);
+            displayTable(1);
         },
         error: function() {
             alert('An error occurred while loading the content.');
@@ -113,11 +114,6 @@ function confirmAddChild(invitationCode, slotName, radio, original_anchor_contai
     $('#confirmButton').on('click', function() {
         sendAddChild(newChild);
         $('#confirmationModal').modal('hide');
-        toogleAddChildMode(false);
-        $('#child-anchor-container').html(original_anchor_container);
-        $('#add-child').click(function() {
-            toogleAddChildMode(true);
-        });
     });
 }
 
@@ -125,87 +121,82 @@ function toogleAddChildMode(enable) {
     console.log("toogleAddChildMode()");
     
     var original = $('#child-anchor-container').html();
-    if (enable) {
-        const table = document.getElementById('slot-children-table');
-        var newRow = document.getElementById('temporary-child-row');
-        if (!newRow) {
-            newRow = document.createElement('tr');
-            newRow.id = 'temporary-row';
-            
-            const slotNameCell = document.createElement('td');
-            const slotNameInput = document.createElement('input');
-            slotNameInput.type = 'text';
-            slotNameInput.placeholder = 'Enter Slot Name';
-            slotNameInput.classList.add('form-control');
-            slotNameCell.appendChild(slotNameInput);
-            
-            const isReservableCell = document.createElement('td');
-            
-            const checkboxWrapper = document.createElement('div');
-            checkboxWrapper.classList.add('form-check');
-            
-            const isReservableCheckbox = document.createElement('input');
-            isReservableCheckbox.type = 'checkbox';
-            isReservableCheckbox.id = 'isReservableCheckbox';
-            isReservableCheckbox.name = 'isReservable';
-            isReservableCheckbox.value = 1; 
-            isReservableCheckbox.classList.add('form-check-input');
-            
-            const checkboxLabel = document.createElement('label');
-            checkboxLabel.setAttribute('for', 'isReservableCheckbox');
-            checkboxLabel.textContent = 'Reservable'; // Set the label text as needed
-            checkboxLabel.classList.add('form-check-label');
-            
-            checkboxWrapper.appendChild(isReservableCheckbox);
-            checkboxWrapper.appendChild(checkboxLabel);
-            
-            isReservableCell.appendChild(checkboxWrapper);
-            
-            const invitationCodeCell = document.createElement('td');
-            const invitationCodeInput = document.createElement('input');
-            invitationCodeInput.type = 'text';
-            invitationCodeInput.placeholder = 'Enter Invitation Code';
-            invitationCodeInput.classList.add('form-control');
-            invitationCodeCell.appendChild(invitationCodeInput);
-            const generateCodeAnchor = document.createElement('a');
-            generateCodeAnchor.href = '#';
-            generateCodeAnchor.textContent = 'Generate Code';
-            generateCodeAnchor.onclick = function(e) {
-                e.preventDefault();
-                invitationCodeInput.value = generateRandomCode();
-            };
-            invitationCodeCell.appendChild(document.createElement('br'));
-            invitationCodeCell.appendChild(generateCodeAnchor);
-            
-            newRow.appendChild(slotNameCell);
-            newRow.appendChild(isReservableCell);
-            newRow.appendChild(invitationCodeCell);
-            newRow.appendChild(document.createElement('td'));
-            newRow.appendChild(document.createElement('td'));
-            newRow.appendChild(document.createElement('td'));
-            
-            table.querySelector('tbody').appendChild(newRow);
-            
-            const saveAnchor = $('<a href="#" id="save-selected-rows">Save New Child</a>');
-            saveAnchor.click(function() {
-                console.log("Save New Child.click()");
-                if (!invitationCodeInput.value || !slotNameInput.value) {
-                    console.log("may be empty: {invitationCodeInput, slotNameInput}");
-                    return;
-                } 
-                confirmAddChild(invitationCodeInput, slotNameInput, isReservableCheckbox, original);
-            });
+    console.log('true');
+    const table = document.getElementById('slot-children-table');
+    var newRow = document.getElementById('temporary-child-row');
+    if (!newRow) {
+        newRow = document.createElement('tr');
+        newRow.id = 'temporary-row';
         
-            const backAnchor = $('<a href="#" id="back-to-original">Back</a>');
-            backAnchor.click(function() {
-                toogleAddChildMode(false);
-                $('#child-anchor-container').html(original);
-                $('#add-child').click(function() {
-                    toogleAddChildMode(true);
-                });
-            });
-            
-            $('#child-anchor-container').empty().append(saveAnchor).append(" | ").append(backAnchor);
-        }
+        const slotNameCell = document.createElement('td');
+        const slotNameInput = document.createElement('input');
+        slotNameInput.type = 'text';
+        slotNameInput.placeholder = 'Enter Slot Name';
+        slotNameInput.classList.add('form-control');
+        slotNameCell.appendChild(slotNameInput);
+        
+        const isReservableCell = document.createElement('td');
+        
+        const checkboxWrapper = document.createElement('div');
+        checkboxWrapper.classList.add('form-check');
+        
+        const isReservableCheckbox = document.createElement('input');
+        isReservableCheckbox.type = 'checkbox';
+        isReservableCheckbox.id = 'isReservableCheckbox';
+        isReservableCheckbox.name = 'isReservable';
+        isReservableCheckbox.value = 1; 
+        isReservableCheckbox.classList.add('form-check-input');
+        
+        const checkboxLabel = document.createElement('label');
+        checkboxLabel.setAttribute('for', 'isReservableCheckbox');
+        checkboxLabel.textContent = 'Reservable'; // Set the label text as needed
+        checkboxLabel.classList.add('form-check-label');
+        
+        checkboxWrapper.appendChild(isReservableCheckbox);
+        checkboxWrapper.appendChild(checkboxLabel);
+        
+        isReservableCell.appendChild(checkboxWrapper);
+        
+        const invitationCodeCell = document.createElement('td');
+        const invitationCodeInput = document.createElement('input');
+        invitationCodeInput.type = 'text';
+        invitationCodeInput.placeholder = 'Enter Invitation Code';
+        invitationCodeInput.classList.add('form-control');
+        invitationCodeCell.appendChild(invitationCodeInput);
+        const generateCodeAnchor = document.createElement('a');
+        generateCodeAnchor.href = '#';
+        generateCodeAnchor.textContent = 'Generate Code';
+        generateCodeAnchor.onclick = function(e) {
+            e.preventDefault();
+            invitationCodeInput.value = generateRandomCode();
+        };
+        invitationCodeCell.appendChild(document.createElement('br'));
+        invitationCodeCell.appendChild(generateCodeAnchor);
+        
+        newRow.appendChild(slotNameCell);
+        newRow.appendChild(isReservableCell);
+        newRow.appendChild(invitationCodeCell);
+        newRow.appendChild(document.createElement('td'));
+        newRow.appendChild(document.createElement('td'));
+        newRow.appendChild(document.createElement('td'));
+        
+        table.querySelector('tbody').appendChild(newRow);
+        
+        const saveAnchor = $('<a href="#" id="save-selected-rows">Save New Child</a>');
+        saveAnchor.click(function() {
+            console.log("Save New Child.click()");
+            if (!invitationCodeInput.value || !slotNameInput.value) {
+                console.log("may be empty: {invitationCodeInput, slotNameInput}");
+                return;
+            } 
+            confirmAddChild(invitationCodeInput, slotNameInput, isReservableCheckbox, original);
+        });
+    
+        const backAnchor = $('<a href="#" id="back-to-original">Back</a>');
+        backAnchor.click(function() {
+            document.getElementById('temporary-row').remove();
+        });
+        
+        $('#child-anchor-container').empty().append(saveAnchor).append(" | ").append(backAnchor);
     }
 }

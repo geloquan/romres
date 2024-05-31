@@ -47,9 +47,9 @@ function sendAddChild(newChild) {
         data: JSON.stringify(newChild),
         success: function(result) {
             console.log('Successfully saved new slot: ', result);
+            console.log('slot_id to process: ', newChild.slot_id);
             global_slot_object = result;
             processSlot(newChild.slot_id);
-            displayTable(1);
         },
         error: function() {
             alert('An error occurred while loading the content.');

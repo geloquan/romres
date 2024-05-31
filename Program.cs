@@ -50,6 +50,11 @@ namespace WebApplication2
                 pattern: "Slot/{invitation_code}",
                 defaults: new { controller = "Slot", action = "InvitationCode" }
             );
+            app.MapControllerRoute(
+                name: "userWithId",
+                pattern: "User/{user_id}/Slot/{slot_id}/calendar",
+                defaults: new { controller = "Slot", action = "Calendar" }
+            );
             //app.MapControllerRoute(
             //    name: "hostDashboardWithIdWithSlotWithId",
             //    pattern: "HostDashboard/{host_id}/Slot/{slot_id}",

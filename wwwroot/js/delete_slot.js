@@ -1,4 +1,4 @@
-function sendDeleteSlot(to_delete, parent_slot_id) {
+function sendDeleteSlot(to_delete, parent_slot_id, slotName) {
     console.log('sendDeleteSlot()');
     $.ajax({
         url: '/slot/delete',
@@ -6,9 +6,11 @@ function sendDeleteSlot(to_delete, parent_slot_id) {
         contentType: 'application/json',
         data: JSON.stringify(to_delete),
         success: function(result) {
-            deleteRow('slot-children-table', to_delete.slot_id);
+            //deleteRow('slot-children-table', to_delete.slot_id);
+            console.log('before delete global: ', global_slot_object);
+            deleteSlot(to_delete.slot_id, slotName);
+            console.log('after delete global: ', global_slot_object);
             processSlot(parent_slot_id);
-            displayTable(1);
         },
         error: function() {
             alert('sendDeleteSlot() FAILED.');
@@ -66,7 +68,7 @@ function confirmDeleteSlot(slotName, invitationCode, slot_id, parent_slot_id) {
     });
 
     $('#confirmButton').on('click', function() {
-        sendDeleteSlot(to_delete, parent_slot_id);
+        sendDeleteSlot(to_delete, parent_slot_id, slotName);
         $('#confirmationModal').modal('hide');
     });
 }

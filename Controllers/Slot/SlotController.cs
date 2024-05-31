@@ -5,7 +5,7 @@ using WebApplication2.Models;
 using Newtonsoft.Json;
 
 namespace WebApplication2.Controllers {
-    public class SlotController : Controller {
+    public partial class SlotController : Controller {
         [HttpPost("/slot/delete")]
         public IActionResult Delete([FromBody] HttpPostDelete request) {
             Console.WriteLine("slot/Delete()");

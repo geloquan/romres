@@ -360,7 +360,9 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 scheduleEntryBtn.appendChild(imgCalendarIcon);
                 scheduleEntryBtn.classList.add("btn", "btn-primary"); 
                 scheduleEntryBtn.addEventListener("click", () => {
-                
+                    const currentUrl = window.location.href;
+                    const newUrl = `${currentUrl}/slot/${childSlot.slotId}/calendar`;
+                    window.location.href = newUrl;
                 });
                 scheduleEntryCell.appendChild(scheduleEntryBtn);
                 row.appendChild(scheduleEntryCell);

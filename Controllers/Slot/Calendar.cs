@@ -7,7 +7,9 @@ using Newtonsoft.Json;
 namespace WebApplication2.Controllers {
     public partial class SlotController : Controller {
         public IActionResult Calendar(int user_id, int slot_id) {
+            Console.WriteLine("Calendar()");
             HttpGetCalendar httpGetCalendar = new HttpGetCalendar();
+            httpGetCalendar.slot_id = slot_id;
             bool success = httpGetCalendar.Process();
             if (success) {
                 var calendarModel = JsonConvert.SerializeObject(httpGetCalendar.calendarModel);

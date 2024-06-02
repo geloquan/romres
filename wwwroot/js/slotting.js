@@ -291,7 +291,7 @@ function ChildrenSlots(ChildrenSlotsResult) {
                     imgIcon.width = 24; // Set the desired width
                     imgIcon.height = 24; // Set the desired height
                 };
-                imgIcon.src = "../img/arrowin.svg"; 
+                imgIcon.src = "/img/arrowin.svg"; 
                 imgIcon.alt = "Enter Slot";
                 button.appendChild(imgIcon);
                 button.classList.add("btn", "btn-primary"); 
@@ -310,7 +310,7 @@ function ChildrenSlots(ChildrenSlotsResult) {
                     imgEditIcon.width = 24; // Set the desired width
                     imgIcon.height = 24; // Set the desired height
                 };
-                imgEditIcon.src = "../img/pencil.svg"; 
+                imgEditIcon.src = "/img/pencil.svg"; 
                 imgEditIcon.alt = "Edit Slot";
                 buttonEditCell.appendChild(imgEditIcon);
                 buttonEditCell.classList.add("btn", "btn-primary"); 
@@ -355,13 +355,13 @@ function ChildrenSlots(ChildrenSlotsResult) {
                     imgCalendarIcon.width = 24; 
                     imgCalendarIcon.height = 24; 
                 };
-                imgCalendarIcon.src = "../img/calendar.svg"; 
+                imgCalendarIcon.src = "/img/calendar.svg"; 
                 imgCalendarIcon.alt = "Edit Slot";
                 scheduleEntryBtn.appendChild(imgCalendarIcon);
                 scheduleEntryBtn.classList.add("btn", "btn-primary"); 
                 scheduleEntryBtn.addEventListener("click", () => {
                     const currentUrl = window.location.href;
-                    const newUrl = `${currentUrl}/slot/${childSlot.slotId}/calendar`;
+                    const newUrl = `${currentUrl}slot/${childSlot.slotId}/calendar`;
                     window.location.href = newUrl;
                 });
                 scheduleEntryCell.appendChild(scheduleEntryBtn);
@@ -386,7 +386,7 @@ function ChildrenSlots(ChildrenSlotsResult) {
                     imgIcon.width = 24; // Set the desired width
                     imgIcon.height = 24; // Set the desired height
                 };
-                imgIcon.src = "../img/arrowin.svg"; 
+                imgIcon.src = "/img/arrowin.svg"; 
                 imgIcon.alt = "Enter Slots";
                 button.appendChild(imgIcon);
                 button.classList.add("btn", "btn-primary"); 
@@ -404,7 +404,7 @@ function ChildrenSlots(ChildrenSlotsResult) {
                     imgEditIcon.width = 24; // Set the desired width
                     imgIcon.height = 24; // Set the desired height
                 };
-                imgEditIcon.src = "../img/pencil.svg"; 
+                imgEditIcon.src = "/img/pencil.svg"; 
                 imgEditIcon.alt = "Edit Slot";
                 buttonEditCell.appendChild(imgEditIcon);
                 buttonEditCell.classList.add("btn", "btn-primary"); 
@@ -421,7 +421,7 @@ function ChildrenSlots(ChildrenSlotsResult) {
                     imgTrashIcon.width = 24; 
                     imgTrashIcon.height = 24;
                 };
-                imgTrashIcon.src = "../img/trash.svg"; 
+                imgTrashIcon.src = "/img/trash.svg"; 
                 imgTrashIcon.alt = "Delete Slot";
                 trashBtn.appendChild(imgTrashIcon);
                 trashBtn.classList.add("btn", "btn-primary"); 
@@ -462,7 +462,7 @@ function FavoriteSlots(slot_object) {
             imgIcon.width = 24;
             imgIcon.height = 24;
         };
-        imgIcon.src = "../img/arrowin.svg"; 
+        imgIcon.src = "/img/arrowin.svg"; 
         imgIcon.alt = "Enter Slot";
         buttonCellButton.appendChild(imgIcon);
         buttonCellButton.classList.add("btn", "btn-primary"); 
@@ -515,7 +515,7 @@ function HostedSlots(slot_object) {
             imgIcon.width = 24;
             imgIcon.height = 24;
         };
-        imgIcon.src = "../img/arrowin.svg"; 
+        imgIcon.src = "/img/arrowin.svg"; 
         imgIcon.alt = "Enter Slot";
         buttonCellButton.appendChild(imgIcon);
         buttonCellButton.classList.add("btn", "btn-primary"); 
@@ -532,7 +532,7 @@ function HostedSlots(slot_object) {
             imgEditIcon.width = 24;
             imgEditIcon.height = 24; 
         };
-        imgEditIcon.src = "../img/pencil.svg"; 
+        imgEditIcon.src = "/img/pencil.svg"; 
         imgEditIcon.alt = "Edit Slot";
         editBtn.appendChild(imgEditIcon);
         editBtn.classList.add("btn", "btn-primary"); 
@@ -549,7 +549,7 @@ function HostedSlots(slot_object) {
             imgTrashIcon.width = 24; 
             imgTrashIcon.height = 24;
         };
-        imgTrashIcon.src = "../img/trash.svg"; 
+        imgTrashIcon.src = "/img/trash.svg"; 
         imgTrashIcon.alt = "Delete Slot";
         trashBtn.appendChild(imgTrashIcon);
         trashBtn.classList.add("btn", "btn-primary"); 

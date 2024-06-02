@@ -155,6 +155,16 @@ namespace WebApplication2.Models {
         public string? UserName { get; set; }
         public string? UserPassword { get; set; }
     }
+    public class CalendarDataPropertyModel {
+        [JsonProperty("calendarPropertyId")]
+        public int? id { get; set; }
+        [JsonProperty("calendarPropertyCalendarId")]
+        public int? calendar_id { get; set; }
+        [JsonProperty("calendarPropertyKey")]
+        public string? key { get; set; }
+        [JsonProperty("calendarPropertyValue")]
+        public string? value { get; set; }
+    }
     public class CalendarDataModel {
         [JsonProperty("calendarId")]
         public int? id {get; set; }
@@ -173,6 +183,9 @@ namespace WebApplication2.Models {
 
         [JsonProperty("isModified")]
         public bool is_modified {get; set; } = false;
+
+        [JsonProperty("properties")]
+        public List<CalendarDataPropertyModel> calendarDataPropertyModels = new List<CalendarDataPropertyModel>();
     }
     public class CalendarModel {
         [JsonProperty("calendarDataModel")]

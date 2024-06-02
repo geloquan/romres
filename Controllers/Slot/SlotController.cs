@@ -5,7 +5,24 @@ using WebApplication2.Models;
 using Newtonsoft.Json;
 
 namespace WebApplication2.Controllers {
-    public class SlotController : Controller {
+    public partial class SlotController : Controller {
+        [HttpPost("/slot/delete")]
+        public IActionResult Delete([FromBody] HttpPostDelete request) {
+            Console.WriteLine("slot/Delete()");
+            if (request != null) {
+                bool processingResult = request.Process();
+                if (processingResult) {
+                    return Ok("errmm");
+                }
+                else {
+                    return StatusCode(500, "Failed Delete().");  // Return appropriate error status
+                }
+            } else {
+                Console.WriteLine("Invalid request data()");
+                return StatusCode(500, "Invalid request data.");
+            }
+        }
+        
         [HttpPut("/slot/{id}/reserve")]
         public IActionResult Reserve(int id, [FromBody] HttpPutReserve request) {
             if (request != null && request.Reserve != null && request.UserId != null) {

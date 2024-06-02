@@ -1,6 +1,171 @@
 using System.Data.SqlClient;
 
 namespace WebApplication2.Models {
+    public class HttpPostDelete {
+        public int? user_id {get;set;}
+        public int? slot_id {get;set;}
+        string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        private string get_slot_network_query = @"
+            SELECT 
+                sn1.primary_slot_id AS root_slot_id,
+                sn1.child_slot_id AS second_layer_slot_id,
+                sn2.child_slot_id AS third_layer_slot_id,
+                sn3.child_slot_id AS fourth_layer_slot_id
+            FROM 
+                slot_network sn1
+            LEFT JOIN 
+                slot_network sn2 ON sn1.child_slot_id = sn2.primary_slot_id
+            LEFT JOIN 
+                slot_network sn3 ON sn2.child_slot_id = sn3.primary_slot_id
+            WHERE 
+                sn1.primary_slot_id = @slot_id;
+        ";
+        private string delete_slot_query = @"
+            
+        ";
+        private string GetDeleteQuery(string table_name) {
+            if ("slot_network" == table_name) {
+                return @"
+                    DELETE FROM
+                        slot_network
+                    WHERE
+                        primary_slot_id = @slot_id
+                    OR 
+                        parent_slot_id = @slot_id
+                    OR
+                        child_slot_id = @slot_id;
+                ";
+             };
+            if ("slot" == table_name) {
+                return @"
+                    DELETE FROM
+                        slot
+                    WHERE
+                        id = @slot_id;
+                ";
+             };
+            string delete_query = $@"
+                DELETE FROM
+                    {table_name}
+                WHERE
+                    slot_id = @slot_id;
+            ";
+            return delete_query;
+        }
+        private void Delete(int slot_id, SqlConnection conn, SqlTransaction transaction) {
+            Console.WriteLine("delete()");
+            List<string> table_list = new List<string> { 
+                "edge", "favorites_tagging",
+                "invitation", "slot_fnl",
+                "user_favorites", "slot_network",
+                "slot"
+            };
+            try {
+                foreach (string table in table_list) {
+                    string query = GetDeleteQuery(table);
+                    using (SqlCommand deleteQueryCommand = new SqlCommand(query, conn, transaction)) {
+                        deleteQueryCommand.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = slot_id;
+                        deleteQueryCommand.ExecuteNonQuery();
+                    }
+                };
+            } catch (Exception ex) {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+            Console.WriteLine("delete() END");
+        }
+        public bool Process() {
+            Console.WriteLine("'process()'");
+            try {
+                using (SqlConnection conn = new SqlConnection(this.connectionQuery)) {
+                    conn.Open();
+                    using (SqlCommand command = new SqlCommand(get_slot_network_query, conn)) {
+                        command.Parameters.Add("@slot_id", System.Data.SqlDbType.Int).Value = this.slot_id;
+                        List<int> visited = new List<int>();
+                        using (SqlDataReader readere = command.ExecuteReader()){
+                            while (readere.Read()) {
+                                int? first = readere.IsDBNull(0) ? (int?)null : readere.GetInt32(0);
+                                int? second = readere.IsDBNull(1) ? (int?)null : readere.GetInt32(1);
+                                int? third = readere.IsDBNull(2) ? (int?)null : readere.GetInt32(2);
+                                int? fourth = readere.IsDBNull(3) ? (int?)null : readere.GetInt32(3);
+                                
+                                using (SqlConnection conn2 = new SqlConnection(connectionQuery)) {
+                                    conn2.Open();
+                                    Console.WriteLine("q first: ");
+                                    if (!first.HasValue || visited.Contains(first.Value)) {
+                                        Console.WriteLine("continue");
+                                        continue;
+                                    }
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            Console.WriteLine("try");
+                                            Delete(first.Value, conn2, transaction);
+                                            transaction.Commit();
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine("Error: " + ex.Message);
+                                            return false;
+                                        }
+                                    }
+                                    Console.WriteLine("w second: " );
+                                    if (!second.HasValue || visited.Contains(second.Value)) {
+                                        Console.WriteLine("continue");
+                                        continue;
+                                    }
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            Delete(second.Value, conn2, transaction);
+                                            transaction.Commit();
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine("Error: " + ex.Message);
+                                            return false;
+                                        }
+                                    }
+                                    
+                                    Console.WriteLine("e third: ");
+                                    if (!third.HasValue || visited.Contains(third.Value)) {
+                                        Console.WriteLine("continue");
+                                        continue;
+                                    }
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            Delete(second.Value, conn2, transaction);
+                                            Console.WriteLine("continue");
+                                            transaction.Commit();
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine("Error: " + ex.Message);
+                                            return false;
+                                        }
+                                    }
+                                    Console.WriteLine("r fourth: ");
+                                    if (!fourth.HasValue || visited.Contains(fourth.Value)) {
+                                        Console.WriteLine("continue");
+                                        continue;
+                                    }
+                                    using (SqlTransaction transaction = conn2.BeginTransaction()) {
+                                        try {
+                                            Delete(fourth.Value, conn2, transaction);
+                                            transaction.Commit();
+                                        } catch (Exception ex) {
+                                            transaction.Rollback();
+                                            Console.WriteLine("Error: " + ex.Message);
+                                            return false;
+                                        }
+                                    }
+                                    Console.WriteLine("t");
+                                }
+                            }
+                        }
+                    }
+                }
+                return true; 
+            } catch (Exception ex) {
+                Console.WriteLine("Error: " + ex.Message);
+                return false;
+            }
+        }
+    }
     public class HttpPutReserve {
         public int? UserId { get; set; }
         public bool? Reserve { get; set; }

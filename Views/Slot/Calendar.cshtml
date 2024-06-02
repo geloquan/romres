@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Host";
+}
+<h5>calendar.cshtml</h5>
+<script>
+    var data = @Html.Raw(ViewBag.CalendarModel);
+    const preference = {
+        repetition_pattern: 'weekly',
+        is_reservable: true 
+    };
+    console.log('data calendar: ', data);
+</script>
+
+<script src="/js/calendar/initial.js"></script>
+
+<div id="calendar-body" class="table-responsive">
+    <table id="calendar" class="table table-striped table-bordered">
+        
+    </table>
+</div>
+
+<script src="/js/calendar/data.js"></script>

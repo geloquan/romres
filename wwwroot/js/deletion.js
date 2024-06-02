@@ -1,5 +1,4 @@
 let deleteMode = false;
-let newHostMode = false;
 const selectedRows = [];
 function successDeleteHosts() {
     console.log("successDeleteHosts()");
@@ -35,7 +34,7 @@ function successDeleteHosts() {
         setTimeout(function() {
             $('#confirmationModal').modal('hide');
             window.location.reload();
-          }, 500);
+          }, 250);
     });
 }
 
@@ -63,7 +62,6 @@ function sendDeleteHosts(slot_id_list) {
         contentType: 'application/json',
         data: JSON.stringify(object),
         success: function(result) {
-        
             successDeleteHosts();
         },
         error: function() {
@@ -177,4 +175,6 @@ function toggleDeleteMode(enable) {
         $rows.removeClass('pointer selected').off('click', selectRow);
         selectedRows.length = 0; 
     }
+}
+function deleteHosted(slot_id) {
 }

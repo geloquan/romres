@@ -156,6 +156,46 @@ function buildSearchSlotTreeTable() {
     slotChildrenTable.appendChild(slotChildrenTableBody);
 
     slotDiv.appendChild(slotChildrenTable);
+    
+    const paginationDiv = document.createElement('div');
+    paginationDiv.id = 'pagination-controls';
+
+    const nav = document.createElement('nav');
+    const ul = document.createElement('ul');
+    ul.className = 'pagination justify-content-center';
+
+    const prevLi = document.createElement('li');
+    prevLi.className = 'page-item';
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'page-link';
+    prevBtn.id = 'prev';
+    prevBtn.innerText = 'Previous';
+    prevBtn.onclick = prevPage;
+    prevLi.appendChild(prevBtn);
+    
+    const pageInfoLi = document.createElement('li');
+    pageInfoLi.className = 'page-item disabled';
+    const pageInfoSpan = document.createElement('span');
+    pageInfoSpan.className = 'page-link';
+    pageInfoSpan.id = 'page-info';
+    pageInfoLi.appendChild(pageInfoSpan);
+
+    const nextLi = document.createElement('li');
+    nextLi.className = 'page-item';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'page-link';
+    nextBtn.id = 'next';
+    nextBtn.innerText = 'Next';
+    nextBtn.onclick = nextPage;
+    nextLi.appendChild(nextBtn);
+
+    ul.appendChild(prevLi);
+    ul.appendChild(pageInfoLi);
+    ul.appendChild(nextLi);
+    nav.appendChild(ul);
+    paginationDiv.appendChild(nav);
+    
+    slotDiv.appendChild(paginationDiv);
 }
 
 function processSlot(slot_id, slot) {
@@ -174,6 +214,7 @@ function processSlot(slot_id, slot) {
     if (results) {
         ParentSlot(results, results.parentSlotId);
         ChildrenSlots(results, slot);
+        displayTable(1);
         console.log("resres: ", results);
         const toRootButton = document.getElementById('to-root');
         if (!toRootButton && results.parentSlotId != null) {

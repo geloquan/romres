@@ -1,9 +1,8 @@
+
 function SlotScope(slot_id) {
-    console.log("SlotScope() entered");
     let matchedSubtree = null;
 
     function traverse(obj) {
-        console.log("traverse() entered");
         if (typeof obj !== 'object' || obj === null) {
             return;
         }
@@ -32,10 +31,8 @@ function SlotScope(slot_id) {
     }
 
     traverse(global_slot_object);
-    console.log("Matched Subtree:", matchedSubtree);
 
     function extractUniqueChildren(childrenSlot) {
-        console.log("extractUniqueChildren() entered");
         if (!childrenSlot || !Array.isArray(childrenSlot)) {
             return [];
         }
@@ -49,7 +46,6 @@ function SlotScope(slot_id) {
             }
         });
 
-        console.log("Unique Children:", uniqueChildren);
         return uniqueChildren;
     }
 
@@ -57,7 +53,6 @@ function SlotScope(slot_id) {
         matchedSubtree.childrenSlot = extractUniqueChildren(matchedSubtree.childrenSlot);
     }
 
-    console.log("Final Matched Subtree with Unique Children:", matchedSubtree);
     return matchedSubtree;
 }
 function removeFaveSlot(slot_id) {
@@ -65,11 +60,9 @@ function removeFaveSlot(slot_id) {
 }
 
 function addOrUpdateButton(slotDiv, buttonText, buttonId, clickHandler) {
-    console.log("addOrUpdateButton() entered");
     let button = document.getElementById(buttonId);
 
     if (!button) {
-        console.log("new button");
         button = document.createElement('button');
         button.textContent = buttonText;
         button.classList.add('btn', 'btn-primary', 'mt-3');
@@ -90,7 +83,6 @@ function addOrUpdateButton(slotDiv, buttonText, buttonId, clickHandler) {
     }
 }
 function ParentSlot(result, parent_slot_id) {
-    console.log("ParentSlot() entered");
     const slotNameElement = document.getElementById("slot-parent-name");
     slotNameElement.innerText = result.name;
 
@@ -144,14 +136,10 @@ function ParentSlot(result, parent_slot_id) {
     editButton.className = "btn btn-primary";
 
     const initialEditButtonClickHandler = function() {
-        console.log("editButton.onclick = function() entered");
         const slotNoteElement = document.getElementById("slot-parent-note");
     
         slotNoteElement.innerHTML = `<textarea id="edit-slot-note">${result.note || ''}</textarea>`;
             
-        console.log("slot_id: ", result.slotId);
-        console.log("userId: ", user_id);
-
         editButton.innerText = "Save";
         editButton.onclick = function() {
             const editedNote = document.getElementById("edit-slot-note").value;
@@ -206,17 +194,16 @@ function ParentSlot(result, parent_slot_id) {
 let toParentButtonAppended = false;
 let toRootButtonAppended = false;
 function processSlot(slot_id) {
-    console.log("processSlot() entered");
     buildFaveSlotTreeTable();
     const results = SlotScope(slot_id);
-    console.log('results: ', results);
+    console.log('slot scope: ', results);
     const slotDiv = document.getElementById('slot-parent-header-container');
     const anchorContainer = document.createElement('div');
     anchorContainer.classList.add('anchor-container');
     if (results) {
         ParentSlot(results, results.parentSlotId);
         ChildrenSlots(results);
-        console.log("resres: ", results);
+        displayTable(1);
         const toRootButton = document.getElementById('to-root');
         if (!toRootButton && results.parentSlotId != null) {
             const button = document.createElement('a');
@@ -259,9 +246,8 @@ function processSlot(slot_id) {
     }
 }
 function ChildrenSlots(ChildrenSlotsResult) {
+    console.log('childrenslots(): ');
     if (entity_type == 'favorites') {
-        console.log("entered ChildrenSlots(favorites)");
-        console.log("ChildrenSlotsResult length: ", ChildrenSlotsResult);
         const tbody = document.getElementById("slot-children");
         if (tbody) {
             while (tbody.firstChild) {
@@ -299,21 +285,46 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 
                 const buttonCell = document.createElement("td");
                 const button = document.createElement("button");
-                button.innerText = "Enter Slot"; 
+                const imgIcon = document.createElement("img");
+                imgIcon.onload = () => {
+                    // Once the image is loaded, set the dimensions
+                    imgIcon.width = 24; // Set the desired width
+                    imgIcon.height = 24; // Set the desired height
+                };
+                imgIcon.src = "/img/arrowin.svg"; 
+                imgIcon.alt = "Enter Slot";
+                button.appendChild(imgIcon);
                 button.classList.add("btn", "btn-primary"); 
                 button.addEventListener("click", () => {
                     processSlot(childSlot.slotId);
+                    
                 });
                 buttonCell.appendChild(button);
                 row.appendChild(buttonCell);
+                
+                const editCell = document.createElement("td");
+                const buttonEditCell = document.createElement("button");
+                const imgEditIcon = document.createElement("img");
+                imgEditIcon.onload = () => {
+                    // Once the image is loaded, set the dimensions
+                    imgEditIcon.width = 24; // Set the desired width
+                    imgIcon.height = 24; // Set the desired height
+                };
+                imgEditIcon.src = "/img/pencil.svg"; 
+                imgEditIcon.alt = "Edit Slot";
+                buttonEditCell.appendChild(imgEditIcon);
+                buttonEditCell.classList.add("btn", "btn-primary"); 
+                buttonEditCell.addEventListener("click", () => {
+                    editSlot(childSlot.slotId);
+                });
+                editCell.appendChild(buttonEditCell);
+                row.appendChild(editCell);
                 
                 tbody.appendChild(row);
         
             });
         }
     } else if (entity_type == 'hosted') {
-        console.log("entered ChildrenSlots(hosted)");
-        console.log("ChildrenSlotsResult length: ", ChildrenSlotsResult);
         const tbody = document.getElementById("slot-children");
         if (tbody) {
             while (tbody.firstChild) {
@@ -337,6 +348,25 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 invitationCodeCell.innerText = childSlot.invitationCode || 'None';
                 row.appendChild(invitationCodeCell);
                 
+                const scheduleEntryCell = document.createElement("td");
+                const scheduleEntryBtn = document.createElement("button");
+                const imgCalendarIcon = document.createElement("img");
+                imgCalendarIcon.onload = () => {
+                    imgCalendarIcon.width = 24; 
+                    imgCalendarIcon.height = 24; 
+                };
+                imgCalendarIcon.src = "/img/calendar.svg"; 
+                imgCalendarIcon.alt = "Edit Slot";
+                scheduleEntryBtn.appendChild(imgCalendarIcon);
+                scheduleEntryBtn.classList.add("btn", "btn-primary"); 
+                scheduleEntryBtn.addEventListener("click", () => {
+                    const currentUrl = window.location.href;
+                    const newUrl = `${currentUrl}slot/${childSlot.slotId}/calendar`;
+                    window.location.href = newUrl;
+                });
+                scheduleEntryCell.appendChild(scheduleEntryBtn);
+                row.appendChild(scheduleEntryCell);
+                
                 let childEdgesText = '';
                 if (childSlot.edges && Array.isArray(childSlot.edges)) {
                     childEdgesText = childSlot.edges.map(coord => `(${coord.x}, ${coord.y})`).join(', ');
@@ -351,13 +381,55 @@ function ChildrenSlots(ChildrenSlotsResult) {
                 
                 const buttonCell = document.createElement("td");
                 const button = document.createElement("button");
-                button.innerText = "Enter Slot"; 
+                const imgIcon = document.createElement("img");
+                imgIcon.onload = () => {
+                    imgIcon.width = 24; // Set the desired width
+                    imgIcon.height = 24; // Set the desired height
+                };
+                imgIcon.src = "/img/arrowin.svg"; 
+                imgIcon.alt = "Enter Slots";
+                button.appendChild(imgIcon);
                 button.classList.add("btn", "btn-primary"); 
                 button.addEventListener("click", () => {
                     processSlot(childSlot.slotId);
                 });
                 buttonCell.appendChild(button);
                 row.appendChild(buttonCell);
+                
+                const editCell = document.createElement("td");
+                const buttonEditCell = document.createElement("button");
+                const imgEditIcon = document.createElement("img");
+                imgEditIcon.onload = () => {
+                    // Once the image is loaded, set the dimensions
+                    imgEditIcon.width = 24; // Set the desired width
+                    imgIcon.height = 24; // Set the desired height
+                };
+                imgEditIcon.src = "/img/pencil.svg"; 
+                imgEditIcon.alt = "Edit Slot";
+                buttonEditCell.appendChild(imgEditIcon);
+                buttonEditCell.classList.add("btn", "btn-primary"); 
+                buttonEditCell.addEventListener("click", () => {
+                    editSlot(childSlot.slotId);
+                });
+                editCell.appendChild(buttonEditCell);
+                row.appendChild(editCell);
+                
+                const trashCell = document.createElement("td");
+                const trashBtn = document.createElement("button");
+                const imgTrashIcon = document.createElement("img");
+                imgTrashIcon.onload = () => {
+                    imgTrashIcon.width = 24; 
+                    imgTrashIcon.height = 24;
+                };
+                imgTrashIcon.src = "/img/trash.svg"; 
+                imgTrashIcon.alt = "Delete Slot";
+                trashBtn.appendChild(imgTrashIcon);
+                trashBtn.classList.add("btn", "btn-primary"); 
+                trashBtn.addEventListener("click", () => {
+                    confirmDeleteSlot(childSlot.name, childSlot.invitationCode || 'None', childSlot.slotId, ChildrenSlotsResult.slotId);
+                });
+                trashCell.appendChild(trashBtn);
+                row.appendChild(trashCell);
                 
                 tbody.appendChild(row);
         
@@ -385,7 +457,14 @@ function FavoriteSlots(slot_object) {
         
         const entryCell = document.createElement("td");
         const buttonCellButton = document.createElement("button");
-        buttonCellButton.innerText = `"Enter Slot" : ${slot_tree.rootSlotModel.slotId}`; 
+        const imgIcon = document.createElement("img");
+        imgIcon.onload = () => {
+            imgIcon.width = 24;
+            imgIcon.height = 24;
+        };
+        imgIcon.src = "/img/arrowin.svg"; 
+        imgIcon.alt = "Enter Slot";
+        buttonCellButton.appendChild(imgIcon);
         buttonCellButton.classList.add("btn", "btn-primary"); 
         buttonCellButton.addEventListener("click", () => {
             processSlot(slot_tree.rootSlotModel.slotId);
@@ -414,7 +493,6 @@ function SlotInit(slot_object, slot_id, user_id) {
 function HostedSlots(slot_object) {
     const hostSlotTable = document.getElementById('hosted-slot-table');
     const tableBody = document.createElement('tbody');
-    console.log("sloted objects: ", slot_object);
     slot_object.slotTrees.forEach(slot_tree => {
         const row = document.createElement('tr');
         row.id = slot_tree.rootId;
@@ -432,7 +510,14 @@ function HostedSlots(slot_object) {
         
         const entryCell = document.createElement("td");
         const buttonCellButton = document.createElement("button");
-        buttonCellButton.innerText = `"Enter Slot" : ${slot_tree.rootSlotModel.slotId}`; 
+        const imgIcon = document.createElement("img");
+        imgIcon.onload = () => {
+            imgIcon.width = 24;
+            imgIcon.height = 24;
+        };
+        imgIcon.src = "/img/arrowin.svg"; 
+        imgIcon.alt = "Enter Slot";
+        buttonCellButton.appendChild(imgIcon);
         buttonCellButton.classList.add("btn", "btn-primary"); 
         buttonCellButton.addEventListener("click", () => {
             processSlot(slot_tree.rootSlotModel.slotId);
@@ -440,15 +525,39 @@ function HostedSlots(slot_object) {
         entryCell.appendChild(buttonCellButton);
         row.appendChild(entryCell);
 
-        const unhostCell = document.createElement("td");
-        const unhostBtn = document.createElement("button");
-        unhostBtn.innerText = `Unhost : ${slot_tree.rootSlotModel.slotId}`; 
-        unhostBtn.classList.add("btn", "btn-primary"); 
-        unhostBtn.addEventListener("click", () => {
-            removeHostSlot(slot_tree.rootSlotModel.slotId);
+        const editCell = document.createElement("td");
+        const editBtn = document.createElement("button");
+        const imgEditIcon = document.createElement("img");
+        imgEditIcon.onload = () => {
+            imgEditIcon.width = 24;
+            imgEditIcon.height = 24; 
+        };
+        imgEditIcon.src = "/img/pencil.svg"; 
+        imgEditIcon.alt = "Edit Slot";
+        editBtn.appendChild(imgEditIcon);
+        editBtn.classList.add("btn", "btn-primary"); 
+        editBtn.addEventListener("click", () => {
+            Edit(slot_tree.rootSlotModel.slotId);
         });
-        unhostCell.appendChild(unhostBtn);
-        row.appendChild(unhostCell);
+        editCell.appendChild(editBtn);
+        row.appendChild(editCell);
+        
+        const trashCell = document.createElement("td");
+        const trashBtn = document.createElement("button");
+        const imgTrashIcon = document.createElement("img");
+        imgTrashIcon.onload = () => {
+            imgTrashIcon.width = 24; 
+            imgTrashIcon.height = 24;
+        };
+        imgTrashIcon.src = "/img/trash.svg"; 
+        imgTrashIcon.alt = "Delete Slot";
+        trashBtn.appendChild(imgTrashIcon);
+        trashBtn.classList.add("btn", "btn-primary"); 
+        trashBtn.addEventListener("click", () => {
+            confirmDeleteSlot(slot_tree.rootSlotModel.name, slot_tree.rootSlotModel.invitationCode || 'None', slot_tree.rootSlotModel.slotId);
+        });
+        trashCell.appendChild(trashBtn);
+        row.appendChild(trashCell);
         
         tableBody.appendChild(row);
     }); 

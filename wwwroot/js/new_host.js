@@ -1,4 +1,7 @@
+let newHostMode = false;
+
 function sendNewHost(newHost) {
+    console.log('sendNewHost()()()');
     $.ajax({
         url: '/host/newhost',
         type: 'PUT',
@@ -19,7 +22,7 @@ function sendNewHost(newHost) {
     });
 }
 
-function confirmNewHost(slotName, invitationCode, hostNameTag, newSlot) {
+function confirmNewHost(invitationCode, slotName, hostNameTag, newSlot, original_anchor_container) {
     console.log("confirmNewHost()");
     if (!invitationCode.value || !slotName.value || !hostNameTag.value) {
         alert('Please fill in all the required fields.');
@@ -62,9 +65,9 @@ function confirmNewHost(slotName, invitationCode, hostNameTag, newSlot) {
 
     $('body').append(modalHtml);
 
-    document.getElementById('confirmSlotName').textContent = slotName;
-    document.getElementById('confirmInvitationCode').textContent = invitationCode;
-    document.getElementById('confirmHostNameTag').textContent = hostNameTag;
+    document.getElementById('confirmSlotName').textContent = slotName.value;
+    document.getElementById('confirmInvitationCode').textContent = invitationCode.value;
+    document.getElementById('confirmHostNameTag').textContent = hostNameTag.value;
 
     $('#confirmationModal').modal('show');
 
@@ -79,6 +82,14 @@ function confirmNewHost(slotName, invitationCode, hostNameTag, newSlot) {
     $('#confirmButton').on('click', function() {
         sendNewHost(newHost);
         $('#confirmationModal').modal('hide');
+        toogleNewHostMode(false);
+        $('#anchor-container').html(original_anchor_container);
+        $('#delete-multiple-host').click(function() {
+            toggleDeleteMode(true);
+        });
+        $('#new-host').click(function() {
+            toogleNewHostMode(true);
+        });
     });
 }
 
@@ -114,53 +125,29 @@ function toogleNewHostMode(enable) {
         generateCodeAnchor.onclick = function(e) {
             e.preventDefault();
             invitationCodeInput.value = generateRandomCode();
-            checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
         };
         invitationCodeCell.appendChild(document.createElement('br'));
         invitationCodeCell.appendChild(generateCodeAnchor);
-        
-        const entryCell = document.createElement('td');
-        const entryButton = document.createElement('button');
-        entryButton.textContent = 'Enter Slot';
-        entryButton.classList.add('btn', 'btn-primary');
-        entryButton.disabled = true; 
-        entryButton.onclick = function() {
-        };
-        entryCell.appendChild(entryButton);
     
         const slotNameCell = document.createElement('td');
         const slotNameInput = document.createElement('input');
         slotNameInput.type = 'text';
         slotNameInput.placeholder = 'Enter Slot Name';
         slotNameInput.classList.add('form-control');
-        slotNameInput.oninput = function() {
-            checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
-        };
         slotNameCell.appendChild(slotNameInput);
-    
         
         const hostNameTagCell = document.createElement('td');
         const hostNameTagInput = document.createElement('input');
         hostNameTagInput.type = 'text';
         hostNameTagInput.placeholder = 'Enter Host Name-tag';
         hostNameTagInput.classList.add('form-control');
-        hostNameTagInput.oninput = function() {
-            checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, entryButton, unhostButton);
-        };
         hostNameTagCell.appendChild(hostNameTagInput);
-    
-        const unhostCell = document.createElement('td');
-        const unhostButton = document.createElement('button');
-        unhostButton.textContent = 'Unhost';
-        unhostButton.classList.add('btn', 'btn-primary');
-        unhostButton.disabled = true; 
-        unhostCell.appendChild(unhostButton);
     
         newRow.appendChild(invitationCodeCell);
         newRow.appendChild(slotNameCell);
         newRow.appendChild(hostNameTagCell);
-        newRow.appendChild(entryCell);
-        newRow.appendChild(unhostCell);
+        newRow.appendChild(document.createElement('td'));
+        newRow.appendChild(document.createElement('td'));
     
         table.querySelector('tbody').appendChild(newRow);
         
@@ -171,7 +158,7 @@ function toogleNewHostMode(enable) {
                 console.log("may be empty: {invitationCodeInput, slotNameInput, hostNameTagInput}");
                 return;
             } 
-            confirmNewHost(invitationCodeInput, slotNameInput, hostNameTagInput);
+            confirmNewHost(invitationCodeInput, slotNameInput, hostNameTagInput, null, original);
         });
         
         const backAnchor = $('<a href="#" id="back-to-original">Back</a>');
@@ -187,7 +174,6 @@ function toogleNewHostMode(enable) {
         });
         
         $('#anchor-container').empty().append(saveAnchor).append(" | ").append(backAnchor);
-        $rows.addClass('pointer').on('click', selectRow);
     } else {
         console.log("else{}");
         $buttons.prop('disabled', false);

@@ -272,7 +272,6 @@ function addNewRow(table_id, newHostAnchor) {
         } 
         var res = confirmNewHost(invitationCodeInput.value, slotNameInput.value, hostNameTagInput.value);
         if (res) {
-            saveNewRow(null, invitationCodeInput, slotNameInput, hostNameTagInput);
             revertNewHostAnchor(newHostAnchor, cancelNewHostAnchor);
             const temporaryRow = document.getElementById('temporary-row');
                 table.deleteRow(0); // delete the first row
@@ -291,45 +290,6 @@ function generateRandomCode() {
     return code;
 }
 
-function checkEnableButtons(invitationCodeInput, slotNameInput, hostNameTagInput, saveButton, unhostButton) {
-    if (invitationCodeInput.value.trim() !== '' && slotNameInput.value.trim() !== '' && hostNameTagInput.value.trim() !== '') {
-        saveButton.disabled = false;
-        unhostButton.disabled = false;
-    } else {
-        saveButton.disabled = true;
-        unhostButton.disabled = true;
-    }
-}
-function saveNewRow(row, invitationCodeInput, slotNameInput, hostNameTagInput) {
-    var newSlot = {
-        hostNameTag: hostNameTagInput.value,
-        invitationCode: invitationCodeInput.value,
-        slotName: slotNameInput.value,
-        userId: userId
-    };
-    console.log(newSlot);
-    $.ajax({
-        url: '/host/newhost',
-        type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify(newSlot),
-        success: function(result) {
-            console.log('Successfully saved new slot: ', result);
-            var dummy_tree = createDummyRootTrees(newSlot.invitationCode, newSlot.slotName, newSlot.hostNameTag, result.new_slot_id);
-            console.log('dummy tree: ', dummy_tree);
-            console.log('original tree struct: ', global_slot_object);
-            global_slot_object.slotTrees.push(dummy_tree.slotTrees[0]);
-            console.log('after push struct: ', global_slot_object);
-            HostedSlots(dummy_tree);
-        },
-        error: function() {
-            alert('An error occurred while loading the content.');
-        }
-    });
-    invitationCodeInput.disabled = true;
-    slotNameInput.disabled = true;
-    hostNameTagInput.disabled = true;
-}
 
 function revertNewHostAnchor(newHostAnchor, cancelNewHostAnchor) {
     console.log('revertNewHostAnchor()');
@@ -414,15 +374,18 @@ function buildFaveSlotTreeTable(tree) {
 
     const anchorContainer = document.createElement('div');
     anchorContainer.classList.add('anchor-container');
+    anchorContainer.id = 'child-anchor-container';
 
     if (entity_type == 'favorites') {
     } else {
         const addSlotChildAnchor = document.createElement('a');
+        addSlotChildAnchor.id = 'add-child'
         addSlotChildAnchor.href = "#";
         addSlotChildAnchor.textContent = "Add child";
         addSlotChildAnchor.classList.add('underline');
         addSlotChildAnchor.onclick = function() {
-            addSlotChild(table_id, addSlotChildAnchor);
+            addChildMode = !addChildMode;
+            toogleAddChildMode(addChildMode);
         };
         //anchorContainer.appendChild(duplicateHost);
         //anchorContainer.appendChild(document.createTextNode(" | "));
@@ -443,15 +406,63 @@ function buildFaveSlotTreeTable(tree) {
     slotChildrenTable.appendChild(slotChildrenTableHead);
     const slotChildrenTableHeaderRow = document.createElement('tr');
     slotChildrenTableHead.appendChild(slotChildrenTableHeaderRow);
-    const childrenTableHeaders = ['Slot Name', 'Is Reservable', 'Invitation Code', 'Edge (x, y)', 'Note', 'Entry'];
+    const childrenTableHeaders = ['Slot Name', 'Is Reservable', 'Invitation Code', 'Schedule', 'Edge (x, y)', 'Note', '', '', ''];
     childrenTableHeaders.forEach(headerText => {
         const th = document.createElement('th');
         th.textContent = headerText;
+        if (headerText == 'Slot Name') {
+            th.innerHTML = `${headerText} 
+                <button id='' onclick="sortTable('asc')">▲</button>
+                <button id='' onclick="sortTable('desc')">▼</button>`;
+        }
         slotChildrenTableHeaderRow.appendChild(th);
     });
     const slotChildrenTableBody = document.createElement('tbody');
+    const emptyTBody = document.createElement('tbody');
     slotChildrenTableBody.id = 'slot-children';
+    slotChildrenTable.appendChild(emptyTBody);
     slotChildrenTable.appendChild(slotChildrenTableBody);
 
     slotDiv.appendChild(slotChildrenTable);
+    
+    const paginationDiv = document.createElement('div');
+    paginationDiv.id = 'pagination-controls';
+
+    const nav = document.createElement('nav');
+    const ul = document.createElement('ul');
+    ul.className = 'pagination justify-content-center';
+
+    const prevLi = document.createElement('li');
+    prevLi.className = 'page-item';
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'page-link';
+    prevBtn.id = 'prev';
+    prevBtn.innerText = 'Previous';
+    prevBtn.onclick = prevPage;
+    prevLi.appendChild(prevBtn);
+    
+    const pageInfoLi = document.createElement('li');
+    pageInfoLi.className = 'page-item disabled';
+    const pageInfoSpan = document.createElement('span');
+    pageInfoSpan.className = 'page-link';
+    pageInfoSpan.id = 'page-info';
+    pageInfoLi.appendChild(pageInfoSpan);
+
+    const nextLi = document.createElement('li');
+    nextLi.className = 'page-item';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'page-link';
+    nextBtn.id = 'next';
+    nextBtn.innerText = 'Next';
+    nextBtn.onclick = nextPage;
+    nextLi.appendChild(nextBtn);
+
+    ul.appendChild(prevLi);
+    ul.appendChild(pageInfoLi);
+    ul.appendChild(nextLi);
+    nav.appendChild(ul);
+    paginationDiv.appendChild(nav);
+    
+    slotDiv.appendChild(paginationDiv);
+    
 }

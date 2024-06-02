@@ -1,19 +1,24 @@
-﻿@model WebApplication2.Models.LoginModel
-
-@{
+﻿@{
     ViewData["Title"] = "Host";
 }
-<div class="text-center">
-    <h1 class="display-4">Welcome! <b>@ViewData["Title"]</b></h1>
-</div>
-<a href="">Create new tree</a>
-<a href=""></a>
-<h3>Hosted Slots:</h3>
-<table>
-    <thead>
-        <ul></ul>
-    </thead>
-    <tbody>
-        <ul></ul>
-    </tbody>
-</table>
+<div id="slot" class="container mt-5"></div>
+<script src="/js/catch.js"></script>
+<script src="/js/deletion.js"></script>
+<script src="/js/duplication.js"></script>
+<script src="/js/dummy_objects.js"></script>
+<script src="/js/tables.js"></script>
+<script src="/js/new_host.js"></script>
+<script src="/js/slotting.js"></script>
+<script>
+    var entity_type = "hosted";
+    var userId = @ViewData["UserId"];
+    var data = @Html.Raw(ViewBag.SlotTreeJson);
+    var global_slot_object = data;
+    $(document).ready(function(){
+        if (data) {
+            console.log('true');
+            console.log("data: ", data);
+            processSlot(@ViewData["HostId"]);
+        }
+    });
+</script>

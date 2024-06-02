@@ -1,0 +1,1 @@
+sqlcmd -S (localdb)\MSSQLLocalDB -Q "RESTORE DATABASE [rom] FROM DISK = 'C:\Programming VS\WebApplication2\rom.bak' WITH MOVE 'rom' TO 'C:\Users\Windows\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances\MSSQLLocalDB\rom.mdf', MOVE 'rom_log' TO 'C:\Users\Windows\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances\MSSQLLocalDB\rom_log.ldf'"

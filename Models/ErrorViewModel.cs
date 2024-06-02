@@ -28,12 +28,6 @@ namespace WebApplication2.Models {
             this.SlotTrees.Add(slotTree);
         }
     }
-    public class SearchSlots {
-        public List<SlotTree> SlotTrees { get; set; } = new List<SlotTree>();
-        public void AddSlotTree(SlotTree slotTree) {
-            this.SlotTrees.Add(slotTree);
-        }
-    }
     public class SlotModel {
         [JsonProperty("edge")]
         public HashSet<EdgeMod> Edge { get; set; } = new HashSet<EdgeMod>();
@@ -161,15 +155,27 @@ namespace WebApplication2.Models {
         public string? UserName { get; set; }
         public string? UserPassword { get; set; }
     }
-    public class LoginSuccessModel {
-        public bool Valid { get; set; }
-        public LoginModel? loginModel { get; set; }
-    }
+    public class CalendarDataModel {
+        [JsonProperty("calendarId")]
+        public int? id {get; set; }
 
-    public class SlotParent {
-        public int parent_id { get; set; }
+        [JsonProperty("slotId")]
+        public int? slot_id {get; set; }
+
+        [JsonProperty("rowLabel")]
+        public string? row_label {get; set; }
+
+        [JsonProperty("columnLabel")]
+        public string? column_label {get; set; }
+
+        [JsonProperty("typeLabel")]
+        public string? type_label {get; set; }
+
+        [JsonProperty("isModified")]
+        public bool is_modified {get; set; } = false;
     }
-    //public class SlotTree {
-    //    public List<SlotModel> slots { get; set; } 
-    //}
+    public class CalendarModel {
+        [JsonProperty("calendarDataModel")]
+        public List<CalendarDataModel> CalendarDataModel { get; set; } = new List<CalendarDataModel>();
+    }
 }

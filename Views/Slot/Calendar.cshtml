@@ -3,10 +3,12 @@
 }
 <h5>calendar.cshtml</h5>
 <script>
+    var data = @Html.Raw(ViewBag.CalendarModel);
     const preference = {
         repetition_pattern: 'weekly',
         is_reservable: true 
     };
+    console.log('data calendar: ', data);
 </script>
 
 <script src="/js/calendar/initial.js"></script>

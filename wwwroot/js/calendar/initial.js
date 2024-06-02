@@ -87,7 +87,6 @@ function supplyFunction(schedule_object) {
     Array.prototype.forEach.call(tbody_tr, elem => {
         const tds = elem.getElementsByTagName('td');
         Array.prototype.forEach.call(tds, (td, index) => {
-            console.log(td.innerText);
             if (!td.innerText) {
                 td.addEventListener('contextmenu', (e) => {
                   e.preventDefault();
@@ -95,7 +94,7 @@ function supplyFunction(schedule_object) {
                   overlay.className = 'overlay';
                   overlay.innerHTML = '<button class="btn btn-primary">CREATE</button>';
                   td.appendChild(overlay);
-              
+                  
                   const button = overlay.querySelector('button');
                   button.addEventListener('click', () => {
                     console.log('CREATE button clicked! ', tds[0].innerText, " + ", th_elements[index].innerText);

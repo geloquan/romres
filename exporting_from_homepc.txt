@@ -1,0 +1,3 @@
+win: cmd
+cli: cd C:\Users\Windows\AppData\Local\Microsoft\Microsoft SQL Server Local DB\Instances\MSSQLLocalDB\
+cli: sqlcmd -S (localdb)\MSSQLLocalDB -Q "BACKUP DATABASE rom TO DISK = 'C:\Programming VS\WebApplication2\rom.bak'"

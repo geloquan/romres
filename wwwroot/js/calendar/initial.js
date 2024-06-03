@@ -1,3 +1,6 @@
+function traverse_calendar() {
+
+}
 function initCalendar() {
     const tbl_calendar = document.getElementById('calendar');
     switch (preference.repetition_pattern) {
@@ -81,31 +84,70 @@ function supplyFunction(schedule_object) {
 
     thead_tr.setAttribute('role', 'row');
     Array.prototype.forEach.call(th_elements, (th, index) => {
-      th.setAttribute('role', 'columnheader');
-      th.setAttribute('scope', 'col');
+        th.setAttribute('role', 'columnheader');
+        th.setAttribute('scope', 'col');
     });
     Array.prototype.forEach.call(tbody_tr, elem => {
         const tds = elem.getElementsByTagName('td');
         Array.prototype.forEach.call(tds, (td, index) => {
             if (!td.innerText) {
-                td.addEventListener('contextmenu', (e) => {
-                  e.preventDefault();
-                  const overlay = document.createElement('div');
-                  overlay.className = 'overlay';
-                  overlay.innerHTML = '<button class="btn btn-primary">CREATE</button>';
-                  td.appendChild(overlay);
-                  
-                  const button = overlay.querySelector('button');
-                  button.addEventListener('click', () => {
-                    console.log('CREATE button clicked! ', tds[0].innerText, " + ", th_elements[index].innerText);
-                  });
-              
-                  document.addEventListener('mouseover', (event) => {
-                    if (!td.contains(event.target) &&!overlay.contains(event.target)) {
-                      overlay.remove();
+                data.calendarDataModel.forEach(elem => {
+                    //console.log(`${elem.row_label} == ${tds[0].innerText} && ${elem.column_label} == ${th_elements[index].innerText}`)
+                    if (elem.rowLabel == tds[0].innerText && elem.columnLabel == th_elements[index].innerText) {
+                        td.classList.add('has-property');
+                        console.log('1');
+                        var tr_list = [];
+                        console.log('trList: ', tr_list);
+                        elem.properties.forEach(property => {
+                            const tr_property = document.createElement('tr');
+                            var property_box = writeProperty(property.calendarPropertyKey, property.calendarPropertyValue);
+
+                            tr_property.appendChild(property_box);  
+                            console.log('property_box: ', property_box);
+                            console.log('tr_property: ', tr_property);
+                            tr_list.push(tr_property);
+                        });
+                        console.log('trList: ', tr_list);
+                        td.addEventListener('mouseover', (e) => {
+                            console.log('hovered');
+                            e.preventDefault();
+                            tr_list.forEach(eleme => {
+                                td.appendChild(eleme);
+                            });
+                            if (!td.contains(event.target) &&!overlay.contains(event.target)) {
+                                td.innerHTML = '';
+                            }
+                        });
+                        td.addEventListener('mouseleave', (e) => {
+                            // Check if the mouse is leaving the td element and not entering the overlay
+                            if (!td.contains(e.relatedTarget)) {
+                                td.innerHTML = ''; // Clear the td contents
+                            }
+                        });
                     }
-                  });
                 });
+                if (!td.classList.contains('has-property')) {
+                    console.log('2');
+                    td.addEventListener('contextmenu', (e) => {
+                      e.preventDefault();
+    
+                      const overlay = document.createElement('div');
+                      overlay.className = 'overlay';
+                      overlay.innerHTML = '<button class="btn btn-primary">CREATE</button>';
+                      td.appendChild(overlay);
+                      
+                      const button = overlay.querySelector('button');
+                      button.addEventListener('click', () => {
+                        console.log('CREATE button clicked! ', tds[0].innerText, " + ", th_elements[index].innerText);
+                      });
+                  
+                      document.addEventListener('mouseover', (event) => {
+                        if (!td.contains(event.target) &&!overlay.contains(event.target)) {
+                          overlay.remove();
+                        }
+                      });
+                    });
+                }
             }
         });
     });

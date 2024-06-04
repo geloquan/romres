@@ -177,8 +177,8 @@ function supplyFunction() {
         const tds = elem.getElementsByTagName('td');
         Array.prototype.forEach.call(tds, (td, index) => {
             if (!td.innerText) {
-                data.calendarDataModel.forEach(elem => {
-                    if (elem.rowLabel == tds[0].innerText && elem.columnLabel == th_elements[index].innerText) {
+                    data.calendarDataModel.forEach(elem => {
+                        if (elem.rowLabel == tds[0].innerText && elem.columnLabel == th_elements[index].innerText) {
                         td.classList.add('has-property');
                         console.log('1');
                         var tr_list = [];
@@ -193,7 +193,11 @@ function supplyFunction() {
                             tr_list.push(tr_property);
                         });
                         console.log('trList: ', tr_list);
+
                         const overlay = document.createElement('div');
+                        const overlay_id = 'overlay-' + tds[0].innerText + '-' + th_elements[index].innerText;
+                        overlay.id = overlay_id;
+
                         const body = document.createElement('div');
                         const content = document.createElement('div');
 
@@ -206,15 +210,45 @@ function supplyFunction() {
 
                         const edit_btn = document.createElement('button');
                         edit_btn.innerText = 'EDIT';
+                        edit_btn.addEventListener('click', (e) => {
+                            console.log(`edit_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
+                            const overlay_div = document.getElementById(overlay_id);
+                            const key_divs = overlay_div.querySelectorAll('.key');
+                            const value_divs = overlay_div.querySelectorAll('.value');
+                            const original_buttons = overlay_div.getElementsByClassName('overlay-buttons').getchildren();
+                            const cancel_button = document.createElement('button');
+    
+                            key_divs.forEach(key_div => {
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.value = key_div.innerText;
+                                key_div.innerHTML = ''; // Clear the current content
+                                key_div.appendChild(input);
+                            });
+                            
+                            value_divs.forEach(value_div => {
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.value = value_div.innerText;
+                                value_div.innerHTML = ''; // Clear the current content
+                                value_div.appendChild(input);
+                            });
+
+                        });
 
                         const copy_btn = document.createElement('button');
                         copy_btn.innerText = 'COPY';
+                        copy_btn.addEventListener('click', (e) => {
+                            console.log(`copy_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
+                        });
 
                         const delete_btn = document.createElement('button');
                         delete_btn.innerText = 'DELETE';
+                        delete_btn.addEventListener('click', (e) => {
+                            console.log(`delete_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
+                        });
 
                         td.addEventListener('mouseover', (e) => {
-                            console.log('hovered');
                             e.preventDefault();
                             const tr_list_td = tr_list;
                             tr_list_td.forEach(eleme => {

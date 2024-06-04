@@ -67,6 +67,10 @@ tr .has-property {
   text-align: left;
   padding: 0;
 }
+.cal-property {
+  display: flex;
+  align-items: center;
+}
 
 .overlay {
   position: absolute;

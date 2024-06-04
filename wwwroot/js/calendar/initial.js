@@ -75,6 +75,21 @@ function tbodyCalendar() {
 
     
 }
+function getEventListeners(element) {
+    const eventListeners = {};
+    const clone = element.cloneNode(true);
+    const allEvents = Object.keys(window).filter(k => k.startsWith('on'));
+    allEvents.forEach(event => {
+        if (element[event]) {
+            eventListeners[event.slice(2)] = [{
+                type: event.slice(2),
+                listener: element[event],
+                useCapture: false
+            }];
+        }
+    });
+    return eventListeners;
+}
 function singlePlot(row_label, column_label, key, value) {
     const thead_tr = document.getElementById('calendar-thead').getElementsByTagName('tr')[0]; 
     const th_elements = thead_tr.getElementsByTagName('th');
@@ -208,34 +223,6 @@ function supplyFunction() {
                         content.classList.add('content');
                         arrow.classList.add('arrow');
 
-                        const edit_btn = document.createElement('button');
-                        edit_btn.innerText = 'EDIT';
-                        edit_btn.addEventListener('click', (e) => {
-                            console.log(`edit_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
-                            const overlay_div = document.getElementById(overlay_id);
-                            const key_divs = overlay_div.querySelectorAll('.key');
-                            const value_divs = overlay_div.querySelectorAll('.value');
-                            const original_buttons = overlay_div.getElementsByClassName('overlay-buttons').getchildren();
-                            const cancel_button = document.createElement('button');
-    
-                            key_divs.forEach(key_div => {
-                                const input = document.createElement('input');
-                                input.type = 'text';
-                                input.value = key_div.innerText;
-                                key_div.innerHTML = ''; // Clear the current content
-                                key_div.appendChild(input);
-                            });
-                            
-                            value_divs.forEach(value_div => {
-                                const input = document.createElement('input');
-                                input.type = 'text';
-                                input.value = value_div.innerText;
-                                value_div.innerHTML = ''; // Clear the current content
-                                value_div.appendChild(input);
-                            });
-
-                        });
-
                         const copy_btn = document.createElement('button');
                         copy_btn.innerText = 'COPY';
                         copy_btn.addEventListener('click', (e) => {
@@ -300,6 +287,78 @@ function supplyFunction() {
                                 overlay.style.display = 'none';
                             }
                         });
+                        const edit_onclick = function() {
+                            console.log(`edit_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
+                            const overlay_div = document.getElementById(overlay_id);
+                            const overlay_clone = document.getElementById(overlay_id).cloneNode(true);
+                            console.log('overlay_div :', overlay_div);
+                            console.log('overlay_clone :', overlay_clone);
+                            const key_divs = overlay_div.querySelectorAll('.key');
+                            const value_divs = overlay_div.querySelectorAll('.value');
+                            
+                            const original_buttons = Array.from(overlay_div.getElementsByClassName('overlay-buttons')[0].children);
+                            const duplicated_buttons = original_buttons.map(button => {
+                                const clone = button.cloneNode(true);
+                                clone.onclick = button.onclick;
+                                return clone;
+                            });
+                            console.log('duplicated_buttons: ', duplicated_buttons);
+                            duplicated_buttons.forEach(duplicated_button => {
+                                console.log('duplicated_button ', duplicated_button.onclick);
+                            });
+                            const buttons_div = overlay_div.getElementsByClassName('overlay-buttons')[0];
+                            while (buttons_div.firstChild) {
+                                buttons_div.removeChild(buttons_div.firstChild);
+                            }
+                            
+                            const save_button = document.createElement('button');
+                            save_button.innerText = 'Save';
+                            save_button.addEventListener('click', (e) => {
+                                console.log('save-button');
+                            });
+                            
+                            const cancel_button = document.createElement('button');
+                            cancel_button.innerText = 'Cancel';
+                            cancel_button.addEventListener('click', (e) => {
+                                console.log('cancel-button');
+                                const parent_div = overlay_div.parentElement;
+                                parent_div.removeChild(overlay_div);
+                                parent_div.appendChild(overlay_clone);
+                                const buttons_div = overlay_clone.getElementsByClassName('overlay-buttons')[0];
+                                while (buttons_div.firstChild) {
+                                    buttons_div.removeChild(buttons_div.firstChild);
+                                }
+                                duplicated_buttons.forEach(duplicated_button => {
+                                    console.log('duplicated_button ', duplicated_button.onclick);
+                                    buttons_div.appendChild(duplicated_button);
+                                });
+                            });
+                            
+                            buttons_div.appendChild(save_button);
+                            buttons_div.appendChild(cancel_button);
+                            
+                            key_divs.forEach(key_div => {
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.value = key_div.innerText;
+                                key_div.innerHTML = ''; // Clear the current content
+                                key_div.appendChild(input);
+                            });
+                            
+                            value_divs.forEach(value_div => {
+                                const input = document.createElement('input');
+                                input.type = 'text';
+                                input.value = value_div.innerText;
+                                value_div.innerHTML = ''; // Clear the current content
+                                value_div.appendChild(input);
+                            });
+                        };
+                        
+                        const edit_btn = document.createElement('button');
+                        edit_btn.innerText = 'EDIT';
+                        
+                        edit_btn.onclick = edit_onclick;
+
                         overlay.appendChild(arrow);
                         body.appendChild(content);
                         buttons.appendChild(edit_btn);
@@ -307,7 +366,6 @@ function supplyFunction() {
                         buttons.appendChild(delete_btn);
                         body.appendChild(buttons);
                         overlay.appendChild(body);
-                        
                         document.body.appendChild(overlay); 
                     } else {}
                 });

@@ -221,8 +221,9 @@ function supplyFunction() {
                         const mouseoverHandler = (e) => {
                             console.log('mouseoverHandler');
                           e.preventDefault();
-                          const tr_list_td = tr_list;
                           const overlay = document.getElementById(overlay_id);
+                          const td = document.getElementById(td_id);
+                          const tr_list_td = tr_list;
                           tr_list_td.forEach(eleme => {
                             console.log('eleme ', eleme);
                             content.appendChild(eleme);
@@ -261,7 +262,9 @@ function supplyFunction() {
 
                         const mouseleaveHandler = (e) => {
                             console.log('mouseleaveHandler');
+                            const td = document.getElementById(td_id);
                             const overlay = document.getElementById(overlay_id);
+                            console.log()
                               if (!td.contains(e.relatedTarget) && !overlay.contains(e.relatedTarget)) {
                                 console.log('mouseleaveHandler true');
                                 overlay.style.display = 'none';
@@ -294,10 +297,49 @@ function supplyFunction() {
                                 buttons_div.removeChild(buttons_div.firstChild);
                             }
                             
+                            console.log('td: ', td);
+                            console.log('td_id: ', td_id);
                             const save_button = document.createElement('button');
                             save_button.innerText = 'Save';
                             save_button.addEventListener('click', (e) => {
                                 console.log('save-button');
+                                const overlay_div = document.getElementById(overlay_id);
+                                const key_divs = overlay_div.querySelectorAll('.key');
+                                const value_divs = overlay_div.querySelectorAll('.value');
+                                overlay_div.style.display = 'none';
+                                overlay_div.addEventListener('mouseleave', mouseleaveHandler);
+                                const td = document.getElementById(td_id);
+                                td.addEventListener('mouseover', mouseoverHandler);
+                                td.addEventListener('mouseleave', mouseleaveHandler);
+                                key_divs.forEach(value_div => {
+                                    const inputElement = value_div.querySelector('input');
+                                    if (inputElement) {
+                                        const inner_text = inputElement.value;
+                                        value_div.innerHTML = '';
+                                        value_div.innerText = inner_text;
+                                        console.log("inputElement.textContent: ", inner_text);
+                                    }
+                                })
+                                value_divs.forEach(value_div => {
+                                    const inputElement = value_div.querySelector('input');
+                                    if (inputElement) {
+                                        const inner_text = inputElement.value;
+                                        value_div.innerHTML = '';
+                                        value_div.innerText = inner_text;
+                                        console.log("inputElement.textContent: ", inner_text);
+                                    }
+                                })
+                                
+                                const buttons_div = overlay_div.getElementsByClassName('overlay-buttons')[0];
+                                console.log('buttons_div ', buttons_div);
+                                while (buttons_div.firstChild) {
+                                    buttons_div.removeChild(buttons_div.firstChild);
+                                }
+                                duplicated_buttons.forEach(duplicated_button => {
+                                    console.log('duplicated_button ', duplicated_button.onclick);
+                                    buttons_div.appendChild(duplicated_button);
+                                });
+                                
                             });
                             
                             const cancel_button = document.createElement('button');
@@ -309,9 +351,12 @@ function supplyFunction() {
                                 parent_div.removeChild(overlay_dive);
                                 parent_div.appendChild(overlay_clone);
                                 overlay_clone.style.display = 'none';
-                                overlay_dive.addEventListener('mouseover', mouseoverHandler);
-                                overlay_dive.addEventListener('mouseleave', mouseleaveHandler);
+                                overlay_clone.addEventListener('mouseleave', mouseleaveHandler);
+                                const td = document.getElementById(td_id);
+                                td.addEventListener('mouseover', mouseoverHandler);
+                                td.addEventListener('mouseleave', mouseleaveHandler);
                                 const buttons_div = overlay_clone.getElementsByClassName('overlay-buttons')[0];
+                                console.log('buttons_div ', buttons_div);
                                 while (buttons_div.firstChild) {
                                     buttons_div.removeChild(buttons_div.firstChild);
                                 }
@@ -336,7 +381,7 @@ function supplyFunction() {
                                 const input = document.createElement('input');
                                 input.type = 'text';
                                 input.value = value_div.innerText;
-                                value_div.innerHTML = ''; // Clear the current content
+                                value_div.innerHTML = '';
                                 value_div.appendChild(input);
                             });
                         };

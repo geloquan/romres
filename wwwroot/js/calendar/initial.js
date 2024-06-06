@@ -75,21 +75,6 @@ function tbodyCalendar() {
 
     
 }
-function getEventListeners(element) {
-    const eventListeners = {};
-    const clone = element.cloneNode(true);
-    const allEvents = Object.keys(window).filter(k => k.startsWith('on'));
-    allEvents.forEach(event => {
-        if (element[event]) {
-            eventListeners[event.slice(2)] = [{
-                type: event.slice(2),
-                listener: element[event],
-                useCapture: false
-            }];
-        }
-    });
-    return eventListeners;
-}
 function singlePlot(row_label, column_label, key, value) {
     const thead_tr = document.getElementById('calendar-thead').getElementsByTagName('tr')[0]; 
     const th_elements = thead_tr.getElementsByTagName('th');
@@ -107,6 +92,8 @@ function singlePlot(row_label, column_label, key, value) {
             if (!td.innerText) {
                 if (row_label == tds[0].innerText && column_label == th_elements[index].innerText) {
                     td.classList.add('has-property');
+                    const td_id = tds[0].innerText + '-' + th_elements[index].innerText;
+                    td.id =  td_id;
                     console.log('1');
                     var tr_list = [];
                     console.log('trList: ', tr_list);
@@ -195,19 +182,16 @@ function supplyFunction() {
                     data.calendarDataModel.forEach(elem => {
                         if (elem.rowLabel == tds[0].innerText && elem.columnLabel == th_elements[index].innerText) {
                         td.classList.add('has-property');
-                        console.log('1');
+                        const td_id = tds[0].innerText + '-' + th_elements[index].innerText;
+                        td.id =  td_id;
                         var tr_list = [];
-                        console.log('trList: ', tr_list);
                         elem.properties.forEach(property => {
                             const tr_property = document.createElement('tr');
                             var property_box = writeProperty(property.calendarPropertyKey, property.calendarPropertyValue);
 
                             tr_property.appendChild(property_box);  
-                            console.log('property_box: ', property_box);
-                            console.log('tr_property: ', tr_property);
                             tr_list.push(tr_property);
                         });
-                        console.log('trList: ', tr_list);
 
                         const overlay = document.createElement('div');
                         const overlay_id = 'overlay-' + tds[0].innerText + '-' + th_elements[index].innerText;
@@ -234,65 +218,64 @@ function supplyFunction() {
                         delete_btn.addEventListener('click', (e) => {
                             console.log(`delete_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
                         });
+                        const mouseoverHandler = (e) => {
+                            console.log('mouseoverHandler');
+                          e.preventDefault();
+                          const tr_list_td = tr_list;
+                          const overlay = document.getElementById(overlay_id);
+                          tr_list_td.forEach(eleme => {
+                            console.log('eleme ', eleme);
+                            content.appendChild(eleme);
+                          });
+                          if (!td.contains(event.target) &&!overlay.contains(event.target)) {
+                            td.innerHTML = '';
+                          }
+                          overlay.classList.add('overlay');
+                          overlay.style.display = 'block';
+                          const overlayWidth = overlay.offsetWidth;
+                          const overlayHeight = overlay.offsetHeight;
+                          const arrowHeight = arrow.offsetHeight;
+                          let left = e.clientX;
+                          let top = e.clientY;
+                          if (left + overlayWidth > window.innerWidth) {
+                            left = window.innerWidth - overlayWidth - 10; // 10px for margin
+                            arrow.style.left = `${e.clientX - left}px`;
+                          } else {
+                            arrow.style.left = '10px';
+                          } 
+                          if (top + overlayHeight + arrowHeight > window.innerHeight) {
+                            top = window.innerHeight - overlayHeight - arrowHeight - 10; // 10px for margin
+                            arrow.style.top = `${overlayHeight}px`; // Move arrow to the bottom
+                            arrow.style.transform = 'rotate(180deg)';
+                          } else {
+                            arrow.style.top = '-10px';
+                            arrow.style.transform = 'rotate(0deg)';
+                          }
+                          
+                          overlay.appendChild(arrow);
+                          
+                          overlay.style.left = `${left-19}px`;
+                          overlay.style.top = `${top+10}px`;
 
-                        td.addEventListener('mouseover', (e) => {
-                            e.preventDefault();
-                            const tr_list_td = tr_list;
-                            tr_list_td.forEach(eleme => {
-                                content.appendChild(eleme);
-                            });
+                        };
 
-                            if (!td.contains(event.target) &&!overlay.contains(event.target)) {
-                                td.innerHTML = '';
-                            }
-                            overlay.classList.add('overlay');
-                            overlay.style.display = 'block';
-
-                            const overlayWidth = overlay.offsetWidth;
-                            const overlayHeight = overlay.offsetHeight;
-                            const arrowHeight = arrow.offsetHeight;
-
-                            let left = e.clientX;
-                            let top = e.clientY;
-
-                            if (left + overlayWidth > window.innerWidth) {
-                                left = window.innerWidth - overlayWidth - 10; // 10px for margin
-                                arrow.style.left = `${e.clientX - left}px`;
-                            } else {
-                                arrow.style.left = '10px';
-                            } 
-
-                            if (top + overlayHeight + arrowHeight > window.innerHeight) {
-                                top = window.innerHeight - overlayHeight - arrowHeight - 10; // 10px for margin
-                                arrow.style.top = `${overlayHeight}px`; // Move arrow to the bottom
-                                arrow.style.transform = 'rotate(180deg)';
-                            } else {
-                                arrow.style.top = '-10px';
-                                arrow.style.transform = 'rotate(0deg)';
-                            }
-                            
-                            overlay.appendChild(arrow);
-                            
-                            overlay.style.left = `${left-19}px`;
-                            overlay.style.top = `${top+10}px`;
-                            
-                        });
-                        td.addEventListener('mouseleave', (e) => {
-                            if (!td.contains(e.relatedTarget) && !overlay.contains(e.relatedTarget)) {
+                        const mouseleaveHandler = (e) => {
+                            console.log('mouseleaveHandler');
+                            const overlay = document.getElementById(overlay_id);
+                              if (!td.contains(e.relatedTarget) && !overlay.contains(e.relatedTarget)) {
+                                console.log('mouseleaveHandler true');
                                 overlay.style.display = 'none';
-                            }
-                        });
-                        overlay.addEventListener('mouseleave', (e) => {
-                            if (!td.contains(e.relatedTarget) && !overlay.contains(e.relatedTarget)) {
-                                overlay.style.display = 'none';
-                            }
-                        });
+                              }
+                        };
+                        
+                        td.addEventListener('mouseover', mouseoverHandler);
+                        td.addEventListener('mouseleave', mouseleaveHandler);
+                        overlay.addEventListener('mouseleave', mouseleaveHandler);
                         const edit_onclick = function() {
                             console.log(`edit_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
                             const overlay_div = document.getElementById(overlay_id);
+                            overlay_div.removeEventListener('mouseleave', mouseleaveHandler);
                             const overlay_clone = document.getElementById(overlay_id).cloneNode(true);
-                            console.log('overlay_div :', overlay_div);
-                            console.log('overlay_clone :', overlay_clone);
                             const key_divs = overlay_div.querySelectorAll('.key');
                             const value_divs = overlay_div.querySelectorAll('.value');
                             
@@ -321,9 +304,13 @@ function supplyFunction() {
                             cancel_button.innerText = 'Cancel';
                             cancel_button.addEventListener('click', (e) => {
                                 console.log('cancel-button');
-                                const parent_div = overlay_div.parentElement;
-                                parent_div.removeChild(overlay_div);
+                                const overlay_dive = document.getElementById(overlay_id);
+                                const parent_div = overlay_dive.parentElement;
+                                parent_div.removeChild(overlay_dive);
                                 parent_div.appendChild(overlay_clone);
+                                overlay_clone.style.display = 'none';
+                                overlay_dive.addEventListener('mouseover', mouseoverHandler);
+                                overlay_dive.addEventListener('mouseleave', mouseleaveHandler);
                                 const buttons_div = overlay_clone.getElementsByClassName('overlay-buttons')[0];
                                 while (buttons_div.firstChild) {
                                     buttons_div.removeChild(buttons_div.firstChild);
@@ -341,7 +328,7 @@ function supplyFunction() {
                                 const input = document.createElement('input');
                                 input.type = 'text';
                                 input.value = key_div.innerText;
-                                key_div.innerHTML = ''; // Clear the current content
+                                key_div.innerHTML = ''; 
                                 key_div.appendChild(input);
                             });
                             
@@ -367,30 +354,8 @@ function supplyFunction() {
                         body.appendChild(buttons);
                         overlay.appendChild(body);
                         document.body.appendChild(overlay); 
-                    } else {}
+                    } 
                 });
-                if (!td.classList.contains('has-property')) {
-                    console.log('2');
-                    td.addEventListener('contextmenu', (e) => {
-                      e.preventDefault();
-                      
-                      const overlay = document.createElement('div');
-                      overlay.className = 'overlay';
-                      overlay.innerHTML = '<button class="btn btn-primary">CREATE</button>';
-                      td.appendChild(overlay);
-                      
-                      const button = overlay.querySelector('button');
-                      button.addEventListener('click', () => {
-                        console.log('CREATE button clicked! ', tds[0].innerText, " + ", th_elements[index].innerText);
-                      });
-                      
-                      document.addEventListener('mouseover', (event) => {
-                        if (!td.contains(event.target) &&!overlay.contains(event.target)) {
-                          overlay.remove();
-                        }
-                      });
-                    });
-                }
             }
         });
     });

@@ -1,4 +1,5 @@
 using System.Data.SqlClient;
+using Newtonsoft.Json;
 
 namespace WebApplication2.Models {
     public class HttpGetCalendar {
@@ -13,6 +14,7 @@ namespace WebApplication2.Models {
                 cdp.id AS calendar_data_property_id,
                 cdp.[key] AS calendar_data_property_key,
                 cdp.value AS calendar_data_property_value
+
             FROM
                 calendar c
             LEFT JOIN
@@ -42,13 +44,12 @@ namespace WebApplication2.Models {
                                 if (current_calendar_id.HasValue && current_calendar_id.Value == reader.GetInt32(0)) {
                                     calendarDataPropertyModel = new CalendarDataPropertyModel();
                                     calendarDataPropertyModel.id = reader.IsDBNull(5) ? (int?)null : reader.GetInt32(5);
-                                    Console.WriteLine($"calendarDataPropertyModel.id: {calendarDataPropertyModel.id}");
                                     
                                     calendarDataPropertyModel.key = !reader.IsDBNull(6) ? reader.GetString(6) : string.Empty;
-                                    Console.WriteLine($"calendarDataPropertyModel.key: {calendarDataPropertyModel.key}");
                                     
                                     calendarDataPropertyModel.value = !reader.IsDBNull(7) ? reader.GetString(7) : string.Empty;
-                                    Console.WriteLine($"calendarDataPropertyModel.value: {calendarDataPropertyModel.value}");
+                                    
+                                    calendarDataPropertyModel.calendar_id = reader.IsDBNull(0) ? (int?)null : reader.GetInt32(0);
                                     
                                     calendarDataModel.calendarDataPropertyModels.Add(calendarDataPropertyModel);
                                 } else {
@@ -56,29 +57,23 @@ namespace WebApplication2.Models {
                                     calendarDataModel = new CalendarDataModel();
                                     
                                     calendarDataModel.id = reader.IsDBNull(0) ? (int?)null : reader.GetInt32(0);
-                                    Console.WriteLine($"calendarDataModel.id: {calendarDataModel.id}");
                                     
                                     calendarDataModel.slot_id = reader.IsDBNull(1) ? (int?)null : reader.GetInt32(1);
-                                    Console.WriteLine($"calendarDataModel.slot_id: {calendarDataModel.slot_id}");
                                     
                                     calendarDataModel.row_label = !reader.IsDBNull(2) ? reader.GetString(2) : string.Empty;
-                                    Console.WriteLine($"calendarDataModel.row_label: {calendarDataModel.row_label}");
                                     
                                     calendarDataModel.column_label = !reader.IsDBNull(3) ? reader.GetString(3) : string.Empty;
-                                    Console.WriteLine($"calendarDataModel.column_label: {calendarDataModel.column_label}");
                                     
                                     calendarDataModel.type_label = !reader.IsDBNull(4) ? reader.GetString(4) : string.Empty;
-                                    Console.WriteLine($"calendarDataModel.type_label: {calendarDataModel.type_label}");
 
                                     calendarDataPropertyModel = new CalendarDataPropertyModel();
                                     calendarDataPropertyModel.id = reader.IsDBNull(5) ? (int?)null : reader.GetInt32(5);
-                                    Console.WriteLine($"calendarDataPropertyModel.id: {calendarDataPropertyModel.id}");
                                     
                                     calendarDataPropertyModel.key = !reader.IsDBNull(6) ? reader.GetString(6) : string.Empty;
-                                    Console.WriteLine($"calendarDataPropertyModel.key: {calendarDataPropertyModel.key}");
                                     
                                     calendarDataPropertyModel.value = !reader.IsDBNull(7) ? reader.GetString(7) : string.Empty;
-                                    Console.WriteLine($"calendarDataPropertyModel.value: {calendarDataPropertyModel.value}");
+                                    
+                                    calendarDataPropertyModel.calendar_id = reader.IsDBNull(0) ? (int?)null : reader.GetInt32(0);
                                     
                                     calendarDataModel.calendarDataPropertyModels.Add(calendarDataPropertyModel);
                                 }
@@ -106,6 +101,45 @@ namespace WebApplication2.Models {
                 return true; 
             } catch (Exception ex) {
                 Console.WriteLine("Error: " + ex.Message);
+                return false;
+            }
+        }
+    }
+    public class HttpPatchCalendar {
+        string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        public int? calendar_id {get;set;}
+        public int? slot_id {get;set;}
+
+        [JsonProperty("calendar_properties")]
+        public List<CalendarDataPropertyModel> calendar_properties { get; set; } = new List<CalendarDataPropertyModel>();
+        private string _query = @"
+            UPDATE calendar_data_property SET [key] = @key, value = @value WHERE id = @id
+        ";
+        public bool Process() {
+            Console.WriteLine("Process()");
+            try {
+                using (var connection = new SqlConnection(connectionQuery)) {
+                    connection.Open();
+                    Console.WriteLine("connection: ");
+                    foreach (var property in calendar_properties) {
+                        Console.WriteLine("foreach: ");
+                        Console.WriteLine("property: " + property.key);
+                        if (property.id.HasValue) {
+                            Console.WriteLine("if: ");
+
+                            using (var command = new SqlCommand(_query, connection)) {
+                                command.Parameters.AddWithValue("@id", property.id.Value);
+                                command.Parameters.AddWithValue("@key", property.key ?? (object)DBNull.Value);
+                                command.Parameters.AddWithValue("@value", property.value ?? (object)DBNull.Value);
+
+                                command.ExecuteNonQuery();
+                            }
+                        }
+                    }
+                }
+                return true;
+            } catch (Exception ex) {
+                Console.WriteLine("Error Process: " + ex.Message);
                 return false;
             }
         }

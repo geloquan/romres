@@ -187,18 +187,19 @@ function supplyFunction() {
                         var tr_list = [];
                         elem.properties.forEach(property => {
                             const tr_property = document.createElement('tr');
-                            var property_box = writeProperty(property.calendarPropertyKey, property.calendarPropertyValue);
+                            var property_box = writeProperty(property.calendarPropertyId, property.calendarPropertyKey, property.calendarPropertyValue);
 
                             tr_property.appendChild(property_box);  
                             tr_list.push(tr_property);
                         });
 
                         const overlay = document.createElement('div');
-                        const overlay_id = 'overlay-' + tds[0].innerText + '-' + th_elements[index].innerText;
+                        const overlay_id = 'overlay - ' + tds[0].innerText + '-' + th_elements[index].innerText;
                         overlay.id = overlay_id;
 
                         const body = document.createElement('div');
                         const content = document.createElement('div');
+                        content.id = 'calendar - ' + elem.calendarId;
 
                         const buttons = document.createElement('div');
                         buttons.classList.add('overlay-buttons');
@@ -219,7 +220,6 @@ function supplyFunction() {
                             console.log(`delete_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
                         });
                         const mouseoverHandler = (e) => {
-                            console.log('mouseoverHandler');
                           e.preventDefault();
                           const overlay = document.getElementById(overlay_id);
                           const td = document.getElementById(td_id);
@@ -261,12 +261,10 @@ function supplyFunction() {
                         };
 
                         const mouseleaveHandler = (e) => {
-                            console.log('mouseleaveHandler');
                             const td = document.getElementById(td_id);
                             const overlay = document.getElementById(overlay_id);
                             console.log()
                               if (!td.contains(e.relatedTarget) && !overlay.contains(e.relatedTarget)) {
-                                console.log('mouseleaveHandler true');
                                 overlay.style.display = 'none';
                               }
                         };
@@ -304,42 +302,7 @@ function supplyFunction() {
                             save_button.addEventListener('click', (e) => {
                                 console.log('save-button');
                                 const overlay_div = document.getElementById(overlay_id);
-                                const key_divs = overlay_div.querySelectorAll('.key');
-                                const value_divs = overlay_div.querySelectorAll('.value');
-                                overlay_div.style.display = 'none';
-                                overlay_div.addEventListener('mouseleave', mouseleaveHandler);
-                                const td = document.getElementById(td_id);
-                                td.addEventListener('mouseover', mouseoverHandler);
-                                td.addEventListener('mouseleave', mouseleaveHandler);
-                                key_divs.forEach(value_div => {
-                                    const inputElement = value_div.querySelector('input');
-                                    if (inputElement) {
-                                        const inner_text = inputElement.value;
-                                        value_div.innerHTML = '';
-                                        value_div.innerText = inner_text;
-                                        console.log("inputElement.textContent: ", inner_text);
-                                    }
-                                })
-                                value_divs.forEach(value_div => {
-                                    const inputElement = value_div.querySelector('input');
-                                    if (inputElement) {
-                                        const inner_text = inputElement.value;
-                                        value_div.innerHTML = '';
-                                        value_div.innerText = inner_text;
-                                        console.log("inputElement.textContent: ", inner_text);
-                                    }
-                                })
-                                
-                                const buttons_div = overlay_div.getElementsByClassName('overlay-buttons')[0];
-                                console.log('buttons_div ', buttons_div);
-                                while (buttons_div.firstChild) {
-                                    buttons_div.removeChild(buttons_div.firstChild);
-                                }
-                                duplicated_buttons.forEach(duplicated_button => {
-                                    console.log('duplicated_button ', duplicated_button.onclick);
-                                    buttons_div.appendChild(duplicated_button);
-                                });
-                                
+                                confirmEditedSlot(null, null, null, overlay_div, mouseoverHandler, mouseleaveHandler, td_id, duplicated_buttons);
                             });
                             
                             const cancel_button = document.createElement('button');

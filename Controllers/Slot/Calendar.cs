@@ -24,5 +24,21 @@ namespace WebApplication2.Controllers {
         public IActionResult SaveChanges([FromBody] HttpPutReserve request) {
             return Ok();
         }
+        [HttpPatch("calendar/edit")]
+        public IActionResult CalendarEdit([FromBody] HttpPatchCalendar request) {
+            Console.WriteLine("CalendarEdit()");
+            if (request != null) {
+                bool processingResult = request.Process();
+                if (processingResult) {
+                    return Ok("errmm");
+                }
+                else {
+                    return StatusCode(500, "Failed Edit().");  // Return appropriate error status
+                }
+            } else {
+                Console.WriteLine("Invalid request data()");
+                return StatusCode(500, "Invalid request data.");
+            }
+        }
     }
 }

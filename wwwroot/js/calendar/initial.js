@@ -1,3 +1,11 @@
+function generateRandomString() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < 5; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+}
 function traverse_calendar() {
 
 }
@@ -225,7 +233,6 @@ function supplyFunction() {
                           const td = document.getElementById(td_id);
                           const tr_list_td = tr_list;
                           tr_list_td.forEach(eleme => {
-                            console.log('eleme ', eleme);
                             content.appendChild(eleme);
                           });
                           if (!td.contains(event.target) &&!overlay.contains(event.target)) {
@@ -279,6 +286,107 @@ function supplyFunction() {
                             const overlay_clone = document.getElementById(overlay_id).cloneNode(true);
                             const key_divs = overlay_div.querySelectorAll('.key');
                             const value_divs = overlay_div.querySelectorAll('.value');
+                            const property_to_delete = [];
+                            const property_to_add = [];
+                            
+                            const properties = overlay_div.querySelectorAll('.cal-property');
+                            properties.forEach(property => {
+                                const property_id = property.id.split(' ')[2];
+                                const button_container = document.createElement("div");
+                                const button = document.createElement("button");
+                                const remove_icon = document.createElement("img");
+
+                                remove_icon.onload = () => {
+                                    remove_icon.width = 24; 
+                                    remove_icon.height = 24;
+                                };
+
+                                remove_icon.src = "/img/minus.svg"; 
+                                remove_icon.alt = "remove";
+
+                                button.appendChild(remove_icon);
+                                button.classList.add("btn-no-bg"); 
+                                button.addEventListener("click", () => {
+                                    const property_div = document.getElementById(property.id);
+                                    property_div.remove();
+                                    property_to_delete.push(property_id);
+                                    console.log('removing property...', property_id);
+                                });
+
+                                button_container.classList.add("d-flex", "justify-content-center", "align-items-center");
+                                button_container.appendChild(button);
+
+                                property.appendChild(button_container);
+
+                            });
+
+                            const contentElement = overlay_div.querySelector(".content");
+                            const add_div = document.createElement("div");
+                            const add_button = document.createElement("button");
+                            const add_icon = document.createElement("img");
+                            add_icon.onload = () => {
+                                add_icon.width = 24; 
+                                add_icon.height = 24;
+                            };
+                            add_icon.src = "/img/add.svg"; 
+                            add_icon.alt = "add";
+
+                            add_button.appendChild(add_icon);
+                            add_button.classList.add("btn", "btn-block", "d-flex", "justify-content-center", "align-items-center", "h-100", "w-100", "p-3", "border-0", "bg-transparent");
+                            add_button.addEventListener("click", () => {
+                                const overlay_div = document.getElementById(overlay_id);
+                                const overlay_rand_id = generateRandomString();
+                                overlay_div.id = overlay_rand_id;
+                                const content_div = overlay_div.querySelector('.content');
+                                const tr = document.createElement('tr');
+                                const div = document.createElement('div');
+                                div.classList.add('cal-property');
+                                
+                                const p_key = document.createElement('div');
+                                p_key.appendChild(document.createElement('input'));
+
+                                const colonText = '\u00A0\u00A0:\u00A0\u00A0'; // Non-breaking spaces around the colon
+                                const colonElement = document.createElement('span');
+                                colonElement.innerText = colonText;
+
+                                const p_value = document.createElement('div');
+                                p_value.appendChild(document.createElement('input'));
+                                const button_container = document.createElement("div");
+                                const button = document.createElement("button");
+                                const remove_icon = document.createElement("img");
+
+                                remove_icon.onload = () => {
+                                    remove_icon.width = 24; 
+                                    remove_icon.height = 24;
+                                };
+
+                                remove_icon.src = "/img/minus.svg"; 
+                                remove_icon.alt = "remove";
+
+                                button.appendChild(remove_icon);
+                                button.classList.add("btn-no-bg"); 
+                                button.addEventListener("click", () => {
+                                    const property_div = document.getElementById(overlay_rand_id);
+                                    property_div.remove();
+                                    property_to_delete.push(overlay_rand_id);
+                                    console.log('removing property...', overlay_rand_id);
+                                });
+
+                                button_container.classList.add("d-flex", "justify-content-center", "align-items-center");
+                                button_container.appendChild(button);
+
+                                div.appendChild(p_key); 
+                                div.appendChild(colonElement);
+                                div.appendChild(p_value); 
+                                div.appendChild(button_container); 
+                                tr.appendChild(div);
+                                content_div.append(tr);
+                            });
+                            
+                            add_div.appendChild(add_button);
+                            add_div.classList.add("w-100", "h-100");
+                            
+                            contentElement.insertAdjacentElement('afterend', add_div);
                             
                             const original_buttons = Array.from(overlay_div.getElementsByClassName('overlay-buttons')[0].children);
                             const duplicated_buttons = original_buttons.map(button => {
@@ -302,7 +410,7 @@ function supplyFunction() {
                             save_button.addEventListener('click', (e) => {
                                 console.log('save-button');
                                 const overlay_div = document.getElementById(overlay_id);
-                                confirmEditedSlot(null, null, null, overlay_div, mouseoverHandler, mouseleaveHandler, td_id, duplicated_buttons);
+                                confirmEditedSlot(null, null, null, overlay_div, mouseoverHandler, mouseleaveHandler, td_id, duplicated_buttons, property_to_delete);
                             });
                             
                             const cancel_button = document.createElement('button');
@@ -310,8 +418,14 @@ function supplyFunction() {
                             cancel_button.addEventListener('click', (e) => {
                                 console.log('cancel-button');
                                 const overlay_dive = document.getElementById(overlay_id);
-                                const parent_div = overlay_dive.parentElement;
-                                parent_div.removeChild(overlay_dive);
+                                console.log('overlay_dive', overlay_dive);
+                                const parent_div = document.getElementById(td_id);
+                                if (overlay_dive && overlay_dive.parentNode) {
+                                    overlay_dive.parentNode.removeChild(overlay_dive);
+                                    console.log('overlay_dive removed');
+                                } else {
+                                    console.log('overlay_dive is not a child of overlay_div');
+                                }
                                 parent_div.appendChild(overlay_clone);
                                 overlay_clone.style.display = 'none';
                                 overlay_clone.addEventListener('mouseleave', mouseleaveHandler);

@@ -126,3 +126,13 @@ tr .has-property {
   border-color: #004085; /* Change border color on focus/active */
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5); /* Bootstrap-like focus shadow */
 }
+
+.btn-no-bg {
+  background-color: transparent;
+  border: none; /* Optional: Remove border if necessary */
+  padding: 0; /* Optional: Adjust padding if necessary */
+  cursor: pointer; /* Optional: Change cursor to pointer */
+}
+.btn-no-bg img {
+  vertical-align: middle; /* Optional: Align the image vertically */
+}

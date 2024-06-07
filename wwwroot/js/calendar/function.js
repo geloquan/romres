@@ -36,6 +36,24 @@ function sendEditedCalendar(to_edit, overlay_div, mouseoverHandler, mouseleaveHa
             const value_divs = overlay_div.querySelectorAll('.value');
             overlay_div.style.display = 'none';
             overlay_div.addEventListener('mouseleave', mouseleaveHandler);
+                            
+            const properties = overlay_div.querySelectorAll('.cal-property');
+            properties.forEach(property => {
+                const button = document.createElement("button");
+                const remove_icon = document.createElement("img");
+                remove_icon.onload = () => {
+                    remove_icon.width = 24; 
+                    remove_icon.height = 24;
+                };
+                remove_icon.src = "/img/minus.svg"; 
+                remove_icon.alt = "remove";
+                button.appendChild(remove_icon);
+                button.classList.add("btn-no-bg"); 
+                button.addEventListener("click", () => {
+                    console.log('removing property... ');
+                });
+                property.appendChild(button);
+            });
 
             const td = document.getElementById(td_id);
             td.addEventListener('mouseover', mouseoverHandler);
@@ -75,16 +93,14 @@ function sendEditedCalendar(to_edit, overlay_div, mouseoverHandler, mouseleaveHa
     });
 }
 
-function confirmEditedSlot(calendar_id, slot_id, calendar_properties, overlay_div, mouseoverHandler, mouseleaveHandler, td_id, duplicated_buttons) {
+function confirmEditedSlot(calendar_id, slot_id, calendar_properties, overlay_div, mouseoverHandler, mouseleaveHandler, td_id, duplicated_buttons, property_to_delete) {
     console.log('confirmEditedSlot()');
     var calendarDataPropertyModel = [];
     console.log('calendarDataPropertyModel: ', calendarDataPropertyModel);
 
-    // Assuming overlay_div is already defined and points to the correct element
     const content_ = overlay_div.getElementsByClassName('content');
     const calendar_id_ = content_[0].id.split(' ')[2];
 
-    // Convert HTMLCollection to an array to use forEach
     Array.from(content_).forEach(content => {
         const properties = content.getElementsByClassName('cal-property');
         Array.from(properties).forEach(property => {
@@ -94,7 +110,6 @@ function confirmEditedSlot(calendar_id, slot_id, calendar_properties, overlay_di
             const valueElement = property.querySelector('.value input');
             const property_id = property.id.split(' ')[2];
 
-            // Ensure the elements exist before accessing their value
             if (keyElement && valueElement) {
                 const key_val = keyElement.value;
                 const value_val = valueElement.value;
@@ -111,7 +126,8 @@ function confirmEditedSlot(calendar_id, slot_id, calendar_properties, overlay_di
         });
     });
     var requestBody = {
-        calendar_properties: calendarDataPropertyModel
+        calendar_properties: calendarDataPropertyModel,
+        property_to_delete: property_to_delete
     };
     console.log('requestBody: ', requestBody);
     
@@ -157,5 +173,4 @@ function confirmEditedSlot(calendar_id, slot_id, calendar_properties, overlay_di
         sendEditedCalendar(requestBody, overlay_div, mouseoverHandler, mouseleaveHandler, td_id, duplicated_buttons);
         $('#confirmationModal').modal('hide');
     });
-    
 }

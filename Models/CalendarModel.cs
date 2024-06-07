@@ -110,10 +110,16 @@ namespace WebApplication2.Models {
         public int? calendar_id {get;set;}
         public int? slot_id {get;set;}
 
+        [JsonProperty("property_to_delete")]
+        public List<int> property_to_delete {get;set;} = new List<int>();
+
         [JsonProperty("calendar_properties")]
         public List<CalendarDataPropertyModel> calendar_properties { get; set; } = new List<CalendarDataPropertyModel>();
-        private string _query = @"
+        private string update_query = @"
             UPDATE calendar_data_property SET [key] = @key, value = @value WHERE id = @id
+        ";
+        private string delete_query = @"
+            DELETE FROM calendar_data_property WHERE id = @id;
         ";
         public bool Process() {
             Console.WriteLine("Process()");
@@ -121,19 +127,36 @@ namespace WebApplication2.Models {
                 using (var connection = new SqlConnection(connectionQuery)) {
                     connection.Open();
                     Console.WriteLine("connection: ");
-                    foreach (var property in calendar_properties) {
-                        Console.WriteLine("foreach: ");
-                        Console.WriteLine("property: " + property.key);
-                        if (property.id.HasValue) {
-                            Console.WriteLine("if: ");
-
-                            using (var command = new SqlCommand(_query, connection)) {
-                                command.Parameters.AddWithValue("@id", property.id.Value);
-                                command.Parameters.AddWithValue("@key", property.key ?? (object)DBNull.Value);
-                                command.Parameters.AddWithValue("@value", property.value ?? (object)DBNull.Value);
-
-                                command.ExecuteNonQuery();
+                    using (var transaction = connection.BeginTransaction()) {
+                        try {
+                            foreach (var property_id in property_to_delete) {
+                                Console.WriteLine("property_id: " + property_id);
+                                using (var command = new SqlCommand(delete_query, connection, transaction)) {
+                                    command.Parameters.AddWithValue("@id", property_id);
+                                    command.ExecuteNonQuery();
+                                }
                             }
+
+                            foreach (var property in calendar_properties) {
+                                Console.WriteLine("foreach: ");
+                                Console.WriteLine("property: " + property.key);
+                                if (property.id.HasValue) {
+                                    Console.WriteLine("if: ");
+
+                                    using (var command = new SqlCommand(update_query, connection, transaction)) {
+                                        command.Parameters.AddWithValue("@id", property.id.Value);
+                                        command.Parameters.AddWithValue("@key", property.key?? (object)DBNull.Value);
+                                        command.Parameters.AddWithValue("@value", property.value?? (object)DBNull.Value);
+
+                                        command.ExecuteNonQuery();
+                                    }
+                                }
+                            }
+
+                            transaction.Commit();
+                        } catch (Exception ex) {
+                            transaction.Rollback();
+                            throw;
                         }
                     }
                 }

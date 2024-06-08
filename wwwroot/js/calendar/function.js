@@ -96,7 +96,7 @@ function sendEditedCalendar(to_edit, overlay_div, mouseoverHandler, mouseleaveHa
 function confirmEditedSlot(calendar_id, slot_id, calendar_properties, overlay_div, mouseoverHandler, mouseleaveHandler, td_id, duplicated_buttons, property_to_delete) {
     console.log('confirmEditedSlot()');
     var calendarDataPropertyModel = [];
-    console.log('calendarDataPropertyModel: ', calendarDataPropertyModel);
+    var new_properties = [];
 
     const content_ = overlay_div.getElementsByClassName('content');
     const calendar_id_ = content_[0].id.split(' ')[2];
@@ -109,25 +109,40 @@ function confirmEditedSlot(calendar_id, slot_id, calendar_properties, overlay_di
             const keyElement = property.querySelector('.key input');
             const valueElement = property.querySelector('.value input');
             const property_id = property.id.split(' ')[2];
-
+            const property_name_id = property.id.split(' ')[0].trim();
+            console.log('property_name_id:', property_name_id, ':');
+            
             if (keyElement && valueElement) {
                 const key_val = keyElement.value;
                 const value_val = valueElement.value;
                 console.log('key_val', key_val);
                 console.log('value_val', value_val);
                 
-                calendarDataPropertyModel.push({
-                    id: property_id,
-                    calendar_id: calendar_id_,
-                    key: key_val,
-                    value: value_val
-                });
+                if (property_name_id != 'temp') {
+                    console.log('!= temp');
+                    calendarDataPropertyModel.push({
+                        id: property_id,
+                        calendar_id: calendar_id_,
+                        key: key_val,
+                        value: value_val
+                    });
+                } else if (property_name_id == 'temp') {
+                    console.log('== temp');
+                    new_properties.push({
+                        calendar_id: calendar_id_,
+                        key: key_val,
+                        value: value_val
+                    });
+                }
+            } else if (property_name_id == 'temp') {
+                console.log('bruh');
             }
         });
     });
     var requestBody = {
         calendar_properties: calendarDataPropertyModel,
-        property_to_delete: property_to_delete
+        property_to_delete: property_to_delete,
+        new_properties: new_properties
     };
     console.log('requestBody: ', requestBody);
     

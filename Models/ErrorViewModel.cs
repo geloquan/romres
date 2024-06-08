@@ -165,6 +165,14 @@ namespace WebApplication2.Models {
         [JsonProperty("calendarPropertyValue")]
         public string? value { get; set; }
     }
+    public class CalendarDataPropertyNewModel {
+        [JsonProperty("calendar_id")]
+        public int? calendar_id { get; set; }
+        [JsonProperty("key")]
+        public string? key { get; set; }
+        [JsonProperty("value")]
+        public string? value { get; set; }
+    }
     public class CalendarDataModel {
         [JsonProperty("calendarId")]
         public int? id {get; set; }

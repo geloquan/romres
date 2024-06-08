@@ -109,7 +109,8 @@ namespace WebApplication2.Models {
         string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
         public int? calendar_id {get;set;}
         public int? slot_id {get;set;}
-
+        [JsonProperty("new_properties")]
+        public List<CalendarDataPropertyNewModel> new_properties {get;set;} = new List<CalendarDataPropertyNewModel>();
         [JsonProperty("property_to_delete")]
         public List<int> property_to_delete {get;set;} = new List<int>();
 
@@ -120,6 +121,13 @@ namespace WebApplication2.Models {
         ";
         private string delete_query = @"
             DELETE FROM calendar_data_property WHERE id = @id;
+        ";
+        private string insert_query = @"
+            INSERT INTO 
+                calendar_data_property 
+                    (calendar_id, [key], value)
+            VALUES
+                (@calendar_id, @key, @value);
         ";
         public bool Process() {
             Console.WriteLine("Process()");
@@ -136,7 +144,18 @@ namespace WebApplication2.Models {
                                     command.ExecuteNonQuery();
                                 }
                             }
+                            foreach (var new_property in new_properties) {
+                                Console.WriteLine("new_property.calendar_id: " + new_property.calendar_id);
+                                Console.WriteLine("new_property.key: " + new_property.key);
+                                Console.WriteLine("new_property.value: " + new_property.value);
+                                using (var command = new SqlCommand(insert_query, connection, transaction)) {
+                                    command.Parameters.AddWithValue("@calendar_id", new_property.calendar_id);
+                                    command.Parameters.AddWithValue("@key", new_property.key);
+                                    command.Parameters.AddWithValue("@value", new_property.value);
+                                    command.ExecuteNonQuery();
+                                }
 
+                            }
                             foreach (var property in calendar_properties) {
                                 Console.WriteLine("foreach: ");
                                 Console.WriteLine("property: " + property.key);

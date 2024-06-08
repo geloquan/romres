@@ -300,7 +300,7 @@ function supplyFunction() {
                                     remove_icon.width = 24; 
                                     remove_icon.height = 24;
                                 };
-
+                                
                                 remove_icon.src = "/img/minus.svg"; 
                                 remove_icon.alt = "remove";
 
@@ -312,7 +312,7 @@ function supplyFunction() {
                                     property_to_delete.push(property_id);
                                     console.log('removing property...', property_id);
                                 });
-
+                                
                                 button_container.classList.add("d-flex", "justify-content-center", "align-items-center");
                                 button_container.appendChild(button);
 
@@ -335,22 +335,28 @@ function supplyFunction() {
                             add_button.classList.add("btn", "btn-block", "d-flex", "justify-content-center", "align-items-center", "h-100", "w-100", "p-3", "border-0", "bg-transparent");
                             add_button.addEventListener("click", () => {
                                 const overlay_div = document.getElementById(overlay_id);
-                                const overlay_rand_id = generateRandomString();
-                                overlay_div.id = overlay_rand_id;
+                                const overlay_rand_id = 'temp - ' + generateRandomString();
                                 const content_div = overlay_div.querySelector('.content');
                                 const tr = document.createElement('tr');
                                 const div = document.createElement('div');
+                                div.id = overlay_rand_id;
                                 div.classList.add('cal-property');
                                 
                                 const p_key = document.createElement('div');
-                                p_key.appendChild(document.createElement('input'));
+                                p_key.classList.add('key');
+                                const p_key_input = document.createElement('input');
+                                p_key_input.type = 'text';
+                                p_key.appendChild(p_key_input);
 
                                 const colonText = '\u00A0\u00A0:\u00A0\u00A0'; // Non-breaking spaces around the colon
                                 const colonElement = document.createElement('span');
                                 colonElement.innerText = colonText;
 
                                 const p_value = document.createElement('div');
-                                p_value.appendChild(document.createElement('input'));
+                                p_value.classList.add('value');
+                                const p_value_input = document.createElement('input');
+                                p_value_input.type = 'text';
+                                p_value.appendChild(p_value_input);
                                 const button_container = document.createElement("div");
                                 const button = document.createElement("button");
                                 const remove_icon = document.createElement("img");

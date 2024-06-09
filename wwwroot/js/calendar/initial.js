@@ -1,3 +1,4 @@
+var copied_calendar = [];
 function generateRandomString() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -219,7 +220,24 @@ function supplyFunction() {
                         const copy_btn = document.createElement('button');
                         copy_btn.innerText = 'COPY';
                         copy_btn.addEventListener('click', (e) => {
-                            console.log(`copy_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
+                            console.log('copy-btn');
+                            const overlay_id_copy = overlay_id;
+                            const overlay = document.getElementById(overlay_id_copy);
+                            const contentElement = overlay.querySelector(".content");
+                            contentElement.querySelectorAll('tr').forEach(tr => {
+                                const keyElement = tr.querySelector('.key');
+                                const valueElement = tr.querySelector('.value');
+                            
+                                if (keyElement && valueElement) {
+                                    const key_ = keyElement.innerText;
+                                    const value_ = valueElement.innerText;
+                                    copied_calendar.push({
+                                        key: key_,
+                                        value: value_ // corrected to use value as the property name
+                                    });
+                                }
+                            });
+                            console.log('copied cal ', copied_calendar);
                         });
 
                         const delete_btn = document.createElement('button');

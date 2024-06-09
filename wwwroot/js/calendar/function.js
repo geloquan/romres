@@ -92,7 +92,84 @@ function sendEditedCalendar(to_edit, overlay_div, mouseoverHandler, mouseleaveHa
         }
     });
 }
+function sendDeleteCalendar(requestBody, overlay_div, td_id) {
+    console.log('sendEditedCalendar()');
+    console.log('overlay_div ', overlay_div);
+    console.log('td_id ', td_id);
+    $.ajax({
+        url: '/calendar/delete',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(requestBody),
+        success: function(result) {
+            console.log('/calendar/delete sucess');
+            let td_div = document.getElementById(td_id);
+            if (td_div) {
+                let new_td = document.createElement('td');
+                td_div.parentNode.replaceChild(new_td, td_div);
+            }
+        },
+        error: function() {
+            alert('An error occurred while loading the content.');
+        }
+    });
 
+}
+function confirmDeletedCalendar(overlay_div, td_id) {
+    console.log('confirmEditedSlot()');
+    
+    const content_div = overlay_div.querySelector('.content');
+    const cal_id = content_div.id.split(' ')[2];
+    console.log('cal_id ', cal_id);
+
+    var requestBody = {
+        calendar_id: cal_id,
+    };
+    console.log('requestBody: ', requestBody);
+    
+    $('#confirmationModal').remove();
+
+    var modalHtml = `
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">Are you sure?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete selected schedule?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmButton">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    $('body').append(modalHtml);
+
+    $('#confirmationModal').modal('show');
+
+    $('#confirmationModal').on('hidden.bs.modal', function () {
+        $(this).remove(); 
+    });
+
+    $('#confirmationModal').find('[data-dismiss="modal"]').on('click', function() {
+        console.log('confirmationModal');
+        $('#confirmationModal').modal('hide');
+    });
+
+    $('#confirmButton').on('click', function() {
+        console.log('confirmButton');
+        sendDeleteCalendar(requestBody, overlay_div, td_id);
+        $('#confirmationModal').modal('hide');
+    });
+}
 function confirmEditedSlot(calendar_id, slot_id, calendar_properties, overlay_div, mouseoverHandler, mouseleaveHandler, td_id, duplicated_buttons, property_to_delete) {
     console.log('confirmEditedSlot()');
     var calendarDataPropertyModel = [];

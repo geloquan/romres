@@ -40,5 +40,21 @@ namespace WebApplication2.Controllers {
                 return StatusCode(500, "Invalid request data.");
             }
         }
+        [HttpPost("calendar/delete")]
+        public IActionResult CalendarDelete([FromBody] HttpPostDeleteCalendar request) {
+            Console.WriteLine("CalendarDelete()");
+            if (request != null) {
+                bool processingResult = request.Process();
+                if (processingResult) {
+                    return Ok("errmm");
+                }
+                else {
+                    return StatusCode(500, "Failed Edit().");  // Return appropriate error status
+                }
+            } else {
+                Console.WriteLine("Invalid request data()");
+                return StatusCode(500, "Invalid request data.");
+            }
+        }
     }
 }

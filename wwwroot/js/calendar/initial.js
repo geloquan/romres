@@ -1,4 +1,5 @@
 var copied_calendar = [];
+var copied = false;
 function generateRandomString() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -84,94 +85,72 @@ function tbodyCalendar() {
 
     
 }
-function singlePlot(row_label, column_label, key, value) {
-    const thead_tr = document.getElementById('calendar-thead').getElementsByTagName('tr')[0]; 
-    const th_elements = thead_tr.getElementsByTagName('th');
 
-    const tbody_tr = document.getElementById('calendar-tbody').getElementsByTagName('tr');
-
-    thead_tr.setAttribute('role', 'row');
-    Array.prototype.forEach.call(th_elements, (th, index) => {
-        th.setAttribute('role', 'columnheader');
-        th.setAttribute('scope', 'col');
-    });
-    Array.prototype.forEach.call(tbody_tr, elem => {
-        const tds = elem.getElementsByTagName('td');
-        Array.prototype.forEach.call(tds, (td, index) => {
-            if (!td.innerText) {
-                if (row_label == tds[0].innerText && column_label == th_elements[index].innerText) {
-                    td.classList.add('has-property');
-                    const td_id = tds[0].innerText + '-' + th_elements[index].innerText;
-                    td.id =  td_id;
-                    console.log('1');
-                    var tr_list = [];
-                    console.log('trList: ', tr_list);
-                    elem.properties.forEach(property => {
-                        const tr_property = document.createElement('tr');
-                        var property_box = writeProperty(key, value);
-
-                        tr_property.appendChild(property_box);  
-                        console.log('property_box: ', property_box);
-                        console.log('tr_property: ', tr_property);
-                        tr_list.push(tr_property);
-                    });
-                    console.log('trList: ', tr_list);
-                    td.addEventListener('mouseover', (e) => {
-                        e.preventDefault();
-                        tr_list.forEach(eleme => {
-                            document.querySelector('#overlay .content').appendChild(eleme);
-                        });
-                        if (!td.contains(event.target) &&!overlay.contains(event.target)) {
-                            td.innerHTML = '';
-                        }
-                        
-                        overlay.style.display = 'block';
-                        const overlayWidth = overlay.offsetWidth;
-                        const overlayHeight = overlay.offsetHeight;
-                        const arrow = overlay.querySelector('.arrow');
-                        const arrowHeight = arrow.offsetHeight;
-
-                        let left = e.clientX;
-                        let top = e.clientY;
-
-                        if (left + overlayWidth > window.innerWidth) {
-                            left = window.innerWidth - overlayWidth - 10; // 10px for margin
-                            arrow.style.left = `${e.clientX - left}px`;
-                        } else {
-                            arrow.style.left = '10px';
-                        } 
-
-                        if (top + overlayHeight + arrowHeight > window.innerHeight) {
-                            top = window.innerHeight - overlayHeight - arrowHeight - 10; // 10px for margin
-                            arrow.style.top = `${overlayHeight}px`; // Move arrow to the bottom
-                            arrow.style.transform = 'rotate(180deg)';
-                        } else {
-                            arrow.style.top = '-10px';
-                            arrow.style.transform = 'rotate(0deg)';
-                        }
-                        
-                        overlay.style.left = `${left}px`;
-                        overlay.style.top = `${top}px`;
-                        
-                    });
-                    td.addEventListener('mouseleave', (e) => {
-                        if (!td.contains(e.relatedTarget) && !overlay.contains(e.relatedTarget)) {
-                            td.innerHTML = ''; 
-                            overlay.style.display = 'none';
-                        }
-                    });
-                    overlay.addEventListener('mouseleave', (e) => {
-                        if (!td.contains(e.relatedTarget) && !overlay.contains(e.relatedTarget)) {
-                            td.innerHTML = ''; 
-                            overlay.style.display = 'none';
-                        }
-                    });
-                } 
+function singlePlot(td_id, key, value) {
+    const mouseoverHandler = (overlay_ide) => (e) => {
+        e.preventDefault();
+        const overlay = document.getElementById(overlay_ide);
+        const td = document.getElementById(td_id);
+        const tr_list_td = tr_list;
+        
+        if (overlay && td) {
+            tr_list_td.forEach(eleme => {
+                content.appendChild(eleme);
+            });
+        
+            if (!td.contains(event.relatedTarget) && !overlay.contains(event.relatedTarget)) {
+                td.innerHTML = '';
             }
-        });
-
-    });
-    
+        
+            overlay.classList.add('overlay');
+            overlay.style.display = 'block';
+        
+            const overlayWidth = overlay.offsetWidth;
+            const overlayHeight = overlay.offsetHeight;
+            const arrowHeight = arrow ? arrow.offsetHeight : 0; // Ensure arrow exists before accessing offsetHeight
+        
+            let left = e.clientX;
+            let top = e.clientY;
+        
+            if (left + overlayWidth > window.innerWidth) {
+                left = window.innerWidth - overlayWidth - 10; // 10px for margin
+                if (arrow) arrow.style.left = `${e.clientX - left}px`;
+            } else {
+                if (arrow) arrow.style.left = '10px';
+            }
+        
+            if (top + overlayHeight + arrowHeight > window.innerHeight) {
+                top = window.innerHeight - overlayHeight - arrowHeight - 10; // 10px for margin
+                if (arrow) {
+                    arrow.style.top = `${overlayHeight}px`; // Move arrow to the bottom
+                    arrow.style.transform = 'rotate(180deg)';
+                }
+            } else {
+                if (arrow) {
+                    arrow.style.top = '-10px';
+                    arrow.style.transform = 'rotate(0deg)';
+                }
+            }
+        
+            if (arrow) overlay.appendChild(arrow);
+        
+            overlay.style.left = `${left - 19}px`;
+            overlay.style.top = `${top + 10}px`;
+        } else {
+            console.error('Overlay or td element not found.');
+        }
+    };
+    const mouseleaveHandler = (overlay_ide) => (e) => {
+        const td = document.getElementById(td_id);
+        const overlay = document.getElementById(overlay_ide);
+        if (td && overlay) {
+            if (!td.contains(e.relatedTarget) && !overlay.contains(e.relatedTarget)) {
+                overlay.style.display = 'none';
+            } 
+        } else {
+            console.error('td or overlay not found');
+        }
+    };
 }
 function supplyFunction() {
     const thead_tr = document.getElementById('calendar-thead').getElementsByTagName('tr')[0]; 
@@ -221,13 +200,14 @@ function supplyFunction() {
                         copy_btn.innerText = 'COPY';
                         copy_btn.addEventListener('click', (e) => {
                             console.log('copy-btn');
+                            copied = true;
                             const overlay_id_copy = overlay_id;
                             const overlay = document.getElementById(overlay_id_copy);
                             const contentElement = overlay.querySelector(".content");
+                            copied_calendar = [];
                             contentElement.querySelectorAll('tr').forEach(tr => {
                                 const keyElement = tr.querySelector('.key');
                                 const valueElement = tr.querySelector('.value');
-                            
                                 if (keyElement && valueElement) {
                                     const key_ = keyElement.innerText;
                                     const value_ = valueElement.innerText;
@@ -240,11 +220,6 @@ function supplyFunction() {
                             console.log('copied cal ', copied_calendar);
                         });
 
-                        const delete_btn = document.createElement('button');
-                        delete_btn.innerText = 'DELETE';
-                        delete_btn.addEventListener('click', (e) => {
-                            console.log(`delete_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
-                        });
                         const mouseoverHandler = (overlay_ide) => (e) => {
 							e.preventDefault();
 							const overlay = document.getElementById(overlay_ide);
@@ -517,11 +492,19 @@ function supplyFunction() {
                             });
                         };
                         
+                        const delete_btn = document.createElement('button');
+                        delete_btn.innerText = 'DELETE';
+                        delete_btn.addEventListener('click', (e) => {
+                            console.log(`delete_btn ${tds[0].innerText} - ${th_elements[index].innerText}`);
+                            const overlay_div = document.getElementById(overlay_id);
+                            confirmDeletedCalendar(overlay_div, td_id);
+                        });
+
                         const edit_btn = document.createElement('button');
                         edit_btn.innerText = 'EDIT';
                         
                         edit_btn.onclick = edit_onclick;
-
+                        
                         overlay.appendChild(arrow);
                         body.appendChild(content);
                         buttons.appendChild(edit_btn);
@@ -532,31 +515,167 @@ function supplyFunction() {
 						overlay.style.display = 'none';
                         document.body.appendChild(overlay); 
                     } else {
-						const new_calendar_id = 'new-calendar - ' + tds[0].innerText + '-' + th_elements[index].innerText;
+                        const new_calendar_id = 'new-calendar - ' + tds[0].innerText + '-' + th_elements[index].innerText;
+                        td.id = tds[0].innerText + '-' + th_elements[index].innerText;
 						const createBtnListener = (e) => {
-							console.log('createBtnListener');
 							if (!td.querySelector('.btn') && !td.classList.contains('has-property')) {
 								const newButton = document.createElement('button');
 								newButton.id = new_calendar_id;
 								newButton.textContent = 'create';
 								newButton.classList.add('btn', 'btn-primary', 'btn-sm');
-								newButton.addEventListener('click', () => {
-									console.log('Button Clicked');
+								newButton.addEventListener('click', (e) => {
+                                    e.preventDefault();
+									console.log('newButton Clicked');
+                                    const overlay_rand_id = 'temp - ' + generateRandomString();
+                                    const calendar_rand_id = 'calendar - ' + generateRandomString();
+                                    const property_rand_id = 'property - ' + generateRandomString();
+                                    
+                                    const overlay = document.createElement('div');
+                                    const bodye = document.createElement('div');
+                                    overlay.appendChild(bodye);
+                                    const content_div = document.createElement('div');
+                                    content_div.id = calendar_rand_id;
+                                    bodye.appendChild(content_div);
+                                    const tr_ = document.createElement('tr');
+                                    content_div.appendChild(tr_);
+                                    const property_div = document.createElement('div');
+                                    tr_.appendChild(property_div);
+                                    property_div.classList.add('cal-property');
+                                    property_div.id = property_rand_id;
+
+                                    const key_div = document.createElement('div');
+                                    key_div.classList.add('key');
+                                    const key_input = document.createElement('input'); 
+                                    key_input.type = 'text';
+                                    key_div.appendChild(key_input);
+                                    property_div.appendChild(key_div);
+                                    
+                                    const colonText = '\u00A0\u00A0:\u00A0\u00A0';
+                                    const colonElement = document.createElement('span');
+                                    colonElement.innerText = colonText;
+                                    property_div.appendChild(colonElement);
+
+                                    const value_div = document.createElement('div');
+                                    value_div.classList.add('value');
+                                    const value_input = document.createElement('input'); 
+                                    value_input.type = 'text';
+                                    value_div.appendChild(value_input);
+                                    property_div.appendChild(value_div);
+
+                                    const button_container = document.createElement("div");
+                                    const button = document.createElement("button");
+                                    const remove_icon = document.createElement("img");
+                                    remove_icon.onload = () => {
+                                        remove_icon.width = 24; 
+                                        remove_icon.height = 24;
+                                    };
+                                    remove_icon.src = "/img/minus.svg"; 
+                                    remove_icon.alt = "remove";
+                                    button.appendChild(remove_icon);
+                                    button.classList.add("btn-no-bg"); 
+                                    button.addEventListener("click", () => {
+                                        const property_div = document.getElementById(property_rand_id);
+                                        property_div.remove();
+                                        property_to_delete.push(property_id);
+                                        console.log('removing property...', property_id);
+                                    });
+                                    button_container.classList.add("d-flex", "justify-content-center", "align-items-center");
+                                    button_container.appendChild(button);
+                                    property_div.appendChild(button_container);
+
+                                    
+                                    const add_div = document.createElement("div");
+                                    const add_button = document.createElement("button");
+                                    const add_icon = document.createElement("img");
+                                    add_icon.onload = () => {
+                                        add_icon.width = 24; 
+                                        add_icon.height = 24;
+                                    };
+                                    add_icon.src = "/img/add.svg"; 
+                                    add_icon.alt = "add";
+                                    add_button.appendChild(add_icon);
+                                    add_button.classList.add("btn", "btn-block", "d-flex", "justify-content-center", "align-items-center", "h-100", "w-100", "p-3", "border-0", "bg-transparent");
+                                    
+
+                                    overlay.classList.add('overlay');
+                                    overlay.style.display = 'block';
+                                    overlay.id = overlay_rand_id;
+                                    console.log('overlay ', overlay);
+                                    const overlayWidth = overlay.offsetWidth;
+                                    const overlayHeight = overlay.offsetHeight;
+                                    const arrow = document.createElement('div');
+                                    arrow.classList.add('arrow');
+                                    const arrowHeight = arrow ? arrow.offsetHeight : 0;
+                                    
+                                    let left = e.clientX;
+                                    let top = e.clientY;
+                                    if (left + overlayWidth > window.innerWidth) {
+                                        left = window.innerWidth - overlayWidth - 10; 
+                                        if (arrow) arrow.style.left = `${e.clientX - left}px`;
+                                    } else {
+                                        if (arrow) arrow.style.left = '10px';
+                                    }
+                                    if (top + overlayHeight + arrowHeight > window.innerHeight) {
+                                        top = window.innerHeight - overlayHeight - arrowHeight - 10;
+                                        if (arrow) {
+                                            arrow.style.top = `${overlayHeight}px`;
+                                            arrow.style.transform = 'rotate(180deg)';
+                                        }
+                                    } else {
+                                        if (arrow) {
+                                            arrow.style.top = '-10px';
+                                            arrow.style.transform = 'rotate(0deg)';
+                                        }
+                                    }
+                                    if (arrow) overlay.appendChild(arrow);
+                                    overlay.style.left = `${left - 19}px`;
+                                    overlay.style.top = `${top + 10}px`;
+
+                                    const buttons = document.createElement('div');
+                                    buttons.classList.add('overlay-buttons');
+                                    
+                                    const save_button = document.createElement('button');
+                                    save_button.innerText = 'SAVE';
+                                    save_button.classList.add('btn', 'btn-primary', 'btn-sm');
+
+                                    const cancel_button = document.createElement('button');
+                                    cancel_button.innerText = 'CANCEL';
+                                    cancel_button.classList.add('btn', 'btn-primary', 'btn-sm');
+                                    cancel_button.addEventListener('click', () => {
+                                        const overlay_div = document.getElementById(overlay_rand_id);
+                                        if (overlay_div && overlay_div.parentNode) {
+                                            overlay_div.parentNode.removeChild(overlay_div);
+                                        }
+                                    })
+                                    add_div.appendChild(add_button);
+                                    add_div.classList.add("w-100", "h-100");
+                                    content_div.appendChild(add_div);
+                                    
+                                    buttons.appendChild(save_button);
+                                    buttons.appendChild(cancel_button);
+                                    bodye.appendChild(buttons);
+                                    overlay.appendChild(bodye);
+                                    overlay.appendChild(arrow);
+                                    document.body.appendChild(overlay);
 								});
 								const pasteButton = document.createElement('button');
 								pasteButton.textContent = 'paste';
-								pasteButton.disabled = true;
-								pasteButton.classList.add('btn', 'btn-primary', 'btn-sm');
+                                if (copied) {
+                                    pasteButton.disabled = false;
+                                } else {
+                                    pasteButton.disabled = true;
+                                }
+								pasteButton.classList.add('btn', 'btn-primary', 'btn-sm', 'btn-paste');
 								pasteButton.addEventListener('click', () => {
 									console.log('pasteButton Clicked');
+                                    console.log('copied cal ', copied_calendar);
 								});
-		
+                                
 								td.appendChild(newButton);
 								td.appendChild(pasteButton);
 							}
 						};
 						const mouseleaveCreateBtn = (e) => {
-						  console.log('mouseleaveCreateBtn');
 						  const button = td.querySelector('.btn');
 						  if (button) {
 							button.remove();

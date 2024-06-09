@@ -105,6 +105,51 @@ namespace WebApplication2.Models {
             }
         }
     }
+    public class HttpPostDeleteCalendar {
+        string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        public int calendar_id {get; set;}
+        private string delete_properties_query = @"
+            DELETE FROM 
+                calendar_data_property
+            WHERE
+                calendar_id = @calendar_id;
+        ";
+        private string delete_calendar_query = @"
+            DELETE FROM 
+                calendar
+            WHERE
+                id = @id;
+        ";
+        public bool Process() {
+            Console.WriteLine("calendar_id " + calendar_id);
+            try {
+                using (var connection = new SqlConnection(connectionQuery)) {
+                    connection.Open();
+                    Console.WriteLine("connection: ");
+                    using (var transaction = connection.BeginTransaction()) {
+                        try {
+                            using (var command = new SqlCommand(delete_properties_query, connection, transaction)) {
+                                command.Parameters.AddWithValue("@calendar_id", calendar_id);
+                                command.ExecuteNonQuery();
+                            }
+                            using (var command = new SqlCommand(delete_calendar_query, connection, transaction)) {
+                                command.Parameters.AddWithValue("@id", calendar_id);
+                                command.ExecuteNonQuery();
+                            }
+                            transaction.Commit();
+                        } catch (Exception ex) {
+                            transaction.Rollback();
+                            throw;
+                        }
+                    }
+                }
+                return true;
+            } catch (Exception ex) {
+                Console.WriteLine("Error: " + ex.Message);
+                return false;
+            }
+        }
+    }
     public class HttpPatchCalendar {
         string connectionQuery = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=rom;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
         public int? calendar_id {get;set;}
